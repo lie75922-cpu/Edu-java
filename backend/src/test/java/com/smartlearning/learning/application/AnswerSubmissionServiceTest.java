@@ -30,7 +30,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -92,6 +91,22 @@ class AnswerSubmissionServiceTest {
         AnswerApi.AnswerResultResponse result = service.submit(31L, request("A", "request-1"), student());
 
         assertThat(result.idempotentReplay()).isTrue();
+        verify(answerRecordRepository, never()).save(any());
+        verify(outboxService, never()).enqueueMasteryUpdate(any(Long.class), any(Long.class), any(Long.class), any(Long.class), any(Long.class), any(Boolean.class));
+    }
+
+    @Test
+    void clientRequestIdCannotBeReusedForAnotherQuestion() {
+        AnswerRecord existing = new AnswerRecord(5L, 3L, 31L, 12L, "[\"A\"]", true, 1, 10L, "request-1", java.time.Instant.now());
+        ReflectionTestUtils.setField(existing, "id", 101L);
+        when(answerRecordRepository.findByStudentIdAndClientRequestId(5L, "request-1")).thenReturn(Optional.of(existing));
+        AnswerSubmissionService service = service();
+
+        assertThatThrownBy(() -> service.submit(99L, request("A", "request-1"), student()))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("another question");
+
+        verify(questionService, never()).requireQuestion(any(Long.class));
         verify(answerRecordRepository, never()).save(any());
         verify(outboxService, never()).enqueueMasteryUpdate(any(Long.class), any(Long.class), any(Long.class), any(Long.class), any(Long.class), any(Boolean.class));
     }
