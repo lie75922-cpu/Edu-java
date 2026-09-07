@@ -96,14 +96,12 @@ python -m pytest -q
 
 | 项目 | 状态 | 说明 |
 |---|---|---|
-| DATA-0 Canonical Schema测试 | ✅ 2/2 | 已在当前执行环境真实运行 |
-| FastAPI健康测试 | ✅ 1/1 | 已在当前执行环境真实运行 |
-| YAML/JSON静态解析 | ✅ | Compose YAML与前端package.json已解析 |
-| Java Maven测试 | CI验证中 | 当前执行容器无Maven，不冒充已通过 |
-| Vue build | CI验证中 | 当前执行容器无法访问npm网络 |
-| Docker Compose启动 | CI/开发机验证 | 当前执行容器无Docker |
-
-GitHub Actions会在push后执行后端、Python、前端和Compose配置检查。
+| DATA-0 Canonical Schema测试 | ✅ 2/2 | 本地及 GitHub Actions 均通过 |
+| FastAPI健康测试 | ✅ 1/1 | 本地及 GitHub Actions 均通过 |
+| Java Maven测试 | ✅ | GitHub Actions 使用 Java 21 真实编译并测试通过 |
+| Vue build | ✅ | GitHub Actions `npm install` + `npm run build`通过 |
+| Docker Compose配置 | ✅ | GitHub Actions `docker compose config`通过 |
+| 完整基础设施容器启动 | 待开发机烟测 | CI当前只校验Compose配置，不把未运行的容器集成测试冒充已通过 |
 
 ## 开发原则
 
