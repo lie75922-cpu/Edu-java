@@ -10,25 +10,32 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 @Service
 public class ResearchExerciseCatalogService {
 
-    private static final int REQUIRED_SCHEMA_VERSION = 1;
-    private static final String REQUIRED_SOURCE = "Junyi via USTC mirror";
+    private static final int REQUIRED_SCHEMA_VERSION = 2;
+    private static final Set<String> ALLOWED_SOURCE_TYPES = Set.of(
+            "PRIMARY",
+            "AUTHOR_PREPROCESSED",
+            "THIRD_PARTY_PROCESSED",
+            "REFERENCE_CODE"
+    );
 
     private final ObjectMapper objectMapper;
     private final Path catalogPath;
+    private volatile CachedCatalog cachedCatalog;
 
     public ResearchExerciseCatalogService(
             ObjectMapper objectMapper,
-            @Value("${app.research.exercises.catalog-path:D:/Code/java/data-pipeline/data/processed/junyi_catalog_v1.json}")
-            String catalogPath
+            @Value("${app.research.exercises.catalog-path}") String catalogPath
     ) {
         this.objectMapper = objectMapper;
         this.catalogPath = Path.of(catalogPath);
@@ -64,9 +71,26 @@ public class ResearchExerciseCatalogService {
             );
         }
 
-        String payload;
         try {
-            payload = Files.readString(catalogPath, StandardCharsets.UTF_8);
+            FileTime modifiedAt = Files.getLastModifiedTime(catalogPath);
+            long size = Files.size(catalogPath);
+            CachedCatalog current = cachedCatalog;
+            if (current != null && current.matches(modifiedAt, size)) {
+                return current.catalog();
+            }
+
+            synchronized (this) {
+                current = cachedCatalog;
+                modifiedAt = Files.getLastModifiedTime(catalogPath);
+                size = Files.size(catalogPath);
+                if (current != null && current.matches(modifiedAt, size)) {
+                    return current.catalog();
+                }
+
+                ResearchExerciseCatalog catalog = readAndValidateCatalog();
+                cachedCatalog = new CachedCatalog(modifiedAt, size, catalog);
+                return catalog;
+            }
         } catch (IOException ex) {
             throw new ResearchCatalogException(
                     HttpStatus.SERVICE_UNAVAILABLE,
@@ -74,7 +98,10 @@ public class ResearchExerciseCatalogService {
                     "research exercise catalog file cannot be read"
             );
         }
+    }
 
+    private ResearchExerciseCatalog readAndValidateCatalog() throws IOException {
+        String payload = Files.readString(catalogPath, StandardCharsets.UTF_8);
         try {
             ResearchExerciseCatalog catalog = objectMapper.readValue(payload, ResearchExerciseCatalog.class);
             validateCatalog(catalog);
@@ -91,10 +118,20 @@ public class ResearchExerciseCatalogService {
     private void validateCatalog(ResearchExerciseCatalog catalog) {
         if (catalog == null
                 || catalog.schemaVersion() != REQUIRED_SCHEMA_VERSION
-                || !REQUIRED_SOURCE.equals(catalog.source())
+                || catalog.provenance() == null
                 || catalog.items() == null) {
             throw invalidFormat("research exercise catalog schema is invalid");
         }
+
+        ResearchCatalogProvenance provenance = catalog.provenance();
+        if (!ALLOWED_SOURCE_TYPES.contains(provenance.sourceType())
+                || isBlank(provenance.sourceLabel())
+                || isBlank(provenance.sourceFileName())
+                || !isSha256(provenance.sourceSha256())
+                || isBlank(provenance.transformation())) {
+            throw invalidFormat("research exercise catalog provenance is invalid");
+        }
+
         for (ResearchExerciseItem item : catalog.items()) {
             if (item == null
                     || item.recordNumber() < 1
@@ -102,8 +139,10 @@ public class ResearchExerciseCatalogService {
                     || item.displayName() == null
                     || item.topic() == null
                     || item.area() == null
+                    || item.prerequisiteRaw() == null
                     || item.prerequisites() == null
-                    || item.prerequisites().stream().anyMatch(Objects::isNull)) {
+                    || item.prerequisites().stream().anyMatch(Objects::isNull)
+                    || !String.join(",", item.prerequisites()).equals(item.prerequisiteRaw())) {
                 throw invalidFormat("research exercise catalog item is invalid");
             }
         }
@@ -128,7 +167,17 @@ public class ResearchExerciseCatalogService {
                 .anyMatch(value -> value.contains(normalizedQuery));
     }
 
+    private boolean isSha256(String value) {
+        return value != null && value.matches("[0-9a-fA-F]{64}");
+    }
+
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
+    }
+
+    private record CachedCatalog(FileTime modifiedAt, long size, ResearchExerciseCatalog catalog) {
+        boolean matches(FileTime otherModifiedAt, long otherSize) {
+            return modifiedAt.equals(otherModifiedAt) && size == otherSize;
+        }
     }
 }
