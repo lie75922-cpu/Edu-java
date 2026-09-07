@@ -9,6 +9,7 @@ public record ResearchExerciseItem(
         String topic,
         String area,
         boolean live,
+        String prerequisiteRaw,
         List<String> prerequisites,
         boolean duplicateExternalId
 ) {
