@@ -30,6 +30,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -106,7 +107,7 @@ class AnswerSubmissionServiceTest {
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("another question");
 
-        verify(questionService, never()).requireQuestion(any(Long.class));
+        verify(questionService, never()).requireQuestion(anyLong());
         verify(answerRecordRepository, never()).save(any());
         verify(outboxService, never()).enqueueMasteryUpdate(any(Long.class), any(Long.class), any(Long.class), any(Long.class), any(Long.class), any(Boolean.class));
     }
