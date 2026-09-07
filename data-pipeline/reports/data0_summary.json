@@ -1,0 +1,413 @@
+{
+  "dataset": "JUNYI_DATA0",
+  "exercise": {
+    "area_count_excluding_missing": 8,
+    "distinct_external_ids": 835,
+    "duplicate_external_id_count": 2,
+    "metadata_rows": 837,
+    "topic_count_excluding_missing": 40
+  },
+  "final_gate": {
+    "conditions": [
+      "Primary DataShop files were not directly acquired; the audited local input is a third-party mirror.",
+      "The governing repository rule prohibits content digests, so the conflicting Issue #2 provenance and split-integrity field is absent.",
+      "2 duplicated Exercise IDs and 2 raw prerequisite self loops require a domain decision.",
+      "Raw prerequisite strings and annotation scores remain evidence, not approved production graph edges.",
+      "No final ExerciseUnit or KnowledgePoint mapping has been frozen."
+    ],
+    "status": "CONDITIONAL_GO",
+    "supporting_evidence": [
+      "Full original ProblemLog audit observed 25925992 interaction rows and 247606 anonymous students.",
+      "The materialised Medium candidate has 10000 students and 284245 leakage-checked interactions.",
+      "Exercise-to-interaction reference rate is 1.000000; correct rate is 0.827874.",
+      "Metadata provides 40 non-missing Topics and 8 non-missing Areas.",
+      "Canonical records, deterministic split membership, and source-separated graph audits were materialised locally without importing research users into platform tables."
+    ]
+  },
+  "interaction": {
+    "business_key_duplicate_rows": 1439,
+    "exact_duplicate_rows": 1439,
+    "known_exercise_reference_rate": 0.999999575715367,
+    "referenced_exercise_count": 722,
+    "row_count": 25925992,
+    "sequence_distribution": {
+      "count": 247606,
+      "max": 22067,
+      "mean": 104.70663877288919,
+      "min": 1,
+      "p10": 1.0,
+      "p25": 3.0,
+      "p50": 10.0,
+      "p75": 50.0,
+      "p90": 220.0,
+      "p95": 485.0,
+      "p99": 1670.9500000000116
+    },
+    "student_count": 247606,
+    "unique_counts": {
+      "correct": {
+        "count": 2,
+        "status": "EXACT"
+      },
+      "count_attempts": {
+        "count": 386,
+        "status": "EXACT"
+      },
+      "count_hints": {
+        "count": 21,
+        "status": "EXACT"
+      },
+      "earned_proficiency": {
+        "count": 2,
+        "status": "EXACT"
+      },
+      "exercise": {
+        "count": 722,
+        "status": "EXACT"
+      },
+      "hint_time_taken_list": {
+        "count": 372527,
+        "status": "EXACT"
+      },
+      "hint_used": {
+        "count": 2,
+        "status": "EXACT"
+      },
+      "points_earned": {
+        "count": 41,
+        "status": "EXACT"
+      },
+      "problem_number": {
+        "count": 5174,
+        "status": "EXACT"
+      },
+      "problem_type": {
+        "count": 1194,
+        "status": "EXACT"
+      },
+      "review_mode": {
+        "count": 2,
+        "status": "EXACT"
+      },
+      "suggested": {
+        "count": 2,
+        "status": "EXACT"
+      },
+      "time_done": {
+        "lower_bound": 2000000,
+        "reason": "memory-safe cardinality cap reached",
+        "status": "LOWER_BOUND"
+      },
+      "time_taken": {
+        "count": 7903,
+        "status": "EXACT"
+      },
+      "time_taken_attempts": {
+        "count": 821841,
+        "status": "EXACT"
+      },
+      "topic_mode": {
+        "count": 2,
+        "status": "EXACT"
+      },
+      "user_id": {
+        "count": 247606,
+        "status": "EXACT"
+      }
+    }
+  },
+  "provenance": {
+    "content_integrity_evidence": "No content digest permitted by governing repository instruction.",
+    "local_source_classification": "THIRD_PARTY_PROCESSED",
+    "primary_direct_acquisition": false
+  },
+  "sampling": {
+    "Large": {
+      "areas": 8,
+      "disk_size_bytes": 100080996,
+      "exercises": 644,
+      "interactions": 427038,
+      "largest_component_ratio": 0.90920245398773,
+      "materialisation_wall_time_seconds": 237.546,
+      "materialised_path": "D:\\Code\\java\\Edu-java-submit\\data-pipeline\\.data\\generated\\large",
+      "peak_working_set_bytes": null,
+      "relation_edges": 979,
+      "sequence_distribution_after_window": {
+        "count": 15000,
+        "max": 50,
+        "mean": 28.4692,
+        "min": 5,
+        "p10": 8.0,
+        "p25": 8.0,
+        "p50": 24.0,
+        "p75": 50.0,
+        "p90": 50.0,
+        "p95": 50.0,
+        "p99": 50.0
+      },
+      "students": 15000,
+      "topics": 40
+    },
+    "Medium": {
+      "areas": 8,
+      "disk_size_bytes": 66746575,
+      "exercises": 624,
+      "interactions": 284245,
+      "largest_component_ratio": 0.90920245398773,
+      "materialisation_wall_time_seconds": 233.953,
+      "materialised_path": "D:\\Code\\java\\Edu-java-submit\\data-pipeline\\.data\\generated\\medium",
+      "peak_working_set_bytes": null,
+      "relation_edges": 979,
+      "sequence_distribution_after_window": {
+        "count": 10000,
+        "max": 50,
+        "mean": 28.4245,
+        "min": 5,
+        "p10": 8.0,
+        "p25": 8.0,
+        "p50": 24.0,
+        "p75": 50.0,
+        "p90": 50.0,
+        "p95": 50.0,
+        "p99": 50.0
+      },
+      "students": 10000,
+      "topics": 40
+    },
+    "Small": {
+      "areas": 8,
+      "disk_size_bytes": 33563018,
+      "exercises": 584,
+      "interactions": 142162,
+      "largest_component_ratio": 0.90920245398773,
+      "materialisation_wall_time_seconds": 231.734,
+      "materialised_path": "D:\\Code\\java\\Edu-java-submit\\data-pipeline\\.data\\generated\\small",
+      "peak_working_set_bytes": null,
+      "relation_edges": 979,
+      "sequence_distribution_after_window": {
+        "count": 5000,
+        "max": 50,
+        "mean": 28.4324,
+        "min": 5,
+        "p10": 8.0,
+        "p25": 8.0,
+        "p50": 24.0,
+        "p75": 50.0,
+        "p90": 50.0,
+        "p95": 50.0,
+        "p99": 50.0
+      },
+      "students": 5000,
+      "topics": 40
+    }
+  },
+  "schema_audit": {
+    "exercise_metadata": {
+      "column_count": 11,
+      "headers": [
+        "name",
+        "live",
+        "prerequisites",
+        "h_position",
+        "v_position",
+        "creation_date",
+        "seconds_per_fast_problem",
+        "pretty_display_name",
+        "short_display_name",
+        "topic",
+        "area"
+      ],
+      "malformed_row_count": 0,
+      "missing": {
+        "area": 20,
+        "prerequisites": 95,
+        "pretty_display_name": 7,
+        "topic": 20
+      },
+      "row_count": 837,
+      "unique_counts": {
+        "area": 9,
+        "creation_date": 837,
+        "h_position": 75,
+        "live": 2,
+        "name": 835,
+        "prerequisites": 532,
+        "pretty_display_name": 827,
+        "seconds_per_fast_problem": 62,
+        "short_display_name": 819,
+        "topic": 41,
+        "v_position": 54
+      }
+    },
+    "problem_log": {
+      "column_count": 17,
+      "headers": [
+        "user_id",
+        "exercise",
+        "problem_type",
+        "problem_number",
+        "topic_mode",
+        "suggested",
+        "review_mode",
+        "time_done",
+        "time_taken",
+        "time_taken_attempts",
+        "correct",
+        "count_attempts",
+        "hint_used",
+        "count_hints",
+        "hint_time_taken_list",
+        "earned_proficiency",
+        "points_earned"
+      ],
+      "malformed_row_count": 0,
+      "missing": {
+        "hint_time_taken_list": 24254263,
+        "problem_type": 81363,
+        "time_taken_attempts": 62365
+      },
+      "row_count": 25925992,
+      "unique_counts": {
+        "correct": {
+          "count": 2,
+          "status": "EXACT"
+        },
+        "count_attempts": {
+          "count": 386,
+          "status": "EXACT"
+        },
+        "count_hints": {
+          "count": 21,
+          "status": "EXACT"
+        },
+        "earned_proficiency": {
+          "count": 2,
+          "status": "EXACT"
+        },
+        "exercise": {
+          "count": 722,
+          "status": "EXACT"
+        },
+        "hint_time_taken_list": {
+          "count": 372527,
+          "status": "EXACT"
+        },
+        "hint_used": {
+          "count": 2,
+          "status": "EXACT"
+        },
+        "points_earned": {
+          "count": 41,
+          "status": "EXACT"
+        },
+        "problem_number": {
+          "count": 5174,
+          "status": "EXACT"
+        },
+        "problem_type": {
+          "count": 1194,
+          "status": "EXACT"
+        },
+        "review_mode": {
+          "count": 2,
+          "status": "EXACT"
+        },
+        "suggested": {
+          "count": 2,
+          "status": "EXACT"
+        },
+        "time_done": {
+          "lower_bound": 2000000,
+          "reason": "memory-safe cardinality cap reached",
+          "status": "LOWER_BOUND"
+        },
+        "time_taken": {
+          "count": 7903,
+          "status": "EXACT"
+        },
+        "time_taken_attempts": {
+          "count": 821841,
+          "status": "EXACT"
+        },
+        "topic_mode": {
+          "count": 2,
+          "status": "EXACT"
+        },
+        "user_id": {
+          "count": 247606,
+          "status": "EXACT"
+        }
+      }
+    },
+    "relationship_annotation_testing": {
+      "column_count": 8,
+      "headers": [
+        "Exercise_A",
+        "Exercise_B",
+        "Similarity_avg",
+        "Similarity_raw",
+        "Difficulty_avg",
+        "Difficulty_raw",
+        "Prerequisite_avg",
+        "Prerequisite_raw"
+      ],
+      "malformed_row_count": 0,
+      "missing": {},
+      "row_count": 823,
+      "unique_counts": {
+        "Difficulty_avg": 47,
+        "Difficulty_raw": 381,
+        "Exercise_A": 130,
+        "Exercise_B": 330,
+        "Prerequisite_avg": 46,
+        "Prerequisite_raw": 378,
+        "Similarity_avg": 48,
+        "Similarity_raw": 285
+      }
+    },
+    "relationship_annotation_training": {
+      "column_count": 8,
+      "headers": [
+        "Exercise_A",
+        "Exercise_B",
+        "Similarity_avg",
+        "Similarity_raw",
+        "Difficulty_avg",
+        "Difficulty_raw",
+        "Prerequisite_avg",
+        "Prerequisite_raw"
+      ],
+      "malformed_row_count": 0,
+      "missing": {},
+      "row_count": 1131,
+      "unique_counts": {
+        "Difficulty_avg": 335,
+        "Difficulty_raw": 1126,
+        "Exercise_A": 239,
+        "Exercise_B": 343,
+        "Prerequisite_avg": 371,
+        "Prerequisite_raw": 1129,
+        "Similarity_avg": 383,
+        "Similarity_raw": 1123
+      }
+    }
+  },
+  "split": {
+    "content_integrity_evidence": "No content digest produced. Exact anonymous member lists and the deterministic seed remain in the ignored local output.",
+    "counts": {
+      "test": 2000,
+      "train": 7000,
+      "valid": 1000
+    },
+    "frozen_before_model_results": true,
+    "member_list_path": "D:\\Code\\java\\Edu-java-submit\\data-pipeline\\.data\\generated\\medium\\split_membership.json",
+    "overlap": {
+      "train_test": 0,
+      "train_valid": 0,
+      "valid_test": 0
+    },
+    "seed": 20261407,
+    "strategy": "student_level"
+  },
+  "status": "CONDITIONAL_GO"
+}

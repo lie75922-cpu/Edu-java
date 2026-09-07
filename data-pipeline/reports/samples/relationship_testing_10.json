@@ -1,0 +1,102 @@
+[
+  {
+    "Difficulty_avg": "2.25",
+    "Difficulty_raw": "2_1_4_2",
+    "Exercise_A": "solving_similar_triangles_2",
+    "Exercise_B": "dividing_fractions_word_problems",
+    "Prerequisite_avg": "2.75",
+    "Prerequisite_raw": "2_1_1_7",
+    "Similarity_avg": "3.25",
+    "Similarity_raw": "3_1_1_8"
+  },
+  {
+    "Difficulty_avg": "3",
+    "Difficulty_raw": "2_2_4_4",
+    "Exercise_A": "solving_similar_triangles_2",
+    "Exercise_B": "solving_similar_triangles_1",
+    "Prerequisite_avg": "8.75",
+    "Prerequisite_raw": "8_9_9_9",
+    "Similarity_avg": "8.5",
+    "Similarity_raw": "8_9_9_8"
+  },
+  {
+    "Difficulty_avg": "5.75",
+    "Difficulty_raw": "5_9_4_5",
+    "Exercise_A": "solving_similar_triangles_2",
+    "Exercise_B": "angle_bisector_theorem",
+    "Prerequisite_avg": "3.75",
+    "Prerequisite_raw": "3_1_4_7",
+    "Similarity_avg": "4.25",
+    "Similarity_raw": "6_1_2_8"
+  },
+  {
+    "Difficulty_avg": "1.5",
+    "Difficulty_raw": "1_1_2_2",
+    "Exercise_A": "solving_similar_triangles_2",
+    "Exercise_B": "similar_triangles_review",
+    "Prerequisite_avg": "7",
+    "Prerequisite_raw": "5_9_6_8",
+    "Similarity_avg": "7.25",
+    "Similarity_raw": "7_9_6_7"
+  },
+  {
+    "Difficulty_avg": "2.25",
+    "Difficulty_raw": "2_1_4_2",
+    "Exercise_A": "solving_similar_triangles_2",
+    "Exercise_B": "similar_triangles_2",
+    "Prerequisite_avg": "8",
+    "Prerequisite_raw": "7_9_7_9",
+    "Similarity_avg": "7.5",
+    "Similarity_raw": "7_8_6_9"
+  },
+  {
+    "Difficulty_avg": "6",
+    "Difficulty_raw": "2_9_4_9",
+    "Exercise_A": "solving_similar_triangles_2",
+    "Exercise_B": "domain_and_range_0.5",
+    "Prerequisite_avg": "1",
+    "Prerequisite_raw": "1_1_1_1",
+    "Similarity_avg": "1",
+    "Similarity_raw": "1_1_1_1"
+  },
+  {
+    "Difficulty_avg": "5.666666667",
+    "Difficulty_raw": "9_6_2",
+    "Exercise_A": "solving_similar_triangles_1",
+    "Exercise_B": "solving_similar_triangles_2",
+    "Prerequisite_avg": "4",
+    "Prerequisite_raw": "3_8_1",
+    "Similarity_avg": "8",
+    "Similarity_raw": "7_9_8"
+  },
+  {
+    "Difficulty_avg": "1.666666667",
+    "Difficulty_raw": "1_2_2",
+    "Exercise_A": "solving_similar_triangles_1",
+    "Exercise_B": "area_of_squares_and_rectangles",
+    "Prerequisite_avg": "2.666666667",
+    "Prerequisite_raw": "1_1_6",
+    "Similarity_avg": "1.333333333",
+    "Similarity_raw": "1_1_2"
+  },
+  {
+    "Difficulty_avg": "3.666666667",
+    "Difficulty_raw": "7_1_3",
+    "Exercise_A": "solving_similar_triangles_1",
+    "Exercise_B": "alternate_interior_angles_2",
+    "Prerequisite_avg": "2.666666667",
+    "Prerequisite_raw": "1_2_5",
+    "Similarity_avg": "3.333333333",
+    "Similarity_raw": "1_4_5"
+  },
+  {
+    "Difficulty_avg": "2.333333333",
+    "Difficulty_raw": "3_2_2",
+    "Exercise_A": "solving_similar_triangles_1",
+    "Exercise_B": "triangle_angles_sum",
+    "Prerequisite_avg": "4.333333333",
+    "Prerequisite_raw": "1_6_6",
+    "Similarity_avg": "4",
+    "Similarity_raw": "3_6_3"
+  }
+]
