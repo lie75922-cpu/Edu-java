@@ -1,6 +1,6 @@
 param(
     [int] $Port = 8080,
-    [string] $CatalogPath = "D:/Code/java/data-pipeline/data/processed/junyi_catalog_v1.json",
+    [string] $CatalogPath = "",
     [string] $BasicUser = "research-local",
     [switch] $PrintCommandOnly
 )
@@ -8,53 +8,41 @@ param(
 $ErrorActionPreference = "Stop"
 
 $backendRoot = Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")
-$surefireXml = Join-Path $backendRoot "target/surefire-reports/TEST-com.smartlearning.research.ResearchExerciseControllerTest.xml"
-$mainClasses = Join-Path $backendRoot "target/classes"
-$mainClass = Join-Path $mainClasses "com/smartlearning/EduApplication.class"
-$javaExe = "D:/software/Java/jdk-21.0.12/bin/java.exe"
+$repoRoot = Resolve-Path -LiteralPath (Join-Path $backendRoot "..")
 
-if (-not (Test-Path -LiteralPath $surefireXml)) {
-    throw "Surefire XML classpath source is missing. Run backend tests once before local direct-java startup."
+if ([string]::IsNullOrWhiteSpace($CatalogPath)) {
+    $CatalogPath = Join-Path $repoRoot "data-pipeline/data/processed/junyi_catalog_v2.json"
 }
-if (-not (Test-Path -LiteralPath $mainClass)) {
-    throw "Compiled backend classes are missing. Compile backend before local direct-java startup."
-}
+$CatalogPath = [System.IO.Path]::GetFullPath($CatalogPath)
+
 if (-not (Test-Path -LiteralPath $CatalogPath)) {
-    throw "Research catalog file is missing: $CatalogPath"
-}
-if (-not (Test-Path -LiteralPath $javaExe)) {
-    throw "Java executable is missing: $javaExe"
+    throw "Research catalog file is missing: $CatalogPath. Regenerate schema v2 with data-pipeline/scripts/export_junyi_catalog.py."
 }
 if ([string]::IsNullOrWhiteSpace($env:EDU_RESEARCH_BASIC_PASSWORD)) {
     throw "Set EDU_RESEARCH_BASIC_PASSWORD in the current shell before starting. The script does not store or print it."
 }
 
-[xml] $report = Get-Content -LiteralPath $surefireXml
-$classpathProperty = $report.testsuite.properties.property | Where-Object { $_.name -eq "java.class.path" } | Select-Object -First 1
-if (-not $classpathProperty) {
-    throw "java.class.path property was not found in Surefire XML."
+$javaExe = $null
+if (-not [string]::IsNullOrWhiteSpace($env:JAVA_HOME)) {
+    $candidate = Join-Path $env:JAVA_HOME "bin/java.exe"
+    if (Test-Path -LiteralPath $candidate) {
+        $javaExe = $candidate
+    }
+}
+if ($null -eq $javaExe) {
+    $javaCommand = Get-Command java -ErrorAction SilentlyContinue
+    if ($null -eq $javaCommand) {
+        throw "Java was not found. Configure JAVA_HOME or place Java 21 on PATH."
+    }
+    $javaExe = $javaCommand.Source
 }
 
-$excludedEntries = @(
-    (Join-Path $backendRoot "target/test-classes"),
-    (Join-Path $backendRoot "target/surefire"),
-    (Join-Path $backendRoot "target/generated-test-sources")
-) | ForEach-Object { [System.IO.Path]::GetFullPath($_) }
-
-$classpathEntries = @()
-foreach ($entry in ($classpathProperty.value -split ";")) {
-    if ([string]::IsNullOrWhiteSpace($entry)) {
-        continue
-    }
-    $full = [System.IO.Path]::GetFullPath($entry)
-    if ($excludedEntries -contains $full) {
-        continue
-    }
-    $classpathEntries += $full
-}
-
-if (-not ($classpathEntries -contains ([System.IO.Path]::GetFullPath($mainClasses)))) {
-    throw "Runtime classpath does not include target/classes."
+$jar = Get-ChildItem -LiteralPath (Join-Path $backendRoot "target") -Filter "edu-backend-*.jar" -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notlike "*.original" } |
+    Sort-Object LastWriteTimeUtc -Descending |
+    Select-Object -First 1
+if ($null -eq $jar) {
+    throw "Packaged backend jar was not found. Run 'mvn --batch-mode package' in backend/ first."
 }
 
 $env:SPRING_SECURITY_USER_NAME = $BasicUser
@@ -76,9 +64,8 @@ $excludedAutoConfigurations = @(
 )
 
 $arguments = @(
-    "-cp",
-    ($classpathEntries -join ";"),
-    "com.smartlearning.EduApplication",
+    "-jar",
+    $jar.FullName,
     "--server.address=127.0.0.1",
     "--server.port=$Port",
     "--spring.profiles.active=local-research",
@@ -88,8 +75,7 @@ $arguments = @(
 
 if ($PrintCommandOnly) {
     Write-Output "java=$javaExe"
-    Write-Output "main_class=com.smartlearning.EduApplication"
-    Write-Output "classpath_entries=$($classpathEntries.Count)"
+    Write-Output "jar=$($jar.FullName)"
     Write-Output "bind=127.0.0.1:$Port"
     Write-Output "catalog_path=$CatalogPath"
     Write-Output "basic_user=$BasicUser"
