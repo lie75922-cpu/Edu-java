@@ -12,3 +12,38 @@
 ## V0.1
 
 当前只提供 Canonical Schema 和 Junyi Adapter 接口骨架。真实解析逻辑在 DATA-0 获得并审计原始数据后实现。
+
+## Junyi Research Exercise Catalog
+
+`scripts/export_junyi_catalog.py` exports a research-domain Exercise catalog for Java-side reads. It does not create platform `Question`, `KnowledgePoint`, or user data.
+
+Example:
+
+```bash
+python -B scripts/export_junyi_catalog.py \
+  --input D:\Code\java\data-pipeline\data\interim\junyi_metadata\junyi_Exercise_table.csv \
+  --output D:\Code\java\data-pipeline\data\processed\junyi_catalog_v1.json
+```
+
+Output contract:
+
+```json
+{
+  "schemaVersion": 1,
+  "source": "Junyi via USTC mirror",
+  "items": [
+    {
+      "recordNumber": 1,
+      "externalId": "exercise name",
+      "displayName": "pretty_display_name",
+      "topic": "raw topic text",
+      "area": "raw area text",
+      "live": true,
+      "prerequisites": ["raw", "tokens"],
+      "duplicateExternalId": false
+    }
+  ]
+}
+```
+
+The exporter validates the CSV header and row width before writing. On failure it exits non-zero and does not overwrite an existing successful output file.

@@ -36,3 +36,6 @@ server:
 app:
   model-service:
     base-url: ${MODEL_SERVICE_BASE_URL:http://localhost:8001}
+  research:
+    exercises:
+      catalog-path: ${RESEARCH_EXERCISE_CATALOG_PATH:D:/Code/java/data-pipeline/data/processed/junyi_catalog_v1.json}
