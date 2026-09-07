@@ -1,0 +1,31 @@
+# Java
+backend/target/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Data / models
+data-pipeline/.data/
+data-pipeline/reports/generated/
+model-service/checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# Environment / IDE
+.env
+.idea/
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+logs/
