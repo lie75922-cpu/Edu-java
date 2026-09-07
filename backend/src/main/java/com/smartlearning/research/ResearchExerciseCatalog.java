@@ -4,7 +4,7 @@ import java.util.List;
 
 public record ResearchExerciseCatalog(
         int schemaVersion,
-        String source,
+        ResearchCatalogProvenance provenance,
         List<ResearchExerciseItem> items
 ) {
 }
