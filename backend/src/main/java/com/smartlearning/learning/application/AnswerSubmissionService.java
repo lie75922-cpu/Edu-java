@@ -61,6 +61,9 @@ public class AnswerSubmissionService {
         AnswerRecord existing = answerRecordRepository.findByStudentIdAndClientRequestId(user.id(), request.clientRequestId())
                 .orElse(null);
         if (existing != null) {
+            if (!existing.getQuestionId().equals(questionId)) {
+                throw new ConflictException("clientRequestId is already bound to another question");
+            }
             return resultForExisting(existing);
         }
 
