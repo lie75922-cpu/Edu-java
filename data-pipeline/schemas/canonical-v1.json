@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "notes": [
+    "Raw prerequisite text remains available without silently becoming a final graph.",
+    "Research Student does not map implicitly to a platform user.",
+    "No KnowledgePoint identifier is invented before an approved domain mapping."
+  ],
+  "properties": {
+    "exercise": {
+      "properties": {
+        "area": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "exercise_external_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "live": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "prerequisite_raw": {
+          "type": "string"
+        },
+        "topic": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "exercise_external_id",
+        "display_name",
+        "topic",
+        "area",
+        "live",
+        "prerequisite_raw"
+      ],
+      "type": "object"
+    },
+    "interaction": {
+      "properties": {
+        "attempts": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "correct": {
+          "type": "boolean"
+        },
+        "count_hints": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "duration_seconds": {
+          "minimum": 0,
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "earned_proficiency": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "exercise_external_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "hint_used": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "student_external_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "student_external_id",
+        "exercise_external_id",
+        "correct",
+        "attempts",
+        "duration_seconds",
+        "hint_used",
+        "count_hints",
+        "earned_proficiency",
+        "occurred_at"
+      ],
+      "type": "object"
+    },
+    "relationship": {
+      "properties": {
+        "relation_type": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "score": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "source": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "source_external_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "target_external_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "verified": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "source_external_id",
+        "target_external_id",
+        "relation_type",
+        "score",
+        "source",
+        "verified"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "exercise",
+    "interaction",
+    "relationship"
+  ],
+  "title": "Edu-java DATA-0 Canonical Dataset v1",
+  "type": "object"
+}

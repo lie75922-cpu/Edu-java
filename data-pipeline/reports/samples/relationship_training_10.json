@@ -1,0 +1,102 @@
+[
+  {
+    "Difficulty_avg": "2.857142857",
+    "Difficulty_raw": "4_5_1_1_1_1_7_1_1_4_2_5_2_5",
+    "Exercise_A": "radius_diameter_and_circumference",
+    "Exercise_B": "arithmetic_word_problems_1",
+    "Prerequisite_avg": "3",
+    "Prerequisite_raw": "1_6_1_1_1_3_2_1_9_2_3_2_8_2",
+    "Similarity_avg": "1.857142857",
+    "Similarity_raw": "1_4_1_1_1_1_2_1_1_1_3_1_3_5"
+  },
+  {
+    "Difficulty_avg": "2.428571429",
+    "Difficulty_raw": "3_5_1_3_2_1_5_1_1_1_1_2_5_3",
+    "Exercise_A": "radius_diameter_and_circumference",
+    "Exercise_B": "parts_of_circles",
+    "Prerequisite_avg": "7.285714286",
+    "Prerequisite_raw": "6_7_7_6_8_8_9_5_9_9_7_7_5_9",
+    "Similarity_avg": "6.785714286",
+    "Similarity_raw": "6_9_6_6_7_8_7_8_8_8_4_6_5_7"
+  },
+  {
+    "Difficulty_avg": "2.285714286",
+    "Difficulty_raw": "2_5_1_1_1_1_3_2_1_1_5_2_3_4",
+    "Exercise_A": "radius_diameter_and_circumference",
+    "Exercise_B": "perimeter_of_squares_and_rectangles",
+    "Prerequisite_avg": "5",
+    "Prerequisite_raw": "2_6_5_4_2_8_3_5_9_5_5_3_7_6",
+    "Similarity_avg": "3.571428571",
+    "Similarity_raw": "2_6_4_1_1_2_4_4_7_2_3_4_4_6"
+  },
+  {
+    "Difficulty_avg": "3.307692308",
+    "Difficulty_raw": "3_3_3_1_2_2_4_4_4_3_5_5_4",
+    "Exercise_A": "vertex_of_a_parabola",
+    "Exercise_B": "solving_quadratics_by_taking_the_square_root",
+    "Prerequisite_avg": "5.846153846",
+    "Prerequisite_raw": "5_8_7_7_6_2_6_5_6_7_3_7_7",
+    "Similarity_avg": "5.923076923",
+    "Similarity_raw": "6_7_6_7_8_4_5_4_3_6_6_8_7"
+  },
+  {
+    "Difficulty_avg": "3.307692308",
+    "Difficulty_raw": "2_3_3_4_2_2_4_4_5_3_4_4_3",
+    "Exercise_A": "vertex_of_a_parabola",
+    "Exercise_B": "completing_the_square_1",
+    "Prerequisite_avg": "5.461538462",
+    "Prerequisite_raw": "6_4_6_8_2_2_5_6_5_6_7_7_7",
+    "Similarity_avg": "5.692307692",
+    "Similarity_raw": "7_5_7_8_3_4_5_5_3_6_7_7_7"
+  },
+  {
+    "Difficulty_avg": "4.846153846",
+    "Difficulty_raw": "6_8_4_1_3_6_4_4_4_5_7_6_5",
+    "Exercise_A": "vertex_of_a_parabola",
+    "Exercise_B": "graphing_parabolas_1",
+    "Prerequisite_avg": "6.230769231",
+    "Prerequisite_raw": "3_6_7_7_8_8_6_6_7_6_3_6_8",
+    "Similarity_avg": "6.692307692",
+    "Similarity_raw": "6_9_7_9_7_8_6_5_4_5_6_7_8"
+  },
+  {
+    "Difficulty_avg": "1.076923077",
+    "Difficulty_raw": "1_1_1_1_1_1_2_1_1_1_1_1_1",
+    "Exercise_A": "vertex_of_a_parabola",
+    "Exercise_B": "addition_2",
+    "Prerequisite_avg": "2.692307692",
+    "Prerequisite_raw": "2_1_1_5_1_1_4_2_3_9_2_3_1",
+    "Similarity_avg": "1.692307692",
+    "Similarity_raw": "1_1_1_1_1_1_3_2_3_2_2_2_2"
+  },
+  {
+    "Difficulty_avg": "6.307692308",
+    "Difficulty_raw": "7_7_8_7_7_9_4_8_5_5_8_4_3",
+    "Exercise_A": "vertex_of_a_parabola",
+    "Exercise_B": "parabola_intuition_3",
+    "Prerequisite_avg": "4.538461538",
+    "Prerequisite_raw": "4_7_4_3_2_3_6_3_6_5_2_6_8",
+    "Similarity_avg": "5.461538462",
+    "Similarity_raw": "6_8_8_3_3_7_6_3_3_6_3_7_8"
+  },
+  {
+    "Difficulty_avg": "4.545454545",
+    "Difficulty_raw": "5_7_3_5_5_5_1_6_6_1_6",
+    "Exercise_A": "triangle_types",
+    "Exercise_B": "triangle_angles_sum",
+    "Prerequisite_avg": "6",
+    "Prerequisite_raw": "7_7_3_4_8_8_4_5_6_9_5",
+    "Similarity_avg": "6.727272727",
+    "Similarity_raw": "7_6_6_5_6_8_7_8_5_9_7"
+  },
+  {
+    "Difficulty_avg": "7",
+    "Difficulty_raw": "7_7_9_8_7_5_9_8_8_1_8",
+    "Exercise_A": "triangle_types",
+    "Exercise_B": "angle_addition_postulate",
+    "Prerequisite_avg": "3.454545455",
+    "Prerequisite_raw": "2_6_2_1_2_7_1_3_6_7_1",
+    "Similarity_avg": "5.363636364",
+    "Similarity_raw": "7_7_6_3_1_8_1_4_6_9_7"
+  }
+]
