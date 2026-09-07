@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: edu-backend
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/edu?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC}
+    username: ${MYSQL_USER:edu}
+    password: ${MYSQL_PASSWORD:edu_dev_password}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  neo4j:
+    uri: ${NEO4J_URI:bolt://localhost:7687}
+    authentication:
+      username: ${NEO4J_USERNAME:neo4j}
+      password: ${NEO4J_PASSWORD:neo4j_dev_password}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  model-service:
+    base-url: ${MODEL_SERVICE_BASE_URL:http://localhost:8001}
