@@ -20,6 +20,9 @@ spring:
     authentication:
       username: ${NEO4J_USERNAME:neo4j}
       password: ${NEO4J_PASSWORD:neo4j_dev_password}
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
 
 management:
   endpoints:
@@ -34,5 +37,13 @@ server:
   port: ${SERVER_PORT:8080}
 
 app:
-  model-service:
-    base-url: ${MODEL_SERVICE_BASE_URL:http://localhost:8001}
+  security:
+    jwt:
+      # JWT_SECRET is intentionally required at runtime and must be at least 32 bytes.
+      secret: ${JWT_SECRET:}
+      issuer: ${JWT_ISSUER:https://edu-java.local}
+      access-token-ttl-seconds: ${JWT_ACCESS_TOKEN_TTL_SECONDS:3600}
+  bootstrap-admin:
+    username: ${BOOTSTRAP_ADMIN_USERNAME:}
+    password: ${BOOTSTRAP_ADMIN_PASSWORD:}
+    nickname: ${BOOTSTRAP_ADMIN_NICKNAME:System Administrator}

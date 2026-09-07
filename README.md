@@ -79,6 +79,7 @@ Edu-java/
 - `docs/ADR/0003-prerequisite-evidence-and-published-graph.md`：关系证据与正式图发布规则
 - `docs/MODEL-0_PLAN.md`：NCDM / ORCDF / RCD / GEAR-CD受控实验计划
 - `docs/V0.2_SCOPE_AND_ACCEPTANCE.md`：V0.2网站业务闭环范围和DoD
+- `docs/V0.2_IMPLEMENTATION.md`：V0.2实现、API、seed边界、启动和验收记录
 
 ## 开发原则
 
