@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { api, percent, run, statusText } from '../store.js'
+import { api, percent, run } from '../store.js'
 
 const courses = ref([])
 const selectedCourseId = ref('')
@@ -121,7 +121,14 @@ onMounted(boot)
     </section>
 
     <section v-if="student" class="panel student-detail-panel">
-      <div class="panel-head"><div><p class="eyebrow">学生学情详情</p><h3>{{ student.displayName }}</h3></div><button class="text-button" @click="student = null">关闭详情</button></div>
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">学生画像</p>
+          <h3>学生学情详情</h3>
+          <p class="student-name-line">{{ student.displayName }}</p>
+        </div>
+        <button class="text-button" @click="student = null">关闭详情</button>
+      </div>
       <div class="metric-grid three compact-metrics"><article class="metric-card"><span>作答次数</span><strong>{{ student.activity.attemptCount }}</strong></article><article class="metric-card"><span>正确次数</span><strong>{{ student.activity.correctCount }}</strong></article><article class="metric-card"><span>正确率</span><strong>{{ percent(student.activity.correctRate) }}</strong></article></div>
       <div class="two-column">
         <div><h4>当前掌握情况</h4><article v-for="item in student.mastery" :key="item.knowledgePointId" class="simple-row"><span>{{ item.knowledgeName }}</span><b>{{ item.status === 'UNKNOWN' ? '暂无学习数据' : percent(item.masteryScore) }}</b></article></div>
