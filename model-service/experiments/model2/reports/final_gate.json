@@ -1,0 +1,39 @@
+{
+  "c40_conditions": {
+    "final_holdout_frozen_and_unused": true,
+    "identity_signal_vs_permuted": true,
+    "identity_signal_vs_pop_mean": true,
+    "identity_signal_vs_pop_mean_or_permuted": true,
+    "observed_c40_incremental_over_rule_beta": false,
+    "observed_exposure_3_nonconstant": true
+  },
+  "c40_failures": [
+    "observed_c40_incremental_over_rule_beta"
+  ],
+  "c40_requirements_passed": false,
+  "final_holdout": {
+    "dataset_name": "JUNYI_FINAL_HOLDOUT_V1",
+    "labels_read_for_model2_diagnostics": false,
+    "metrics_generated_in_model2": false,
+    "status": "FROZEN_UNEVALUATED",
+    "student_count": 5000
+  },
+  "product_boundaries": {
+    "gear_cd_trained": false,
+    "java_mastery_provider_changed": false,
+    "orcdf_trained": false,
+    "published_graph_changed": false,
+    "rcd_trained": false,
+    "recommendation_changed": false,
+    "rule_mastery_changed": false
+  },
+  "reasons": [
+    "A simple student-ability signal remains after C40 fails its diagnostic requirements. Stop graph cognitive diagnosis and permit only a separately designed simple hierarchical ability plus Topic-deviation research route."
+  ],
+  "simple_conditions": {
+    "rasch_1pl_over_exercise": true,
+    "student_global_beta_over_exercise": false
+  },
+  "simple_student_signal_present": true,
+  "status": "GO_SIMPLE_HIERARCHICAL_ROUTE"
+}
