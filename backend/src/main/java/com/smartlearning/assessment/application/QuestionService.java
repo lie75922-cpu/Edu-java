@@ -67,8 +67,44 @@ public class QuestionService {
         return questionRepository.findByExerciseUnitIdOrderByIdAsc(exerciseUnitId).stream().map(this::toAdminResponse).toList();
     }
 
+    public List<QuestionApi.AdminQuestionResponse> listForTeaching(long exerciseUnitId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(exerciseUnitService.requireExercise(exerciseUnitId).getCourseId(), user);
+        return listForAdmin(exerciseUnitId);
+    }
+
     public QuestionApi.AdminQuestionResponse getForAdmin(long questionId) {
         return toAdminResponse(requireQuestion(questionId));
+    }
+
+    public QuestionApi.AdminQuestionResponse getForTeaching(long questionId, CurrentUser user) {
+        Question question = requireQuestion(questionId);
+        courseAccessService.requireTeachingAccess(exerciseUnitService.requireExercise(question.getExerciseUnitId()).getCourseId(), user);
+        return toAdminResponse(question);
+    }
+
+    @Transactional
+    public QuestionApi.AdminQuestionResponse createForTeaching(QuestionApi.QuestionRequest request, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(exerciseUnitService.requireExercise(request.exerciseUnitId()).getCourseId(), user);
+        return create(request, user.id());
+    }
+
+    @Transactional
+    public QuestionApi.AdminQuestionResponse updateForTeaching(
+            long questionId,
+            QuestionApi.QuestionRequest request,
+            CurrentUser user
+    ) {
+        Question question = requireQuestion(questionId);
+        courseAccessService.requireTeachingAccess(exerciseUnitService.requireExercise(question.getExerciseUnitId()).getCourseId(), user);
+        courseAccessService.requireTeachingAccess(exerciseUnitService.requireExercise(request.exerciseUnitId()).getCourseId(), user);
+        return update(questionId, request);
+    }
+
+    @Transactional
+    public void disableForTeaching(long questionId, CurrentUser user) {
+        Question question = requireQuestion(questionId);
+        courseAccessService.requireTeachingAccess(exerciseUnitService.requireExercise(question.getExerciseUnitId()).getCourseId(), user);
+        disable(questionId);
     }
 
     @Transactional

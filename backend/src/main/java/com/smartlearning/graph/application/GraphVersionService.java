@@ -1,7 +1,9 @@
 package com.smartlearning.graph.application;
 
+import com.smartlearning.auth.domain.CurrentUser;
 import com.smartlearning.common.exception.ConflictException;
 import com.smartlearning.common.exception.NotFoundException;
+import com.smartlearning.course.application.CourseAccessService;
 import com.smartlearning.course.domain.Course;
 import com.smartlearning.course.infrastructure.persistence.CourseRepository;
 import com.smartlearning.graph.api.GraphApi;
@@ -34,6 +36,7 @@ public class GraphVersionService {
     private final KnowledgeRelationEvidenceLinkRepository evidenceLinkRepository;
     private final KnowledgePointRepository knowledgePointRepository;
     private final OutboxService outboxService;
+    private final CourseAccessService courseAccessService;
 
     public GraphVersionService(
             CourseRepository courseRepository,
@@ -41,7 +44,8 @@ public class GraphVersionService {
             KnowledgeRelationRepository relationRepository,
             KnowledgeRelationEvidenceLinkRepository evidenceLinkRepository,
             KnowledgePointRepository knowledgePointRepository,
-            OutboxService outboxService
+            OutboxService outboxService,
+            CourseAccessService courseAccessService
     ) {
         this.courseRepository = courseRepository;
         this.graphVersionRepository = graphVersionRepository;
@@ -49,6 +53,67 @@ public class GraphVersionService {
         this.evidenceLinkRepository = evidenceLinkRepository;
         this.knowledgePointRepository = knowledgePointRepository;
         this.outboxService = outboxService;
+        this.courseAccessService = courseAccessService;
+    }
+
+    @Transactional
+    public GraphApi.GraphVersionResponse createForTeaching(GraphApi.CreateGraphVersionRequest request, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return create(request, user.id());
+    }
+
+    public List<GraphApi.GraphVersionResponse> listForTeaching(long courseId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(courseId, user);
+        return list(courseId);
+    }
+
+    public GraphApi.GraphVersionResponse getForTeaching(long graphVersionId, CurrentUser user) {
+        GraphVersion version = requireTeachingVersion(graphVersionId, user);
+        return toVersionResponse(version, requireCourse(version.getCourseId()));
+    }
+
+    public List<GraphApi.GraphRelationResponse> listRelationsForTeaching(long graphVersionId, CurrentUser user) {
+        requireTeachingVersion(graphVersionId, user);
+        return listRelations(graphVersionId);
+    }
+
+    @Transactional
+    public GraphApi.GraphRelationResponse addManualRelationForTeaching(
+            long graphVersionId,
+            GraphApi.ManualRelationRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return addManualRelation(graphVersionId, request, user.id());
+    }
+
+    @Transactional
+    public GraphApi.GraphRelationResponse reviewRelationForTeaching(
+            long graphVersionId,
+            long relationId,
+            GraphApi.RelationReviewRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return reviewRelation(graphVersionId, relationId, request);
+    }
+
+    @Transactional
+    public void rejectRelationForTeaching(long graphVersionId, long relationId, CurrentUser user) {
+        requireTeachingVersion(graphVersionId, user);
+        rejectRelation(graphVersionId, relationId);
+    }
+
+    @Transactional
+    public GraphApi.GraphVersionResponse requestPublishForTeaching(long graphVersionId, CurrentUser user) {
+        requireTeachingVersion(graphVersionId, user);
+        return requestPublish(graphVersionId);
+    }
+
+    @Transactional
+    public GraphApi.GraphVersionResponse retryProjectionForTeaching(long graphVersionId, CurrentUser user) {
+        requireTeachingVersion(graphVersionId, user);
+        return retryProjection(graphVersionId);
     }
 
     @Transactional
@@ -162,6 +227,12 @@ public class GraphVersionService {
     GraphVersion requireVersion(long graphVersionId) {
         return graphVersionRepository.findById(graphVersionId)
                 .orElseThrow(() -> new NotFoundException("graph version does not exist"));
+    }
+
+    private GraphVersion requireTeachingVersion(long graphVersionId, CurrentUser user) {
+        GraphVersion version = requireVersion(graphVersionId);
+        courseAccessService.requireTeachingAccess(version.getCourseId(), user);
+        return version;
     }
 
     private void copyActiveSnapshot(Course course, GraphVersion target, long copiedBy) {

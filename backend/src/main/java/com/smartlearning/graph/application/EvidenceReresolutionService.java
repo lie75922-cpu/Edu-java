@@ -1,7 +1,9 @@
 package com.smartlearning.graph.application;
 
+import com.smartlearning.auth.domain.CurrentUser;
 import com.smartlearning.common.exception.ConflictException;
 import com.smartlearning.common.exception.NotFoundException;
+import com.smartlearning.course.application.CourseAccessService;
 import com.smartlearning.graph.api.GraphApi;
 import com.smartlearning.graph.domain.EvidenceReresolutionTrigger;
 import com.smartlearning.graph.domain.GraphVersion;
@@ -44,6 +46,7 @@ public class EvidenceReresolutionService {
     private final KnowledgeRelationEvidenceResolutionHistoryRepository historyRepository;
     private final EvidenceResolutionResolver resolutionResolver;
     private final ObjectMapper objectMapper;
+    private final CourseAccessService courseAccessService;
 
     public EvidenceReresolutionService(
             GraphVersionRepository graphVersionRepository,
@@ -52,7 +55,8 @@ public class EvidenceReresolutionService {
             KnowledgeRelationEvidenceLinkRepository evidenceLinkRepository,
             KnowledgeRelationEvidenceResolutionHistoryRepository historyRepository,
             EvidenceResolutionResolver resolutionResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CourseAccessService courseAccessService
     ) {
         this.graphVersionRepository = graphVersionRepository;
         this.evidenceRepository = evidenceRepository;
@@ -61,6 +65,35 @@ public class EvidenceReresolutionService {
         this.historyRepository = historyRepository;
         this.resolutionResolver = resolutionResolver;
         this.objectMapper = objectMapper;
+        this.courseAccessService = courseAccessService;
+    }
+
+    @Transactional(readOnly = true)
+    public GraphApi.EvidenceReresolutionResult dryRunForTeaching(
+            long graphVersionId,
+            GraphApi.EvidenceReresolutionRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return dryRun(graphVersionId, request, user.id());
+    }
+
+    @Transactional
+    public GraphApi.EvidenceReresolutionResult applyForTeaching(
+            long graphVersionId,
+            GraphApi.EvidenceReresolutionRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return apply(graphVersionId, request, user.id());
+    }
+
+    @Transactional(readOnly = true)
+    public List<GraphApi.EvidenceResolutionHistoryResponse> historyForTeaching(long evidenceId, CurrentUser user) {
+        KnowledgeRelationEvidence evidence = evidenceRepository.findById(evidenceId)
+                .orElseThrow(() -> new NotFoundException("relation evidence does not exist"));
+        courseAccessService.requireTeachingAccess(evidence.getCourseId(), user);
+        return history(evidenceId);
     }
 
     /** Computes prospective changes only. It intentionally creates no run, conflict, link, relation, or history rows. */
@@ -276,6 +309,13 @@ public class EvidenceReresolutionService {
         if (version.getStatus() != GraphVersionStatus.DRAFT && version.getStatus() != GraphVersionStatus.VALIDATION_FAILED) {
             throw new ConflictException("evidence re-resolution requires an editable draft graph version");
         }
+        return version;
+    }
+
+    private GraphVersion requireTeachingVersion(long graphVersionId, CurrentUser user) {
+        GraphVersion version = graphVersionRepository.findById(graphVersionId)
+                .orElseThrow(() -> new NotFoundException("graph version does not exist"));
+        courseAccessService.requireTeachingAccess(version.getCourseId(), user);
         return version;
     }
 

@@ -50,11 +50,75 @@ public class KnowledgeService {
                 .toList();
     }
 
+    public List<KnowledgeApi.KnowledgeAreaResponse> listAreasForTeaching(long courseId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(courseId, user);
+        return listAreasForAdmin(courseId);
+    }
+
     public List<KnowledgeApi.KnowledgePointResponse> listPointsForAdmin(long courseId) {
         courseService.requireCourse(courseId);
         return pointRepository.findByCourseIdAndStatusOrderByKnowledgeCodeAsc(courseId, "ACTIVE").stream()
                 .map(this::toPointResponse)
                 .toList();
+    }
+
+    public List<KnowledgeApi.KnowledgePointResponse> listPointsForTeaching(long courseId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(courseId, user);
+        return listPointsForAdmin(courseId);
+    }
+
+    @Transactional
+    public KnowledgeApi.KnowledgeAreaResponse createAreaForTeaching(
+            KnowledgeApi.KnowledgeAreaRequest request,
+            CurrentUser user
+    ) {
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return createArea(request);
+    }
+
+    @Transactional
+    public KnowledgeApi.KnowledgeAreaResponse updateAreaForTeaching(
+            long areaId,
+            KnowledgeApi.KnowledgeAreaRequest request,
+            CurrentUser user
+    ) {
+        KnowledgeArea existing = requireArea(areaId);
+        courseAccessService.requireTeachingAccess(existing.getCourseId(), user);
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return updateArea(areaId, request);
+    }
+
+    @Transactional
+    public void disableAreaForTeaching(long areaId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(requireArea(areaId).getCourseId(), user);
+        disableArea(areaId);
+    }
+
+    @Transactional
+    public KnowledgeApi.KnowledgePointResponse createPointForTeaching(
+            KnowledgeApi.KnowledgePointRequest request,
+            CurrentUser user
+    ) {
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return createPoint(request);
+    }
+
+    @Transactional
+    public KnowledgeApi.KnowledgePointResponse updatePointForTeaching(
+            long pointId,
+            KnowledgeApi.KnowledgePointRequest request,
+            CurrentUser user
+    ) {
+        KnowledgePoint existing = requirePoint(pointId);
+        courseAccessService.requireTeachingAccess(existing.getCourseId(), user);
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return updatePoint(pointId, request);
+    }
+
+    @Transactional
+    public void disablePointForTeaching(long pointId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(requirePoint(pointId).getCourseId(), user);
+        disablePoint(pointId);
     }
 
     @Transactional

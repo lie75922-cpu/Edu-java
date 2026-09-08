@@ -77,10 +77,34 @@ const personalization = reactive({
   learningPath: null
 })
 
+const teacher = reactive({
+  courses: [],
+  selectedCourseId: '',
+  from: '',
+  to: '',
+  overview: null,
+  knowledgePoints: [],
+  heatmap: null,
+  highErrors: [],
+  heatmapPage: 0,
+  heatmapSize: 25,
+  minimumAttempts: 5,
+  student: null
+})
+
+const teacherAssignments = reactive({
+  courseId: '',
+  teacherId: '',
+  assignmentRole: 'INSTRUCTOR',
+  items: []
+})
+
 const authenticated = computed(() => Boolean(session.value?.accessToken))
 const roles = computed(() => session.value?.user?.roles || [])
 const isStudent = computed(() => roles.value.includes('STUDENT'))
-const canManage = computed(() => roles.value.includes('SYSTEM_ADMIN') || roles.value.includes('TEACHER'))
+const canTeach = computed(() => roles.value.includes('SYSTEM_ADMIN') || roles.value.includes('TEACH_ADMIN') || roles.value.includes('TEACHER'))
+const canManageCourses = computed(() => roles.value.includes('SYSTEM_ADMIN') || roles.value.includes('TEACH_ADMIN'))
+const canManage = computed(() => canTeach.value)
 const canImport = computed(() => roles.value.includes('SYSTEM_ADMIN'))
 const filteredGraphNodes = computed(() => {
   const nodes = graph.data?.nodes || []
@@ -168,8 +192,10 @@ async function loadCourses() {
 }
 
 async function enterCourse(course) {
-  const enrolled = await run(() => api(`/courses/${course.id}/enroll`, { method: 'POST' }))
-  if (!enrolled) return
+  if (isStudent.value) {
+    const enrolled = await run(() => api(`/courses/${course.id}/enroll`, { method: 'POST' }))
+    if (!enrolled) return
+  }
   const loadedCourse = await run(() => api(`/courses/${course.id}`))
   if (!loadedCourse) return
   selectedCourse.value = loadedCourse
@@ -182,6 +208,83 @@ async function enterCourse(course) {
     return []
   })
   view.value = 'course'
+}
+
+function teacherWindowQuery() {
+  if (Boolean(teacher.from) !== Boolean(teacher.to)) {
+    error.value = '时间窗口必须同时填写开始和结束，或全部留空以使用最近 30 天。'
+    return null
+  }
+  const parameters = new URLSearchParams()
+  if (teacher.from && teacher.to) {
+    const from = new Date(teacher.from)
+    const to = new Date(teacher.to)
+    if (Number.isNaN(from.valueOf()) || Number.isNaN(to.valueOf()) || from >= to) {
+      error.value = '请输入有效且结束晚于开始的时间窗口。'
+      return null
+    }
+    parameters.set('from', from.toISOString())
+    parameters.set('to', to.toISOString())
+  }
+  return parameters
+}
+
+async function openTeacherWorkspace() {
+  const coursesForTeacher = await run(() => api('/teacher/courses'))
+  if (!coursesForTeacher) return
+  teacher.courses = coursesForTeacher
+  if (!coursesForTeacher.some(course => String(course.courseId) === String(teacher.selectedCourseId))) {
+    teacher.selectedCourseId = coursesForTeacher[0] ? String(coursesForTeacher[0].courseId) : ''
+  }
+  teacher.student = null
+  view.value = 'teacher'
+  if (teacher.selectedCourseId) await loadTeacherAnalytics()
+}
+
+async function loadTeacherAnalytics() {
+  const courseId = numberOrNull(teacher.selectedCourseId)
+  if (!courseId) {
+    error.value = '请选择已授权课程。'
+    return
+  }
+  const windowParameters = teacherWindowQuery()
+  if (!windowParameters) return
+  const analyticsParameters = windowParameters.toString()
+  const withWindow = analyticsParameters ? `?${analyticsParameters}` : ''
+  const errorParameters = new URLSearchParams(windowParameters)
+  errorParameters.set('minimumAttempts', String(teacher.minimumAttempts || 5))
+  const loaded = await run(() => Promise.all([
+    api(`/teacher/courses/${courseId}/analytics/overview${withWindow}`),
+    api(`/teacher/courses/${courseId}/analytics/knowledge-points${withWindow}`),
+    api(`/teacher/courses/${courseId}/analytics/mastery-heatmap?page=${teacher.heatmapPage}&size=${teacher.heatmapSize}`),
+    api(`/teacher/courses/${courseId}/analytics/questions/errors?${errorParameters}`)
+  ]))
+  if (loaded) {
+    const [overview, knowledgePoints, heatmap, highErrors] = loaded
+    teacher.overview = overview
+    teacher.knowledgePoints = knowledgePoints.items
+    teacher.heatmap = heatmap
+    teacher.highErrors = highErrors.items
+    teacher.student = null
+    view.value = 'teacher'
+  }
+}
+
+async function changeTeacherHeatmapPage(delta) {
+  const nextPage = teacher.heatmapPage + delta
+  if (nextPage < 0) return
+  teacher.heatmapPage = nextPage
+  await loadTeacherAnalytics()
+}
+
+async function loadTeacherStudent(studentId) {
+  const courseId = numberOrNull(teacher.selectedCourseId)
+  if (!courseId) return
+  const result = await run(() => api(`/teacher/courses/${courseId}/students/${studentId}/analytics`))
+  if (result) {
+    teacher.student = result
+    view.value = 'teacher-student'
+  }
 }
 
 async function filterExercises(pointId) {
@@ -337,6 +440,43 @@ function editCourse(course) {
 async function disableCourse(course) {
   const result = await run(() => api(`/admin/courses/${course.id}`, { method: 'DELETE' }), '课程已禁用。')
   if (result !== null) await loadCourses()
+}
+
+async function loadTeacherAssignments() {
+  const courseId = numberOrNull(teacherAssignments.courseId)
+  if (!courseId) {
+    error.value = '请输入课程 ID。'
+    return
+  }
+  const result = await run(() => api(`/admin/courses/${courseId}/teachers`))
+  if (result) teacherAssignments.items = result
+}
+
+async function saveTeacherAssignment() {
+  const courseId = numberOrNull(teacherAssignments.courseId)
+  const teacherId = numberOrNull(teacherAssignments.teacherId)
+  if (!courseId || !teacherId) {
+    error.value = '请输入课程 ID 和教师 ID。'
+    return
+  }
+  const result = await run(() => api(`/admin/courses/${courseId}/teachers`, {
+    method: 'POST',
+    body: JSON.stringify({ teacherId, assignmentRole: teacherAssignments.assignmentRole })
+  }), '教师课程分配已保存。')
+  if (result) {
+    teacherAssignments.teacherId = ''
+    await loadTeacherAssignments()
+  }
+}
+
+async function deactivateTeacherAssignment(assignment) {
+  const courseId = numberOrNull(teacherAssignments.courseId)
+  if (!courseId) return
+  const result = await run(
+    () => api(`/admin/courses/${courseId}/teachers/${assignment.teacherId}`, { method: 'DELETE' }),
+    '教师课程分配已停用。'
+  )
+  if (result !== null) await loadTeacherAssignments()
 }
 
 async function loadCatalog() {
@@ -713,13 +853,14 @@ onMounted(() => {
     <header>
       <div>
         <h1>Edu-java</h1>
-        <p>V0.5 Evidence 重解析审计、规则掌握度与 Published Graph 学习路径</p>
+        <p>V0.6 课程级教师授权与基于 Platform Business Domain 的学习分析</p>
       </div>
       <nav v-if="authenticated">
         <button @click="view = 'courses'; loadCourses()">课程</button>
         <button @click="openGraph">知识图</button>
         <button v-if="isStudent" @click="loadPersonalization">我的学习</button>
-        <button @click="loadHistory">学习记录</button>
+        <button v-if="isStudent" @click="loadHistory">学习记录</button>
+        <button v-if="canTeach" @click="openTeacherWorkspace">教师工作台</button>
         <button v-if="canManage" @click="view = 'admin'; loadCourses()">管理</button>
         <button class="secondary" @click="logout">退出</button>
       </nav>
@@ -750,12 +891,118 @@ onMounted(() => {
     </section>
 
     <section v-else-if="view === 'courses'" class="card">
-      <div class="section-title"><h2>可加入的课程</h2><button class="secondary" @click="loadCourses">刷新</button></div>
-      <p v-if="courses.length === 0">当前没有可用课程，请由管理员创建或导入目录。</p>
+      <div class="section-title"><h2>已授权课程</h2><button class="secondary" @click="loadCourses">刷新</button></div>
+      <p v-if="courses.length === 0">当前没有已授权的 ACTIVE 课程。</p>
       <article v-for="course in courses" :key="course.id" class="list-item">
         <div><strong>{{ course.courseCode }} · {{ course.courseName }}</strong><p>{{ course.description || '暂无课程说明。' }}</p></div>
-        <button @click="enterCourse(course)">加入并进入</button>
+        <button @click="enterCourse(course)">{{ isStudent ? '进入课程' : '查看课程' }}</button>
       </article>
+    </section>
+
+    <section v-else-if="view === 'teacher' && canTeach" class="card">
+      <div class="section-title">
+        <div>
+          <h2>教师课程工作台</h2>
+          <p>仅统计 Platform Business Domain 的课程、选课、作答、掌握度与推荐快照；不使用 Junyi 匿名 Research Student 数据。</p>
+        </div>
+        <button class="secondary" @click="openTeacherWorkspace">刷新课程</button>
+      </div>
+      <p v-if="teacher.courses.length === 0">当前没有可查看的 ACTIVE 课程。</p>
+      <template v-else>
+        <div class="inline-form">
+          <label>课程
+            <select v-model="teacher.selectedCourseId" @change="teacher.heatmapPage = 0; loadTeacherAnalytics()">
+              <option v-for="course in teacher.courses" :key="course.courseId" :value="String(course.courseId)">
+                {{ course.courseCode }} · {{ course.courseName }}（在读 {{ course.activeEnrollmentCount }} 人）
+              </option>
+            </select>
+          </label>
+          <label>开始时间（可空）<input v-model="teacher.from" type="datetime-local"></label>
+          <label>结束时间（可空）<input v-model="teacher.to" type="datetime-local"></label>
+          <label>高错题最小作答数 <input v-model.number="teacher.minimumAttempts" type="number" min="1"></label>
+          <button @click="teacher.heatmapPage = 0; loadTeacherAnalytics()">加载分析</button>
+        </div>
+
+        <template v-if="teacher.overview">
+          <p class="analytics-caption">时间窗口：{{ new Date(teacher.overview.window.from).toLocaleString() }} 至 {{ new Date(teacher.overview.window.to).toLocaleString() }}。</p>
+          <div class="analytics-grid">
+            <article class="metric"><small>ACTIVE 在读学生</small><strong>{{ teacher.overview.activeEnrolledStudents }}</strong></article>
+            <article class="metric"><small>窗口内有活动学生</small><strong>{{ teacher.overview.studentsWithActivity }}</strong></article>
+            <article class="metric"><small>作答次数</small><strong>{{ teacher.overview.attemptCount }}</strong></article>
+            <article class="metric"><small>正确率</small><strong>{{ teacher.overview.correctRate === null ? '—' : `${(Number(teacher.overview.correctRate) * 100).toFixed(2)}%` }}</strong></article>
+            <article class="metric"><small>ACTIVE 知识点</small><strong>{{ teacher.overview.activeKnowledgePointCount }}</strong></article>
+            <article class="metric"><small>已观测掌握度学生</small><strong>{{ teacher.overview.observedMasteryStudents }}</strong></article>
+          </div>
+          <p>掌握度版本：{{ teacher.overview.masteryAlgorithmVersions.join('、') || '暂无已观测掌握度' }}。</p>
+        </template>
+
+        <section class="graph-detail">
+          <h3>KnowledgePoint 学情</h3>
+          <p>UNKNOWN 不伪造分数，且不计入平均掌握度。{{ teacher.knowledgePoints.length === 0 ? '当前没有 ACTIVE KnowledgePoint。' : '' }}</p>
+          <article v-for="point in teacher.knowledgePoints" :key="point.knowledgePointId" class="admin-row">
+            <span>
+              <strong>{{ point.knowledgeCode }} · {{ point.knowledgeName }}</strong>
+              <small>OBSERVED {{ point.observedStudentCount }} · UNKNOWN {{ point.unknownStudentCount }} · 弱项 {{ point.weakObservedStudentCount }} · 作答 {{ point.attemptCount }} · 正确 {{ point.correctCount }}</small>
+            </span>
+            <span>平均掌握度 {{ point.meanMastery === null ? '—' : Number(point.meanMastery).toFixed(4) }} · 正确率 {{ point.correctRate === null ? '—' : `${(Number(point.correctRate) * 100).toFixed(2)}%` }}</span>
+          </article>
+        </section>
+
+        <section v-if="teacher.heatmap" class="graph-detail">
+          <div class="section-title"><h3>Student × KnowledgePoint 掌握度热力表</h3><span>第 {{ teacher.heatmap.page + 1 }} 页，共 {{ teacher.heatmap.totalStudents }} 名 ACTIVE 学生</span></div>
+          <div class="heatmap-wrap">
+            <table>
+              <thead><tr><th>学生</th><th v-for="point in teacher.heatmap.knowledgePoints" :key="point.knowledgePointId">{{ point.knowledgeCode }}</th></tr></thead>
+              <tbody>
+                <tr v-for="student in teacher.heatmap.students" :key="student.studentId">
+                  <th><button class="link" @click="loadTeacherStudent(student.studentId)">{{ student.displayName }} #{{ student.studentId }}</button></th>
+                  <td v-for="item in student.items" :key="item.knowledgePointId" :class="item.status === 'UNKNOWN' ? 'mastery-unknown' : 'mastery-observed'">
+                    {{ item.status === 'UNKNOWN' ? 'UNKNOWN' : Number(item.masteryScore).toFixed(4) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="inline-actions">
+            <button class="secondary" :disabled="teacher.heatmapPage === 0 || loading" @click="changeTeacherHeatmapPage(-1)">上一页</button>
+            <button class="secondary" :disabled="(teacher.heatmapPage + 1) * teacher.heatmapSize >= teacher.heatmap.totalStudents || loading" @click="changeTeacherHeatmapPage(1)">下一页</button>
+          </div>
+        </section>
+
+        <section class="graph-detail">
+          <h3>高错题</h3>
+          <p v-if="teacher.highErrors.length === 0">当前窗口内没有达到最小作答数的高错题。</p>
+          <article v-for="question in teacher.highErrors" :key="question.questionId" class="admin-row">
+            <span><strong>{{ question.exerciseCode }} · Question #{{ question.questionId }}</strong><small>{{ question.stemPreview }} · 关联：{{ question.associatedKnowledgePoints.map(point => point.knowledgeName).join('、') || 'UNMAPPED' }}</small></span>
+            <span>错误 {{ question.wrongCount }}/{{ question.attemptCount }}（{{ (Number(question.wrongRate) * 100).toFixed(2) }}%）· {{ question.distinctStudents }} 人</span>
+          </article>
+        </section>
+      </template>
+    </section>
+
+    <section v-else-if="view === 'teacher-student' && teacher.student" class="card">
+      <button class="link" @click="view = 'teacher'">← 返回教师工作台</button>
+      <div class="section-title"><div><h2>{{ teacher.student.displayName }} 的课程学情</h2><p>Student #{{ teacher.student.studentId }} · Course #{{ teacher.student.courseId }}</p></div><button class="secondary" @click="loadTeacherStudent(teacher.student.studentId)">刷新</button></div>
+      <p>作答 {{ teacher.student.activity.attemptCount }} 次 · 正确 {{ teacher.student.activity.correctCount }} 次 · 正确率 {{ teacher.student.activity.correctRate === null ? '—' : `${(Number(teacher.student.activity.correctRate) * 100).toFixed(2)}%` }} · 最近活动 {{ teacher.student.activity.latestActivityAt ? new Date(teacher.student.activity.latestActivityAt).toLocaleString() : '—' }}</p>
+      <section class="graph-detail">
+        <h3>当前掌握度</h3>
+        <article v-for="item in teacher.student.mastery" :key="item.knowledgePointId" class="admin-row"><span>{{ item.knowledgeCode }} · {{ item.knowledgeName }}</span><span>{{ item.status === 'UNKNOWN' ? 'UNKNOWN' : `${Number(item.masteryScore).toFixed(4)} · ${item.correctCount}/${item.attemptCount}` }}</span></article>
+      </section>
+      <section class="graph-detail">
+        <h3>最近作答</h3>
+        <p v-if="teacher.student.recentAnswers.length === 0">暂无作答记录。</p>
+        <article v-for="answer in teacher.student.recentAnswers" :key="answer.answerRecordId" class="admin-row"><span>{{ answer.exerciseCode }} · {{ answer.stemPreview }}</span><span :class="answer.correct ? 'correct-text' : 'incorrect-text'">{{ answer.correct ? '正确' : '错误' }} · {{ new Date(answer.answeredAt).toLocaleString() }}</span></article>
+      </section>
+      <section class="graph-detail">
+        <h3>掌握度变化历史</h3>
+        <p v-if="teacher.student.masteryHistory.length === 0">暂无掌握度变化历史。</p>
+        <article v-for="history in teacher.student.masteryHistory" :key="history.historyId" class="admin-row"><span>{{ history.knowledgeCode }} · {{ history.previousScore === null ? 'UNKNOWN' : Number(history.previousScore).toFixed(4) }} → {{ Number(history.newScore).toFixed(4) }}</span><span>{{ new Date(history.createdAt).toLocaleString() }}</span></article>
+      </section>
+      <section class="graph-detail">
+        <h3>最新推荐上下文</h3>
+        <p v-if="!teacher.student.latestRecommendation">暂无推荐快照。</p>
+        <template v-else><p>GraphVersion #{{ teacher.student.latestRecommendation.graphVersionId }} · {{ teacher.student.latestRecommendation.masteryAlgorithmVersion }} · {{ teacher.student.latestRecommendation.recommendationRuleVersion }}</p><article v-for="item in teacher.student.latestRecommendation.items" :key="item.rank" class="admin-row"><span>{{ item.rank }}. {{ item.knowledgeName }}</span><span>{{ item.reasonCode }} · {{ item.masteryScore === null ? 'UNKNOWN' : Number(item.masteryScore).toFixed(4) }}</span></article></template>
+      </section>
     </section>
 
     <section v-else-if="view === 'course' && selectedCourse" class="card">
@@ -918,7 +1165,7 @@ onMounted(() => {
     </section>
 
     <section v-else-if="view === 'admin' && canManage" class="admin-grid">
-      <section class="card">
+      <section v-if="canManageCourses" class="card">
         <h2>课程管理</h2>
         <form @submit.prevent="saveCourse">
           <label>课程编码 <input v-model="admin.course.courseCode" required></label>
@@ -928,6 +1175,15 @@ onMounted(() => {
           <button>保存课程</button><button type="button" class="secondary" @click="resetCourseForm">新建</button>
         </form>
         <article v-for="course in courses" :key="course.id" class="admin-row"><span>#{{ course.id }} {{ course.courseCode }} · {{ course.courseName }}</span><span><button class="link" @click="editCourse(course)">编辑</button><button class="link danger" @click="disableCourse(course)">禁用</button></span></article>
+        <h3>教师课程分配</h3>
+        <div class="inline-form">
+          <label>课程 ID <input v-model="teacherAssignments.courseId" type="number"></label>
+          <label>教师 ID <input v-model="teacherAssignments.teacherId" type="number"></label>
+          <label>分配角色 <select v-model="teacherAssignments.assignmentRole"><option>OWNER</option><option>INSTRUCTOR</option></select></label>
+          <button @click="saveTeacherAssignment">保存分配</button>
+          <button class="secondary" @click="loadTeacherAssignments">加载分配</button>
+        </div>
+        <article v-for="assignment in teacherAssignments.items" :key="assignment.id" class="admin-row"><span>{{ assignment.displayName }} (#{{ assignment.teacherId }}) · {{ assignment.assignmentRole }} · {{ assignment.status }}</span><button v-if="assignment.status === 'ACTIVE'" class="link danger" @click="deactivateTeacherAssignment(assignment)">停用</button></article>
       </section>
 
       <section class="card">
@@ -1160,10 +1416,21 @@ pre { overflow: auto; padding: 14px; background: #101827; color: #dbeafe; border
 .mastery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .mastery-item { padding: 12px; border: 1px solid #d9e1ef; border-radius: 8px; background: #fff; }
 .mastery-item p { margin: 6px 0 0; color: #536078; }
+.analytics-caption { color: #536078; font-size: .9rem; margin: 14px 0; }
+.analytics-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+.metric { padding: 14px; border: 1px solid #d9e1ef; border-radius: 8px; background: #fff; }
+.metric small { display: block; color: #536078; }
+.metric strong { display: block; margin-top: 6px; font-size: 1.28rem; }
+.heatmap-wrap { overflow: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+th, td { padding: 9px; border: 1px solid #d9e1ef; text-align: left; white-space: nowrap; }
+th { background: #edf3ff; }
+.mastery-unknown { background: #f1f5f9; color: #64748b; }
+.mastery-observed { background: #eaf8ef; color: #14532d; font-variant-numeric: tabular-nums; }
 .explanation { margin: 8px 0 0; min-height: 0; max-height: 150px; font-size: .78rem; }
 .inline-form, .inline-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
 .inline-form label { flex: 1 1 180px; }
 .compact-form { grid-template-columns: minmax(220px, 1fr) auto auto; align-items: end; margin: 12px 0; }
-@media (max-width: 800px) { .graph-layout, .mastery-grid { grid-template-columns: 1fr; } .compact-form { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .graph-layout, .mastery-grid, .analytics-grid { grid-template-columns: 1fr; } .compact-form { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { header { align-items: flex-start; flex-direction: column; } .admin-grid { grid-template-columns: 1fr; } }
 </style>
