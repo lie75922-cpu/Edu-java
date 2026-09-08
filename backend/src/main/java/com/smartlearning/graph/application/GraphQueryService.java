@@ -74,6 +74,11 @@ public class GraphQueryService {
         return toView(graphVersionId, publishedGraphStore.prerequisiteSubgraph(graphVersionId, knowledgePointId));
     }
 
+    /** Reuses the V0.3 active-version authority for recommendation and learning-path consumers. */
+    public long activeGraphVersionId(long courseId, CurrentUser user) {
+        return requireActiveGraphVersion(courseId, user);
+    }
+
     private long requireActiveGraphVersion(long courseId, CurrentUser user) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new NotFoundException("course does not exist"));

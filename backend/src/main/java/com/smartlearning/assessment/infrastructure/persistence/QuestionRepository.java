@@ -10,5 +10,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     Optional<Question> findFirstByExerciseUnitIdAndStatusOrderByIdAsc(Long exerciseUnitId, String status);
 
+    boolean existsByExerciseUnitIdAndStatus(Long exerciseUnitId, String status);
+
     List<Question> findByExerciseUnitIdOrderByIdAsc(Long exerciseUnitId);
 }
