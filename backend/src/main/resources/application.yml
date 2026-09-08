@@ -5,6 +5,10 @@ spring:
     url: ${MYSQL_URL:jdbc:mysql://localhost:3306/edu?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC}
     username: ${MYSQL_USER:edu}
     password: ${MYSQL_PASSWORD:edu_dev_password}
+    hikari:
+      # Release readiness must fail health checks promptly when MySQL is unavailable.
+      connection-timeout: ${MYSQL_CONNECTION_TIMEOUT_MS:5000}
+      validation-timeout: ${MYSQL_VALIDATION_TIMEOUT_MS:3000}
   jpa:
     open-in-view: false
     hibernate:
@@ -15,6 +19,8 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      connect-timeout: ${REDIS_CONNECT_TIMEOUT:3s}
+      timeout: ${REDIS_COMMAND_TIMEOUT:3s}
   neo4j:
     uri: ${NEO4J_URI:bolt://localhost:7687}
     authentication:
@@ -31,7 +37,32 @@ management:
         include: health,info
   endpoint:
     health:
-      show-details: when-authorized
+      probes:
+        enabled: true
+      show-details: never
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: db,neo4jRelease,redisRelease
+      status:
+        order: down,out-of-service,degraded,up,unknown
+        http-mapping:
+          down: 503
+          out-of-service: 503
+          degraded: 200
+  health:
+    redis:
+      enabled: false
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: edu-backend
+    version: ${APP_BUILD_VERSION:0.7.0-dev}
+    build-time: ${APP_BUILD_TIME:local}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -47,3 +78,20 @@ app:
     username: ${BOOTSTRAP_ADMIN_USERNAME:}
     password: ${BOOTSTRAP_ADMIN_PASSWORD:}
     nickname: ${BOOTSTRAP_ADMIN_NICKNAME:System Administrator}
+  release:
+    mode: ${APP_RELEASE_MODE:false}
+    build-version: ${APP_BUILD_VERSION:0.7.0-dev}
+    build-time: ${APP_BUILD_TIME:local}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:8081}
+  demo-seed:
+    enabled: ${APP_DEMO_SEED_ENABLED:false}
+  graph-projection:
+    initial-delay-ms: ${APP_GRAPH_PROJECTION_INITIAL_DELAY_MS:30000}
+    poll-interval-ms: ${APP_GRAPH_PROJECTION_POLL_INTERVAL_MS:5000}
+  mastery-worker:
+    initial-delay-ms: ${APP_MASTERY_WORKER_INITIAL_DELAY_MS:30000}
+    poll-interval-ms: ${APP_MASTERY_WORKER_POLL_INTERVAL_MS:5000}
+
+release:
+  mysql-root-password: ${RELEASE_MYSQL_ROOT_PASSWORD:}

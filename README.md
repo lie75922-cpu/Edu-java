@@ -2,7 +2,7 @@
 
 **基于知识图谱与个性化学习分析的 Java 智能教学平台**
 
-> 当前阶段：**V0.6 教师课程授权与学情分析已完成；MODEL-0A / MODEL-0R / MODEL-1 实验保持既有归档结论。**
+> 当前阶段：**V0.7 Release Readiness 实现中；仅在 clean full stack、真实 API/浏览器 E2E、恢复/备份演练与 GitHub CI 均完成后才会给出 Release Candidate Gate。MODEL-0A / MODEL-0R / MODEL-1 实验保持既有归档结论。**
 
 本项目按真实软件工程与研究流程推进：
 
@@ -343,6 +343,20 @@ Edu-java/
 ├── docs/            # ADR、Scope、实验Gate、实现与验收记录
 └── docker-compose.yml
 ```
+
+### V0.7 — Release Readiness（实现中）
+
+V0.7 不增加教育业务功能。它为 V0.6 已有能力增加可复现全栈 Compose、release 配置校验、健康/readiness/version/OpenAPI、合成 Platform Demo Seed、真实 API/Playwright 验收、恢复/备份 Runbook 与 GitHub Full-stack Release Gate。
+
+快速本地启动（PowerShell）：
+
+```powershell
+Set-Location D:\Code\java\Edu-java-v07-20260908
+.\scripts\generate-local-release-env.ps1 -Path .env.release
+docker compose --env-file .env.release -f docker-compose.full.yml up --build -d
+```
+
+详细步骤见 [Deployment](docs/DEPLOYMENT.md)、[Runbook](docs/RUNBOOK.md)、[Demo Guide](docs/DEMO_GUIDE.md)、[Architecture](docs/ARCHITECTURE.md) 与 [V0.7 implementation record](docs/V0.7_IMPLEMENTATION.md)。本地演示只使用合成 `DEMO-*` 平台用户；Junyi Research Student 永不作为业务用户展示。
 
 ---
 

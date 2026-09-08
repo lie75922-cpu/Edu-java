@@ -6,26 +6,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/system")
-public class SystemHealthController {
+public class SystemVersionController {
 
     private final ReleaseProperties releaseProperties;
 
-    public SystemHealthController(ReleaseProperties releaseProperties) {
+    public SystemVersionController(ReleaseProperties releaseProperties) {
         this.releaseProperties = releaseProperties;
     }
 
-    @GetMapping("/health")
-    public ApiResponse<Map<String, Object>> health() {
+    @GetMapping("/version")
+    public ApiResponse<Map<String, String>> version() {
         return ApiResponse.ok(Map.of(
-                "status", "UP",
                 "service", "edu-backend",
                 "version", releaseProperties.buildVersion(),
-                "timestamp", Instant.now().toString()
+                "buildTime", releaseProperties.buildTime()
         ));
     }
 }

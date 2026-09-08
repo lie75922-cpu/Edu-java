@@ -9,6 +9,8 @@ const storedSession = (() => {
   }
 })()
 
+const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api/v1').replace(/\/+$/, '')
+
 const session = ref(storedSession)
 const view = ref(storedSession ? 'courses' : 'login')
 const notice = ref('')
@@ -136,7 +138,7 @@ async function api(path, options = {}) {
   const headers = { ...(options.headers || {}) }
   if (session.value?.accessToken) headers.Authorization = `Bearer ${session.value.accessToken}`
   if (options.body) headers['Content-Type'] = 'application/json'
-  const response = await fetch(`/api/v1${path}`, { ...options, headers })
+  const response = await fetch(`${apiBaseUrl}${path}`, { ...options, headers })
   const payload = await response.json().catch(() => null)
   if (!response.ok || payload?.code !== 'OK') {
     if (response.status === 401) logout()
@@ -853,7 +855,7 @@ onMounted(() => {
     <header>
       <div>
         <h1>Edu-java</h1>
-        <p>V0.6 课程级教师授权与基于 Platform Business Domain 的学习分析</p>
+        <p>V0.7 Release Candidate · Platform Business Domain 全栈演示</p>
       </div>
       <nav v-if="authenticated">
         <button @click="view = 'courses'; loadCourses()">课程</button>

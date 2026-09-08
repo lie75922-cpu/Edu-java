@@ -58,3 +58,38 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate Compose file
         run: docker compose config
+
+  full-stack-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate isolated local release configuration
+        run: |
+          chmod +x scripts/*.sh
+          scripts/generate-local-release-env.sh .env.release
+      - name: Validate full-stack compose definition without exposing values
+        run: docker compose --env-file .env.release -f docker-compose.full.yml config --quiet
+      - name: Build and start full release stack
+        run: docker compose --env-file .env.release -f docker-compose.full.yml up --build -d
+      - name: Wait for real readiness
+        run: scripts/wait-for-ready.sh http://localhost:8080
+      - name: Run full-stack API smoke
+        run: docker compose --env-file .env.release -f docker-compose.full.yml --profile test run --rm e2e npm run smoke
+      - name: Run real browser E2E
+        run: docker compose --env-file .env.release -f docker-compose.full.yml --profile test run --rm e2e npm run e2e
+      - name: Collect diagnostics after a failure
+        if: failure()
+        run: |
+          docker compose --env-file .env.release -f docker-compose.full.yml ps
+          docker compose --env-file .env.release -f docker-compose.full.yml logs --no-color
+      - name: Upload browser reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-e2e-artifacts
+          path: artifacts
+          if-no-files-found: warn
+      - name: Clean up release stack
+        if: always()
+        run: docker compose --env-file .env.release -f docker-compose.full.yml down -v --remove-orphans
