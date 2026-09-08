@@ -18,6 +18,14 @@ const chapters = [
   { key: 'ALG', name: '第四章 代数结构', desc: '代数系统、群、环、域、格与布尔代数' }
 ]
 
+const preferredOrder = [
+  'DM-LOGIC-PROP', 'DM-LOGIC-EQUIV', 'DM-LOGIC-NF', 'DM-LOGIC-INFERENCE',
+  'DM-SET-BASIC', 'DM-REL-BASIC', 'DM-REL-EQUIV', 'DM-REL-ORDER',
+  'DM-GRAPH-BASIC', 'DM-GRAPH-CONNECT', 'DM-GRAPH-EULER', 'DM-GRAPH-TREE',
+  'DM-ALG-SYSTEM', 'DM-ALG-GROUP', 'DM-ALG-RING', 'DM-ALG-LATTICE'
+]
+const orderIndex = new Map(preferredOrder.map((code, index) => [code, index]))
+
 function chapterOf(point) {
   const code = point.knowledgeCode || ''
   if (code.includes('LOGIC')) return 'LOGIC'
@@ -27,9 +35,20 @@ function chapterOf(point) {
   return 'OTHER'
 }
 
+function chapterName(point) {
+  return chapters.find(item => item.key === chapterOf(point))?.name || '课程知识'
+}
+
+const orderedPoints = computed(() => [...points.value].sort((left, right) => {
+  const leftIndex = orderIndex.has(left.knowledgeCode) ? orderIndex.get(left.knowledgeCode) : Number.MAX_SAFE_INTEGER
+  const rightIndex = orderIndex.has(right.knowledgeCode) ? orderIndex.get(right.knowledgeCode) : Number.MAX_SAFE_INTEGER
+  if (leftIndex !== rightIndex) return leftIndex - rightIndex
+  return String(left.knowledgeName).localeCompare(String(right.knowledgeName), 'zh-CN')
+}))
+
 const visiblePoints = computed(() => selectedChapter.value === '全部'
-  ? points.value
-  : points.value.filter(item => chapterOf(item) === selectedChapter.value))
+  ? orderedPoints.value
+  : orderedPoints.value.filter(item => chapterOf(item) === selectedChapter.value))
 
 function pointExercise(point) {
   return exercises.value.find(exercise => (exercise.knowledgePoints || []).some(item => item.id === point.id || item.knowledgePointId === point.id))
@@ -111,7 +130,7 @@ onMounted(boot)
       <div class="knowledge-list">
         <article v-for="(point, index) in visiblePoints" :key="point.id" class="knowledge-row">
           <div class="knowledge-index">{{ String(index + 1).padStart(2, '0') }}</div>
-          <div class="knowledge-main"><strong>{{ point.knowledgeName }}</strong><span>{{ point.knowledgeCode }}</span></div>
+          <div class="knowledge-main"><strong>{{ point.knowledgeName }}</strong><span>{{ chapterName(point) }}</span></div>
           <div class="knowledge-actions">
             <span v-if="pointExercise(point)" class="resource-count">1 组练习</span>
             <button v-if="pointExercise(point)" class="primary-button small" @click="startPractice(point)">开始练习</button>
