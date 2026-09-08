@@ -1,13 +1,8 @@
 package com.smartlearning.graph.application;
 
-import com.smartlearning.assessment.domain.ExerciseKnowledge;
-import com.smartlearning.assessment.domain.ExerciseUnit;
-import com.smartlearning.assessment.infrastructure.persistence.ExerciseKnowledgeRepository;
-import com.smartlearning.assessment.infrastructure.persistence.ExerciseUnitRepository;
 import com.smartlearning.common.exception.ConflictException;
 import com.smartlearning.common.exception.NotFoundException;
 import com.smartlearning.graph.api.GraphApi;
-import com.smartlearning.graph.domain.EvidenceResolutionStatus;
 import com.smartlearning.graph.domain.GraphVersion;
 import com.smartlearning.graph.domain.KnowledgeRelation;
 import com.smartlearning.graph.domain.KnowledgeRelationEvidence;
@@ -21,8 +16,6 @@ import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvide
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvidenceLinkRepository;
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvidenceRepository;
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationRepository;
-import com.smartlearning.knowledge.domain.KnowledgePoint;
-import com.smartlearning.knowledge.infrastructure.persistence.KnowledgePointRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -39,7 +32,6 @@ import java.util.Set;
 public class EvidenceImportService {
 
     private static final String JUNYI_RAW_PREREQUISITE = "JUNYI_RAW_PREREQUISITE";
-    private static final String JUNYI_CATALOG = "JUNYI_CATALOG";
     private static final String PREREQUISITE = "PREREQUISITE";
 
     private final GraphVersionRepository graphVersionRepository;
@@ -48,9 +40,7 @@ public class EvidenceImportService {
     private final KnowledgeRelationEvidenceLinkRepository evidenceLinkRepository;
     private final KnowledgeRelationEvidenceImportRunRepository importRunRepository;
     private final KnowledgeRelationEvidenceConflictRepository conflictRepository;
-    private final ExerciseUnitRepository exerciseUnitRepository;
-    private final ExerciseKnowledgeRepository exerciseKnowledgeRepository;
-    private final KnowledgePointRepository knowledgePointRepository;
+    private final EvidenceResolutionResolver evidenceResolutionResolver;
     private final ObjectMapper objectMapper;
 
     public EvidenceImportService(
@@ -60,9 +50,7 @@ public class EvidenceImportService {
             KnowledgeRelationEvidenceLinkRepository evidenceLinkRepository,
             KnowledgeRelationEvidenceImportRunRepository importRunRepository,
             KnowledgeRelationEvidenceConflictRepository conflictRepository,
-            ExerciseUnitRepository exerciseUnitRepository,
-            ExerciseKnowledgeRepository exerciseKnowledgeRepository,
-            KnowledgePointRepository knowledgePointRepository,
+            EvidenceResolutionResolver evidenceResolutionResolver,
             ObjectMapper objectMapper
     ) {
         this.graphVersionRepository = graphVersionRepository;
@@ -71,13 +59,11 @@ public class EvidenceImportService {
         this.evidenceLinkRepository = evidenceLinkRepository;
         this.importRunRepository = importRunRepository;
         this.conflictRepository = conflictRepository;
-        this.exerciseUnitRepository = exerciseUnitRepository;
-        this.exerciseKnowledgeRepository = exerciseKnowledgeRepository;
-        this.knowledgePointRepository = knowledgePointRepository;
+        this.evidenceResolutionResolver = evidenceResolutionResolver;
         this.objectMapper = objectMapper;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GraphApi.EvidenceImportResult dryRun(
             long graphVersionId,
             GraphApi.EvidenceImportRequest request,
@@ -125,11 +111,11 @@ public class EvidenceImportService {
             long requestedBy,
             boolean apply
     ) {
-        GraphVersion version = requireEditableVersion(graphVersionId);
+        GraphVersion version = requireImportVersion(graphVersionId, apply);
         String mode = apply ? "APPLY" : "DRY_RUN";
-        KnowledgeRelationEvidenceImportRun run = importRunRepository.save(new KnowledgeRelationEvidenceImportRun(
+        KnowledgeRelationEvidenceImportRun run = apply ? importRunRepository.save(new KnowledgeRelationEvidenceImportRun(
                 version.getId(), version.getCourseId(), requestedBy, mode, JUNYI_RAW_PREREQUISITE
-        ));
+        )) : null;
         MutableSummary summary = new MutableSummary();
         List<ConflictDraft> conflicts = new ArrayList<>();
         Set<String> inputEvidenceIds = new HashSet<>();
@@ -155,8 +141,11 @@ public class EvidenceImportService {
                 }
                 summary.reusedEvidence++;
             } else {
-                Resolution resolution = resolve(version.getCourseId(), input);
-                if (!resolution.resolved()) {
+                KnowledgeRelationEvidence.ResolutionState resolution = evidenceResolutionResolver.resolve(
+                        version.getCourseId(), JUNYI_RAW_PREREQUISITE,
+                        input.sourceExerciseExternalId(), input.targetExerciseExternalId()
+                );
+                if (!resolution.isResolved()) {
                     conflicts.add(ConflictDraft.of(input, resolution.conflictCode(), resolution.detail()));
                 }
                 evidence = new KnowledgeRelationEvidence(
@@ -191,22 +180,31 @@ public class EvidenceImportService {
             }
         }
 
-        List<KnowledgeRelationEvidenceConflict> persisted = conflicts.stream()
-                .map(conflict -> conflictRepository.save(new KnowledgeRelationEvidenceConflict(
-                        run.getId(), conflict.externalEvidenceId(), conflict.sourceExternalId(), conflict.targetExternalId(),
-                        conflict.code(), toJson(Map.of("message", conflict.detail()))
-                )))
-                .toList();
-        summary.conflictCount = persisted.size();
+        List<GraphApi.EvidenceConflictResponse> conflictResponses;
+        if (apply) {
+            List<KnowledgeRelationEvidenceConflict> persisted = conflicts.stream()
+                    .map(conflict -> conflictRepository.save(new KnowledgeRelationEvidenceConflict(
+                            run.getId(), conflict.externalEvidenceId(), conflict.sourceExternalId(), conflict.targetExternalId(),
+                            conflict.code(), toJson(Map.of("message", conflict.detail()))
+                    )))
+                    .toList();
+            summary.conflictCount = persisted.size();
+            conflictResponses = persisted.stream().map(this::toConflictResponse).toList();
+        } else {
+            summary.conflictCount = conflicts.size();
+            conflictResponses = conflicts.stream().map(this::toConflictResponse).toList();
+        }
         String status = summary.conflictCount == 0
                 ? (apply ? "COMPLETED" : "DRY_RUN_COMPLETED")
                 : (apply ? "COMPLETED_WITH_CONFLICTS" : "DRY_RUN_COMPLETED_WITH_CONFLICTS");
-        run.complete(status, toJson(summary.snapshot()));
+        if (apply) {
+            run.complete(status, toJson(summary.snapshot()));
+        }
 
         return new GraphApi.EvidenceImportResult(
-                run.getId(), version.getId(), mode, status, summary.createdEvidence, summary.reusedEvidence,
+                run == null ? null : run.getId(), version.getId(), mode, status, summary.createdEvidence, summary.reusedEvidence,
                 summary.resolvedEvidence, summary.candidateRelationsCreated, summary.candidateRelationsAggregated,
-                summary.conflictCount, persisted.stream().map(this::toConflictResponse).toList()
+                summary.conflictCount, conflictResponses
         );
     }
 
@@ -229,7 +227,7 @@ public class EvidenceImportService {
                 });
         if (!evidenceLinkRepository.existsByRelationIdAndEvidenceId(relation.getId(), evidence.getId())) {
             evidenceLinkRepository.save(new KnowledgeRelationEvidenceLink(relation.getId(), evidence.getId()));
-            relation.incrementEvidenceCount();
+            relation.reconcileEvidenceCount(linkCount(relation.getId()));
             if (relation.getEvidenceCount() > 1) {
                 summary.candidateRelationsAggregated++;
             }
@@ -254,69 +252,21 @@ public class EvidenceImportService {
         }
     }
 
-    private Resolution resolve(long courseId, GraphApi.RawPrerequisiteEvidenceRequest input) {
-        List<ExerciseUnit> sourceMatches = exerciseUnitRepository.findByCourseIdAndSourceTypeAndExternalId(
-                courseId, JUNYI_CATALOG, input.sourceExerciseExternalId()
-        );
-        if (sourceMatches.isEmpty()) {
-            return Resolution.unresolved(EvidenceResolutionStatus.UNRESOLVED_IDENTITY, "MISSING_SOURCE_EXERCISE",
-                    "source exercise external ID does not resolve to an ExerciseUnit");
-        }
-        if (sourceMatches.size() > 1 || !"RESOLVED".equals(sourceMatches.getFirst().getIdentityStatus())) {
-            return Resolution.unresolved(EvidenceResolutionStatus.UNRESOLVED_IDENTITY, "AMBIGUOUS_SOURCE_EXERCISE",
-                    "source exercise external ID does not resolve uniquely to an ExerciseUnit");
-        }
-        ExerciseUnit sourceExercise = sourceMatches.getFirst();
-
-        List<ExerciseUnit> targetMatches = exerciseUnitRepository.findByCourseIdAndSourceTypeAndExternalId(
-                courseId, JUNYI_CATALOG, input.targetExerciseExternalId()
-        );
-        if (targetMatches.isEmpty()) {
-            return Resolution.unresolvedWithSource(sourceExercise.getId(), "MISSING_TARGET_EXERCISE",
-                    "target exercise external ID does not resolve to an ExerciseUnit");
-        }
-        if (targetMatches.size() > 1 || !"RESOLVED".equals(targetMatches.getFirst().getIdentityStatus())) {
-            return Resolution.unresolvedWithSource(sourceExercise.getId(), "AMBIGUOUS_TARGET_EXERCISE",
-                    "target exercise external ID does not resolve uniquely to an ExerciseUnit");
-        }
-        ExerciseUnit targetExercise = targetMatches.getFirst();
-
-        List<ExerciseKnowledge> sourceMappings = exerciseKnowledgeRepository.findByExerciseUnitIdOrderByIdAsc(sourceExercise.getId());
-        if (sourceMappings.isEmpty()) {
-            return Resolution.unmappedSource(sourceExercise.getId(), targetExercise.getId(), "source ExerciseUnit has no KnowledgePoint mapping");
-        }
-        if (sourceMappings.size() > 1) {
-            return Resolution.ambiguousSourceMapping(sourceExercise.getId(), targetExercise.getId(),
-                    "source ExerciseUnit maps to multiple KnowledgePoints and cannot be auto-projected");
-        }
-        List<ExerciseKnowledge> targetMappings = exerciseKnowledgeRepository.findByExerciseUnitIdOrderByIdAsc(targetExercise.getId());
-        if (targetMappings.isEmpty()) {
-            return Resolution.unmappedTarget(sourceExercise.getId(), targetExercise.getId(), "target ExerciseUnit has no KnowledgePoint mapping");
-        }
-        if (targetMappings.size() > 1) {
-            return Resolution.ambiguousTargetMapping(sourceExercise.getId(), targetExercise.getId(),
-                    "target ExerciseUnit maps to multiple KnowledgePoints and cannot be auto-projected");
-        }
-        Long sourcePointId = sourceMappings.getFirst().getKnowledgePointId();
-        Long targetPointId = targetMappings.getFirst().getKnowledgePointId();
-        KnowledgePoint sourcePoint = knowledgePointRepository.findById(sourcePointId).orElse(null);
-        KnowledgePoint targetPoint = knowledgePointRepository.findById(targetPointId).orElse(null);
-        if (sourcePoint == null || targetPoint == null || sourcePoint.getCourseId() != courseId || targetPoint.getCourseId() != courseId) {
-            return Resolution.unresolved(EvidenceResolutionStatus.UNRESOLVED_IDENTITY, "INVALID_KNOWLEDGE_MAPPING",
-                    "ExerciseUnit mapping does not resolve to same-course KnowledgePoints");
-        }
-        if (sourcePointId.equals(targetPointId)) {
-            return Resolution.rejectedSelfLoop(sourceExercise.getId(), targetExercise.getId(), sourcePointId,
-                    "source and target ExerciseUnits map to the same KnowledgePoint");
-        }
-        return Resolution.resolved(sourceExercise.getId(), targetExercise.getId(), sourcePointId, targetPointId);
-    }
-
-    private GraphVersion requireEditableVersion(long graphVersionId) {
+    private GraphVersion requireImportVersion(long graphVersionId, boolean apply) {
         GraphVersion version = graphVersionRepository.findById(graphVersionId)
                 .orElseThrow(() -> new NotFoundException("graph version does not exist"));
-        version.reopenForEditing();
+        if (version.getStatus() != com.smartlearning.graph.domain.GraphVersionStatus.DRAFT
+                && version.getStatus() != com.smartlearning.graph.domain.GraphVersionStatus.VALIDATION_FAILED) {
+            throw new ConflictException("only a draft or validation-failed graph version can import evidence");
+        }
+        if (apply && version.getStatus() == com.smartlearning.graph.domain.GraphVersionStatus.VALIDATION_FAILED) {
+            version.reopenForEditing();
+        }
         return version;
+    }
+
+    private int linkCount(long relationId) {
+        return Math.toIntExact(evidenceLinkRepository.countByRelationId(relationId));
     }
 
     private boolean sameEndpoints(KnowledgeRelationEvidence existing, GraphApi.RawPrerequisiteEvidenceRequest input) {
@@ -349,6 +299,13 @@ public class EvidenceImportService {
         );
     }
 
+    private GraphApi.EvidenceConflictResponse toConflictResponse(ConflictDraft conflict) {
+        return new GraphApi.EvidenceConflictResponse(
+                null, conflict.externalEvidenceId(), conflict.sourceExternalId(), conflict.targetExternalId(),
+                conflict.code(), toJson(Map.of("message", conflict.detail())), null
+        );
+    }
+
     private record PointPair(Long sourceKnowledgePointId, Long targetKnowledgePointId) {
     }
 
@@ -361,59 +318,6 @@ public class EvidenceImportService {
     ) {
         static ConflictDraft of(GraphApi.RawPrerequisiteEvidenceRequest input, String code, String detail) {
             return new ConflictDraft(input.externalEvidenceId(), input.sourceExerciseExternalId(), input.targetExerciseExternalId(), code, detail);
-        }
-    }
-
-    private record Resolution(
-            EvidenceResolutionStatus status,
-            String conflictCode,
-            String detail,
-            Long sourceExerciseUnitId,
-            Long targetExerciseUnitId,
-            Long sourceKnowledgePointId,
-            Long targetKnowledgePointId
-    ) {
-        static Resolution resolved(Long sourceExerciseId, Long targetExerciseId, Long sourcePointId, Long targetPointId) {
-            return new Resolution(EvidenceResolutionStatus.RESOLVED, null, null,
-                    sourceExerciseId, targetExerciseId, sourcePointId, targetPointId);
-        }
-
-        static Resolution unresolved(EvidenceResolutionStatus status, String code, String detail) {
-            return new Resolution(status, code, detail, null, null, null, null);
-        }
-
-        static Resolution unresolvedWithSource(Long sourceExerciseId, String code, String detail) {
-            return new Resolution(EvidenceResolutionStatus.UNRESOLVED_IDENTITY, code, detail,
-                    sourceExerciseId, null, null, null);
-        }
-
-        static Resolution unmappedSource(Long sourceExerciseId, Long targetExerciseId, String detail) {
-            return new Resolution(EvidenceResolutionStatus.UNMAPPED_SOURCE, "UNMAPPED_SOURCE", detail,
-                    sourceExerciseId, targetExerciseId, null, null);
-        }
-
-        static Resolution unmappedTarget(Long sourceExerciseId, Long targetExerciseId, String detail) {
-            return new Resolution(EvidenceResolutionStatus.UNMAPPED_TARGET, "UNMAPPED_TARGET", detail,
-                    sourceExerciseId, targetExerciseId, null, null);
-        }
-
-        static Resolution ambiguousSourceMapping(Long sourceExerciseId, Long targetExerciseId, String detail) {
-            return new Resolution(EvidenceResolutionStatus.AMBIGUOUS_SOURCE_MAPPING, "AMBIGUOUS_SOURCE_MAPPING", detail,
-                    sourceExerciseId, targetExerciseId, null, null);
-        }
-
-        static Resolution ambiguousTargetMapping(Long sourceExerciseId, Long targetExerciseId, String detail) {
-            return new Resolution(EvidenceResolutionStatus.AMBIGUOUS_TARGET_MAPPING, "AMBIGUOUS_TARGET_MAPPING", detail,
-                    sourceExerciseId, targetExerciseId, null, null);
-        }
-
-        static Resolution rejectedSelfLoop(Long sourceExerciseId, Long targetExerciseId, Long pointId, String detail) {
-            return new Resolution(EvidenceResolutionStatus.REJECTED_SELF_LOOP, "REJECTED_SELF_LOOP", detail,
-                    sourceExerciseId, targetExerciseId, pointId, pointId);
-        }
-
-        boolean resolved() {
-            return status == EvidenceResolutionStatus.RESOLVED;
         }
     }
 
