@@ -1,0 +1,168 @@
+{
+  "content_integrity_evidence": "No content digest is present because the governing repository rule forbids it. Review uses fixed paths, exact schemas, exact member-list comparison, and measured counts.",
+  "dataset_name": "JUNYI_MID_MODEL_V1",
+  "derivation_rules": {
+    "exact_duplicate": "Retain the first full-record occurrence in source order; remove later full-record-equal occurrences only from the derived model input.",
+    "test_membership_changed": false,
+    "unknown_exercise": "Exclude from Q-matrix-based model input and report separately.",
+    "unmapped_topic": "Exclude an observed exercise if its metadata has no single non-missing Topic mapping; do not infer a replacement concept."
+  },
+  "derived_local_artifacts": {
+    "eligible_interactions": "eligible_interactions.jsonl",
+    "exercise_index_map": "exercise_index_map.json",
+    "git_tracking": "ignored",
+    "q_matrix": "q_matrix.csv",
+    "root": "model-service/experiments/model0/data/junyi_mid_model_v1",
+    "split_membership_copy": "split_membership.json",
+    "split_tables": {
+      "test": "interactions_test.csv",
+      "train": "interactions_train.csv",
+      "valid": "interactions_valid.csv"
+    },
+    "student_index_map": "student_index_map.json",
+    "topic_index_map": "topic_index_map.json"
+  },
+  "frozen_split": {
+    "counts": {
+      "test": 2000,
+      "train": 7000,
+      "valid": 1000
+    },
+    "exact_member_list_comparison": "PASS",
+    "overlap": {
+      "train_test": 0,
+      "train_valid": 0,
+      "valid_test": 0
+    },
+    "student_count": 10000
+  },
+  "measurements": {
+    "cold_start_evaluation_constraint": {
+      "allowed_policy": "Neutral zero-history held-out embeddings only; do not use validation/test responses for per-student calibration without a new Owner-approved protocol.",
+      "reason": "Student-disjoint validation/test memberships provide no response rows for fitting per-student NCDM/ORCDF embeddings.",
+      "status": "REQUIRED"
+    },
+    "exercise_topic_mapping": {
+      "conflicting_topic_external_ids": 0,
+      "distinct_external_ids": 815,
+      "duplicate_external_id_count": 0,
+      "mapped_external_ids": 815,
+      "mapping_rule": "Map only an external ID with exactly one non-missing Topic across its metadata records; leave missing or conflicting IDs unmapped.",
+      "metadata_rows": 815,
+      "topic_count": 40,
+      "unmapped_external_ids": 0
+    },
+    "fixed_data0_graph_scope": {
+      "edges": 979,
+      "nodes": 815,
+      "scope_note": "DATA-0 fixed graph scope; it is only a comparison and is not the Medium observed-exercise induced graph."
+    },
+    "frozen_split": {
+      "counts": {
+        "test": 2000,
+        "train": 7000,
+        "valid": 1000
+      },
+      "exact_member_list_comparison": "PASS",
+      "overlap": {
+        "train_test": 0,
+        "train_valid": 0,
+        "valid_test": 0
+      },
+      "student_count": 10000
+    },
+    "interactions": {
+      "exact_duplicate_definition": [
+        "student_external_id",
+        "exercise_external_id",
+        "correct",
+        "attempts",
+        "count_hints",
+        "duration_seconds",
+        "earned_proficiency",
+        "hint_used",
+        "occurred_at"
+      ],
+      "exact_duplicate_rows": 17,
+      "observed_exercise_count_after_filtering": 624,
+      "observed_exercise_count_before_filtering": 624,
+      "retained_q_eligible_rows": 284228,
+      "rows_after_exact_duplicate_removal": 284228,
+      "source_rows": 284245,
+      "topic_unmapped_rows_after_dedup": 0,
+      "unknown_exercise_rows_after_dedup": 0,
+      "unknown_exercise_rows_source": 0
+    },
+    "medium_observed_exercise_induced_graph": {
+      "components": 26,
+      "cyclic_sccs": 2,
+      "duplicate_relation_rows_in_projection": 1,
+      "edge_source": "PREREQUISITE_RAW_UNVERIFIED / JUNYI_EXERCISE_METADATA only",
+      "edges": 763,
+      "largest_component": 589,
+      "largest_component_ratio": 0.9439102564102564,
+      "nodes": 624,
+      "publication_status": "RAW_EVIDENCE_ONLY_NOT_PUBLISHED_GRAPH",
+      "raw_relation_rows_in_projection": 764,
+      "self_loops": 1
+    },
+    "q_eligible_observed_exercise_induced_graph": {
+      "components": 26,
+      "cyclic_sccs": 2,
+      "duplicate_relation_rows_in_projection": 1,
+      "edge_source": "PREREQUISITE_RAW_UNVERIFIED / JUNYI_EXERCISE_METADATA only",
+      "edges": 763,
+      "largest_component": 589,
+      "largest_component_ratio": 0.9439102564102564,
+      "nodes": 624,
+      "publication_status": "RAW_EVIDENCE_ONLY_NOT_PUBLISHED_GRAPH",
+      "raw_relation_rows_in_projection": 764,
+      "self_loops": 1
+    },
+    "q_matrix": {
+      "columns": 40,
+      "density": 0.025,
+      "nonzero_entries": 624,
+      "rows": 624,
+      "semantics": "one Topic column per uniquely mapped observed Exercise external ID",
+      "unmapped_observed_exercise_ids": 0
+    },
+    "relationship_source_counts": {
+      "JUNYI_EXERCISE_METADATA|PREREQUISITE_RAW_UNVERIFIED|False": 979
+    },
+    "retained_split_statistics": {
+      "test": {
+        "correct": 46447,
+        "correct_rate": 0.8132189442353147,
+        "interactions": 57115,
+        "students": 2000
+      },
+      "train": {
+        "correct": 163856,
+        "correct_rate": 0.8217782057454662,
+        "interactions": 199392,
+        "students": 7000
+      },
+      "valid": {
+        "correct": 22943,
+        "correct_rate": 0.827639695537679,
+        "interactions": 27721,
+        "students": 1000
+      }
+    }
+  },
+  "model_evaluation_boundary": {
+    "allowed_policy": "Neutral zero-history held-out embeddings only; do not use validation/test responses for per-student calibration without a new Owner-approved protocol.",
+    "reason": "Student-disjoint validation/test memberships provide no response rows for fitting per-student NCDM/ORCDF embeddings.",
+    "status": "REQUIRED"
+  },
+  "parent_dataset": "JUNYI_MID",
+  "source_artifacts": {
+    "medium_root": "data-pipeline/.data/generated/medium",
+    "parent_manifest": "data-pipeline/manifests/junyi_mid_v1.json"
+  },
+  "source_type": "THIRD_PARTY_PROCESSED",
+  "status": "PASS_WITH_COLD_START_LIMITATION",
+  "version": "1.0.0-model0"
+}
+

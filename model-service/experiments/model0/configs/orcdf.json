@@ -1,0 +1,41 @@
+{
+  "dataset_name": "JUNYI_MID_MODEL_V1",
+  "model": "ORCDF-NCD",
+  "implementation": {
+    "reference_repository": "data-pipeline/.data/reference/InsCD",
+    "package": "inscdkit",
+    "package_version": "1.3.1",
+    "license": "MIT",
+    "reference_component": "inscd.models.graph.orcdf.ORCDF with NCD_IF",
+    "adapter_policy": "Use the maintained ORCDF response-graph semantics through a local split-safe runner; no raw prerequisite evidence is supplied as a model graph."
+  },
+  "seed": 20260907,
+  "device_preference": "cuda:0",
+  "data_protocol": {
+    "split_strategy": "frozen_student_level",
+    "test_membership_changes_allowed": false,
+    "held_out_student_policy": "Neutral zero-history embedding: response-graph construction uses train rows only, and validation/test student base embeddings are fixed to zero with no calibration from held-out responses.",
+    "test_evaluation_policy": "One final test evaluation only after the validation-selected epoch is frozen; a local ledger blocks an accidental second evaluation."
+  },
+  "response_graph": {
+    "student_exercise_edges": "Only retained train rows; separate right and wrong relations; repeated student-exercise rows are coalesced as weighted adjacency entries by the reference implementation.",
+    "exercise_topic_edges": "The frozen 624 by 40 Topic Q-matrix from JUNYI_MID_MODEL_V1.",
+    "prerequisite_edges": "Not used. Raw prerequisite evidence is neither a Published Graph nor an ORCDF input in this experiment."
+  },
+  "training": {
+    "latent_dim": 32,
+    "gcn_layers": 2,
+    "flip_ratio": 0.05,
+    "ssl_temperature": 3.0,
+    "ssl_weight": 0.001,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "optimization_unit": "one full retained-train split step per epoch; required because the reference ORCDF contrastive objective is graph-global and this CPU-only run must not silently substitute a sampled loss",
+    "max_epochs": 8,
+    "early_stopping_patience": 3,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch"
+  }
+}
+

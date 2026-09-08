@@ -1,0 +1,87 @@
+{
+  "fair_comparison_run": false,
+  "frozen_model_input": {
+    "exercise_num": 624,
+    "student_num": 10000,
+    "topic_num": 40
+  },
+  "identity_mapping_audit": {
+    "checked_reference_files": {
+      "concept_from_exercise": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/graph/k_from_e.txt",
+        "size_bytes": 6822
+      },
+      "directed_graph": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/graph/K_Directed.txt",
+        "size_bytes": 8621
+      },
+      "exercise_from_concept": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/graph/e_from_k.txt",
+        "size_bytes": 6822
+      },
+      "reference_config": {
+        "relative_path": "data-pipeline/.data/reference/RCD/RCD/config.txt",
+        "size_bytes": 88
+      },
+      "reference_log": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/log_data.json",
+        "size_bytes": 62377743
+      },
+      "reference_test": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/test_set.json",
+        "size_bytes": 13910315
+      },
+      "reference_train": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/train_set.json",
+        "size_bytes": 40056148
+      },
+      "undirected_graph": {
+        "relative_path": "data-pipeline/.data/reference/RCD/data/junyi/graph/K_Undirected.txt",
+        "size_bytes": 9060
+      }
+    },
+    "forbidden_inference": [
+      "Do not map by numeric position.",
+      "Do not map by coincident identifier values.",
+      "Do not invent a Topic graph from raw prerequisite evidence."
+    ],
+    "numeric_concept_to_frozen_topic_mapping": "NOT_FOUND",
+    "reference_exercise_to_frozen_exercise_mapping": "NOT_FOUND"
+  },
+  "model": "RCD",
+  "preflight_status": "PASS_WITH_COLD_START_LIMITATION",
+  "production_integration_changed": false,
+  "reference_cardinalities": {
+    "exercise_num": 835,
+    "knowledge_num": 835,
+    "student_num": 10000
+  },
+  "reference_graph": {
+    "directed": {
+      "numeric_nodes": 776,
+      "raw_rows": 988,
+      "self_loops": 2,
+      "unique_edges": 981
+    },
+    "status": "REFERENCE_GRAPH_ONLY",
+    "undirected": {
+      "numeric_nodes": 362,
+      "raw_rows": 1040,
+      "self_loops": 1,
+      "unique_edges": 1040
+    }
+  },
+  "route_config": {
+    "model": "RCD",
+    "on_missing_conditions": "Emit NOT_COMPARABLE_ON_COMMON_GRAPH, do not train RCD on a mismatched graph, and do not place a reference reproduction in the fair comparison table.",
+    "required_conditions": [
+      "An auditable mapping from every RCD numeric concept node used by the comparison graph to the frozen JUNYI_MID_MODEL_V1 Topic/Q-matrix semantics, without inferred identifiers.",
+      "A documented exercise identity mapping from the RCD reference data to the frozen derived Exercise index, without relying on row order or coincidental numeric values.",
+      "The resulting common concept graph must remain raw/reference evidence and must not be treated as a Published Graph."
+    ],
+    "route": "conditional_same_dataset_comparison"
+  },
+  "status": "NOT_COMPARABLE_ON_COMMON_GRAPH",
+  "test_evaluation_count": 0
+}
+
