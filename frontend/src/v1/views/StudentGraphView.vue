@@ -37,7 +37,7 @@ const layoutNodes = computed(() => {
   chapterOrder.forEach((chapter, column) => {
     const nodes = groups.get(chapter) || []
     nodes.forEach((node, row) => {
-      result.push({ ...node, chapter, x: 145 + column * 220, y: 90 + row * 115 })
+      result.push({ ...node, chapter, x: 82 + column * 152, y: 88 + row * 118 })
     })
   })
   return result
@@ -49,7 +49,7 @@ const layoutEdges = computed(() => (graph.value?.edges || []).map(edge => ({
   source: nodeMap.value.get(edge.sourceKnowledgePointId),
   target: nodeMap.value.get(edge.targetKnowledgePointId)
 })).filter(edge => edge.source && edge.target))
-const canvasHeight = computed(() => Math.max(520, ...layoutNodes.value.map(node => node.y + 80)))
+const canvasHeight = computed(() => Math.max(520, ...layoutNodes.value.map(node => node.y + 78)))
 
 async function load(course = null) {
   if (course) selectedCourse.value = course
@@ -94,15 +94,15 @@ onMounted(boot)
         </div>
         <div v-if="!graph" class="empty-state"><strong>当前课程暂无已发布知识图谱</strong><p>需要先完成知识关系审核与图谱发布。</p></div>
         <div v-else class="graph-scroll">
-          <svg class="knowledge-svg" :viewBox="`0 0 1080 ${canvasHeight}`" :style="{ minHeight: `${canvasHeight}px` }">
-            <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8" /></marker></defs>
+          <svg class="knowledge-svg" :viewBox="`0 0 640 ${canvasHeight}`" :style="{ minHeight: `${canvasHeight}px` }">
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8294ab" /></marker></defs>
             <g class="graph-lines">
-              <line v-for="edge in layoutEdges" :key="edge.relationId" :x1="edge.source.x" :y1="edge.source.y" :x2="edge.target.x" :y2="edge.target.y" marker-end="url(#arrow)" />
+              <line v-for="edge in layoutEdges" :key="edge.relationId" :x1="edge.source.x" :y1="edge.source.y + 31" :x2="edge.target.x" :y2="edge.target.y - 31" marker-end="url(#arrow)" />
             </g>
             <g v-for="node in layoutNodes" :key="node.id" class="svg-node" :class="[`chapter-${node.chapter.toLowerCase()}`, { dim: query && !filteredNodes.some(item => item.id === node.id), selected: selectedNode?.id === node.id }]" :transform="`translate(${node.x},${node.y})`" @click="inspect(node)">
-              <circle r="34" />
-              <text text-anchor="middle" dy="4">{{ node.knowledgeName.slice(0, 5) }}</text>
-              <text class="node-label" text-anchor="middle" dy="58">{{ node.knowledgeName }}</text>
+              <circle r="30" />
+              <text text-anchor="middle" dy="4">{{ node.knowledgeName.slice(0, 4) }}</text>
+              <text class="node-label" text-anchor="middle" dy="51">{{ node.knowledgeName }}</text>
             </g>
           </svg>
         </div>
@@ -112,7 +112,7 @@ onMounted(boot)
         <template v-if="selectedNode">
           <span class="soft-badge">{{ chapterNames[chapterOf(selectedNode)] }}</span>
           <h3>{{ selectedNode.knowledgeName }}</h3>
-          <p class="muted">知识编码：{{ selectedNode.knowledgeCode }}</p>
+          <p class="muted">从课程知识结构理解它与其他知识的学习顺序。</p>
           <div class="detail-block">
             <strong>前置知识</strong>
             <p v-if="!relationView?.prerequisites?.nodes?.length">当前没有直接前置知识。</p>
