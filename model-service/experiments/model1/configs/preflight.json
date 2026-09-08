@@ -1,0 +1,40 @@
+{
+  "dataset_name": "JUNYI_EXTERNAL_HOLDOUT_V1",
+  "seed": 20260908,
+  "target_students": 5000,
+  "minimum_eligible_chronological_interactions": 20,
+  "source_boundary": {
+    "parent_manifest": "data-pipeline/manifests/junyi_mid_v1.json",
+    "original_medium_membership": "data-pipeline/.data/generated/medium/split_membership.json",
+    "raw_inputs": "Supplied explicitly at execution time; raw source rows are never tracked."
+  },
+  "membership_selection": {
+    "fields_used": [
+      "user_id",
+      "exercise",
+      "time_done"
+    ],
+    "correct_label_used": false,
+    "eligible_exercise_scope": "Observed and one-Topic Q-eligible Exercises from the frozen original Medium materialization.",
+    "sequence_length_strata": [
+      "20-49",
+      "50-99",
+      "100-199",
+      "200-499",
+      "500-plus"
+    ],
+    "allocation": "Proportional by eligible-student stratum, floor quotas followed by descending fractional remainder and stable stratum order.",
+    "within_stratum_order": "Sort anonymous external IDs, then deterministic shuffle using seed plus stratum index.",
+    "replacement": "No replacement or post-result substitution."
+  },
+  "chronological_protocol": {
+    "ordering": "time_done ascending with original ProblemLog source row as stable tie-breaker.",
+    "split": "For every retained sequence (all have at least 20 rows): floor(0.60*n) train/history, floor(0.20*n) validation, remaining final test.",
+    "future_leakage": "Train labels only fit models and rate estimates; validation selects; final test is read once after configuration is frozen."
+  },
+  "raw_interaction_policy": {
+    "selection_pass": "No correct value is parsed or used.",
+    "materialisation_pass": "Every selected eligible chronology row with a valid binary correct label is retained. Any invalid selected label fails preflight rather than changing membership.",
+    "deduplication": "No response row is removed by a label-dependent duplicate rule in this fresh-holdout protocol."
+  }
+}
