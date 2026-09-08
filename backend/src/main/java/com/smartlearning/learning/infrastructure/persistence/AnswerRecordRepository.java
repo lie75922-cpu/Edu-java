@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
 
 public interface AnswerRecordRepository extends JpaRepository<AnswerRecord, Long> {
 
@@ -13,4 +14,10 @@ public interface AnswerRecordRepository extends JpaRepository<AnswerRecord, Long
     long countByStudentIdAndQuestionId(Long studentId, Long questionId);
 
     List<AnswerRecord> findByStudentIdOrderByAnsweredAtDesc(Long studentId);
+
+    List<AnswerRecord> findByStudentIdAndCourseIdAndAnsweredAtAfterOrderByAnsweredAtDesc(
+            Long studentId,
+            Long courseId,
+            Instant answeredAfter
+    );
 }

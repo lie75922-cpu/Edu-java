@@ -67,8 +67,18 @@ const graphAdmin = reactive({
   importResult: null
 })
 
+const personalization = reactive({
+  courseId: '',
+  mastery: [],
+  masteryHistory: [],
+  recommendation: null,
+  targetKnowledgePointId: '',
+  learningPath: null
+})
+
 const authenticated = computed(() => Boolean(session.value?.accessToken))
 const roles = computed(() => session.value?.user?.roles || [])
+const isStudent = computed(() => roles.value.includes('STUDENT'))
 const canManage = computed(() => roles.value.includes('SYSTEM_ADMIN') || roles.value.includes('TEACHER'))
 const canImport = computed(() => roles.value.includes('SYSTEM_ADMIN'))
 const filteredGraphNodes = computed(() => {
@@ -77,6 +87,9 @@ const filteredGraphNodes = computed(() => {
   if (!query) return nodes
   return nodes.filter(node => `${node.knowledgeCode} ${node.knowledgeName}`.toLowerCase().includes(query))
 })
+const weakKnowledge = computed(() => personalization.mastery.filter(item =>
+  item.status === 'OBSERVED' && item.masteryScore !== null && Number(item.masteryScore) < 0.7
+))
 
 function setMessage(message = '', failure = '') {
   notice.value = message
@@ -219,6 +232,65 @@ async function loadHistory() {
     answerHistory.value = result
     view.value = 'history'
   }
+}
+
+function personalizationCourseId() {
+  return numberOrNull(personalization.courseId) || selectedCourse.value?.id
+}
+
+async function loadPersonalization() {
+  const courseId = personalizationCourseId()
+  if (!courseId) {
+    error.value = '请先进入课程，或输入已加入课程的 ID。'
+    return
+  }
+  const loaded = await run(async () => {
+    const [mastery, masteryHistory] = await Promise.all([
+      api(`/courses/${courseId}/mastery`),
+      api(`/courses/${courseId}/mastery/history`)
+    ])
+    let recommendation = null
+    try {
+      recommendation = await api(`/courses/${courseId}/recommendations/latest`)
+    } catch (reason) {
+      if (!String(reason.message || '').includes('no recommendation snapshot')) throw reason
+    }
+    return { mastery, masteryHistory, recommendation }
+  })
+  if (loaded) {
+    personalization.courseId = String(courseId)
+    personalization.mastery = loaded.mastery.items
+    personalization.masteryHistory = loaded.masteryHistory
+    personalization.recommendation = loaded.recommendation
+    personalization.learningPath = null
+    view.value = 'personalization'
+  }
+}
+
+async function generateRecommendations() {
+  const courseId = personalizationCourseId()
+  if (!courseId) {
+    error.value = '请先选择或输入课程 ID。'
+    return
+  }
+  const recommendation = await run(
+    () => api(`/courses/${courseId}/recommendations`, { method: 'POST' }),
+    '推荐快照已生成；它不会修改 Published Graph。'
+  )
+  if (recommendation) {
+    personalization.courseId = String(courseId)
+    personalization.recommendation = recommendation
+  }
+}
+
+async function loadLearningPath() {
+  const targetKnowledgePointId = numberOrNull(personalization.targetKnowledgePointId)
+  if (!targetKnowledgePointId) {
+    error.value = '请输入目标 KnowledgePoint ID。'
+    return
+  }
+  const result = await run(() => api(`/knowledge-points/${targetKnowledgePointId}/learning-path`))
+  if (result) personalization.learningPath = result
 }
 
 function numberOrNull(value) {
@@ -597,11 +669,12 @@ onMounted(() => {
     <header>
       <div>
         <h1>Edu-java</h1>
-        <p>V0.3 知识关系证据治理与版本化 Published Graph</p>
+        <p>V0.4 规则掌握度、可解释推荐与 Published Graph 学习路径</p>
       </div>
       <nav v-if="authenticated">
         <button @click="view = 'courses'; loadCourses()">课程</button>
         <button @click="openGraph">知识图</button>
+        <button v-if="isStudent" @click="loadPersonalization">我的学习</button>
         <button @click="loadHistory">学习记录</button>
         <button v-if="canManage" @click="view = 'admin'; loadCourses()">管理</button>
         <button class="secondary" @click="logout">退出</button>
@@ -695,6 +768,83 @@ onMounted(() => {
           <p v-if="graph.pathResult">GraphVersion #{{ graph.pathResult.graphVersionId }}：{{ graph.pathResult.knowledgePointIds.length ? graph.pathResult.knowledgePointIds.map(id => `#${id}`).join(' → ') : '两点之间无有向先修路径。' }}</p>
         </section>
       </template>
+    </section>
+
+    <section v-else-if="view === 'personalization'" class="card">
+      <div class="section-title">
+        <div>
+          <h2>我的知识掌握与学习建议</h2>
+          <p>掌握度来自透明规则 <code>RULE_BETA_1_1_V1</code>，不是 AI 认知诊断。</p>
+        </div>
+        <button class="secondary" @click="loadPersonalization">刷新</button>
+      </div>
+      <div class="inline-form">
+        <label>课程 ID <input v-model="personalization.courseId" type="number" @change="loadPersonalization"></label>
+        <button @click="generateRecommendations">生成推荐快照</button>
+      </div>
+
+      <section class="graph-detail">
+        <h3>我的知识掌握情况</h3>
+        <p v-if="personalization.mastery.length === 0">该课程没有 ACTIVE KnowledgePoint，或尚未加载。</p>
+        <div class="mastery-grid" v-else>
+          <article v-for="item in personalization.mastery" :key="item.knowledgePointId" class="mastery-item">
+            <strong>#{{ item.knowledgePointId }} · {{ item.knowledgeName }}</strong>
+            <p v-if="item.status === 'UNKNOWN'">UNKNOWN（尚无答题历史，不显示伪掌握度）</p>
+            <p v-else>规则掌握度：{{ Number(item.masteryScore).toFixed(4) }} · {{ item.correctCount }}/{{ item.attemptCount }}</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="graph-detail">
+        <h3>薄弱知识</h3>
+        <p v-if="weakKnowledge.length === 0">当前没有已观测且低于 0.70 的知识点。</p>
+        <p v-else>{{ weakKnowledge.map(item => `#${item.knowledgePointId} ${item.knowledgeName} (${Number(item.masteryScore).toFixed(4)})`).join('；') }}</p>
+      </section>
+
+      <section class="graph-detail">
+        <h3>推荐练习与原因</h3>
+        <p v-if="!personalization.recommendation">尚无推荐快照。生成时会绑定当前 active Published Graph。</p>
+        <template v-else>
+          <p>快照 #{{ personalization.recommendation.id }} · GraphVersion #{{ personalization.recommendation.graphVersionId }} · {{ personalization.recommendation.recommendationRuleVersion }}</p>
+          <p v-if="personalization.recommendation.items.length === 0">没有同时满足知识点、活动 ExerciseUnit 和活动 Question 条件的可推荐练习。</p>
+          <article v-for="item in personalization.recommendation.items" :key="item.id" class="list-item">
+            <div>
+              <strong>#{{ item.rank }} · {{ item.knowledgeName }}</strong>
+              <p>{{ item.exerciseName || '仅知识点建议' }} · {{ item.reasonCode }}</p>
+              <small>掌握度：{{ item.masteryStatus === 'UNKNOWN' ? 'UNKNOWN（无答题历史）' : Number(item.masteryScore).toFixed(4) }}</small>
+              <pre class="explanation">{{ item.explanationJson }}</pre>
+            </div>
+          </article>
+        </template>
+      </section>
+
+      <section class="graph-detail">
+        <h3>目标知识点学习路径</h3>
+        <div class="inline-form">
+          <label>目标 KnowledgePoint ID <input v-model="personalization.targetKnowledgePointId" type="number"></label>
+          <button @click="loadLearningPath">查询学习路径</button>
+        </div>
+        <template v-if="personalization.learningPath">
+          <p>GraphVersion #{{ personalization.learningPath.graphVersionId }}</p>
+          <p v-if="personalization.learningPath.nodes.length === 0">没有需要安排的未掌握节点。</p>
+          <article v-for="node in personalization.learningPath.nodes" :key="node.knowledgePointId" class="list-item">
+            <div>
+              <strong>{{ node.order }}. #{{ node.knowledgePointId }} · {{ node.knowledgeName }}</strong>
+              <p>{{ node.reasonCode }} · {{ node.masteryStatus === 'UNKNOWN' ? 'UNKNOWN（无答题历史）' : Number(node.masteryScore).toFixed(4) }}</p>
+            </div>
+            <span>{{ node.hasAvailableExercise ? `练习：${node.exerciseName}` : '暂无可用 ExerciseUnit' }}</span>
+          </article>
+        </template>
+      </section>
+
+      <section class="graph-detail">
+        <h3>Mastery 变化历史</h3>
+        <p v-if="personalization.masteryHistory.length === 0">还没有掌握度更新历史。</p>
+        <article v-for="entry in personalization.masteryHistory" :key="entry.historyId" class="list-item">
+          <div>#{{ entry.knowledgePointId }} · {{ entry.knowledgeName }}<p>{{ entry.previousScore === null ? 'UNKNOWN' : Number(entry.previousScore).toFixed(4) }} → {{ Number(entry.newScore).toFixed(4) }} · AnswerRecord #{{ entry.answerRecordId }}</p></div>
+          <span>{{ new Date(entry.createdAt).toLocaleString() }}</span>
+        </article>
+      </section>
     </section>
 
     <section v-else-if="view === 'question' && activeQuestion" class="card narrow">
@@ -932,9 +1082,13 @@ pre { overflow: auto; padding: 14px; background: #101827; color: #dbeafe; border
 .graph-node { display: flex; justify-content: space-between; gap: 12px; }
 .graph-node small, .admin-row small { display: block; color: #66728a; margin-top: 3px; overflow-wrap: anywhere; }
 .graph-detail { margin-top: 18px; padding: 16px; border: 1px solid #d9e1ef; border-radius: 8px; background: #fafcff; }
+.mastery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mastery-item { padding: 12px; border: 1px solid #d9e1ef; border-radius: 8px; background: #fff; }
+.mastery-item p { margin: 6px 0 0; color: #536078; }
+.explanation { margin: 8px 0 0; min-height: 0; max-height: 150px; font-size: .78rem; }
 .inline-form, .inline-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
 .inline-form label { flex: 1 1 180px; }
 .compact-form { grid-template-columns: minmax(220px, 1fr) auto auto; align-items: end; margin: 12px 0; }
-@media (max-width: 800px) { .graph-layout { grid-template-columns: 1fr; } .compact-form { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .graph-layout, .mastery-grid { grid-template-columns: 1fr; } .compact-form { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { header { align-items: flex-start; flex-direction: column; } .admin-grid { grid-template-columns: 1fr; } }
 </style>

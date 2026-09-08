@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collection;
 
 public interface ExerciseKnowledgeRepository extends JpaRepository<ExerciseKnowledge, Long> {
 
@@ -15,4 +16,6 @@ public interface ExerciseKnowledgeRepository extends JpaRepository<ExerciseKnowl
     long countByExerciseUnitId(Long exerciseUnitId);
 
     long countByKnowledgePointId(Long knowledgePointId);
+
+    List<ExerciseKnowledge> findByKnowledgePointIdInOrderByKnowledgePointIdAscExerciseUnitIdAsc(Collection<Long> knowledgePointIds);
 }
