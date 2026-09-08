@@ -65,11 +65,11 @@ async function measure(name, operation, count = sampleCount) {
 
 const student = await login('demo-student-alice')
 const studentCourses = data(await request('/api/v1/courses', { token: student.accessToken }), 'student courses')
-const course = studentCourses.find(item => item.courseCode === 'DEMO-ALG-101')
-assert(course, 'synthetic algebra course is unavailable')
+const course = studentCourses.find(item => item.courseCode === 'DM-101')
+assert(course, '离散数学主课程不可用')
 const points = data(await request(`/api/v1/courses/${course.id}/knowledge-points`, { token: student.accessToken }), 'knowledge points')
-const target = points.find(point => point.knowledgeCode === 'DEMO-ALG-APPLICATION')
-assert(target, 'learning-path target is unavailable')
+const target = points.find(point => point.knowledgeCode === 'DM-LOGIC-INFERENCE')
+assert(target, '学习路径目标知识点不可用')
 const exercises = data(await request(`/api/v1/exercise-units?courseId=${course.id}`, { token: student.accessToken }), 'exercise units')
 assert(exercises.length > 0, 'no exercise unit is available')
 const nextQuestion = data(await request(`/api/v1/exercise-units/${exercises[0].id}/questions/next`, { token: student.accessToken }), 'next question')
@@ -78,7 +78,7 @@ assert(selectedOptionKey, 'question does not expose an answerable option')
 
 const teacher = await login('demo-teacher-a')
 const teacherCourses = data(await request('/api/v1/teacher/courses', { token: teacher.accessToken }), 'teacher courses')
-assert(teacherCourses.length === 1 && teacherCourses[0].courseId === course.id, 'teacher fixture is not course-isolated')
+assert(teacherCourses.some(item => item.courseId === course.id), '张老师没有离散数学课程权限')
 const heatmap = data(await request(`/api/v1/teacher/courses/${course.id}/analytics/mastery-heatmap?page=0&size=10`, { token: teacher.accessToken }), 'teacher heatmap')
 const studentId = heatmap.students?.[0]?.studentId
 assert(studentId, 'teacher heatmap does not contain a synthetic student')
@@ -127,12 +127,14 @@ concurrentResponses.forEach(result => data(result, 'concurrent mastery read'))
 
 const evidence = {
   measuredAt: new Date().toISOString(),
-  mode: 'local synthetic Platform Demo fixture; fixed 10 sequential samples after one warm-up per endpoint',
+  mode: 'local synthetic Chinese discrete-math Platform Demo fixture; fixed 10 sequential samples after one warm-up per endpoint',
   dataScale: {
-    activeCourses: 2,
+    activeCourses: studentCourses.length,
     platformUsers: 7,
     targetCourseCode: course.courseCode,
-    targetKnowledgePointCode: target.knowledgeCode
+    targetKnowledgePointCode: target.knowledgeCode,
+    targetKnowledgePoints: points.length,
+    targetExerciseUnits: exercises.length
   },
   metrics,
   concurrency: {
@@ -144,5 +146,5 @@ const evidence = {
 }
 
 await mkdir('artifacts', { recursive: true })
-await writeFile('artifacts/performance-v07.json', `${JSON.stringify(evidence, null, 2)}\n`, 'utf8')
+await writeFile('artifacts/performance-v1-preview.json', `${JSON.stringify(evidence, null, 2)}\n`, 'utf8')
 console.log(JSON.stringify(evidence))
