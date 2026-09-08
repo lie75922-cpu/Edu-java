@@ -16,7 +16,9 @@ V0.2 已建立 `course_enrollment`，学生只能访问自己处于 ACTIVE enrol
   -> 该 Course 下全部学生学情
 ```
 
-因此，教师分析功能必须先建立显式的 Teacher-Course assignment，再开放班级与学生明细。
+独立代码审查还确认，现有 `AdminCourseController`、`AdminQuestionController`、`AdminExerciseUnitController`、`AdminKnowledgeController`、`AdminGraphController` 等控制器普遍以 `SYSTEM_ADMIN | TEACHER` 角色作为入口，但尚未统一落实 Course 级归属检查。这意味着只新增“教师大屏权限”仍不足以真正解决越权问题。
+
+因此 V0.6 必须先建立显式 Teacher-Course assignment，并统一收紧已有课程内容/图谱治理接口，再开放班级与学生明细。
 
 ## 2. 决策
 
@@ -44,12 +46,16 @@ sys_user(teacher)
 
 数据库外键只保证用户存在；应用层必须验证被分配用户具有 `TEACHER` 或允许的教学角色，不能把普通 STUDENT 静默升级成教师。
 
+V0.6 中 `OWNER` / `INSTRUCTOR` 先作为可审计教学关系与UI信息；普通教师的实际课程级内容/分析访问均要求 ACTIVE assignment。课程生命周期仍由平台教学管理员控制，不在本阶段人为创造复杂 OWNER 特权矩阵。
+
 ### 2.2 权限矩阵
 
 #### SYSTEM_ADMIN
 
 - 可访问所有课程；
+- 可创建/修改/停用 Course；
 - 可管理 Teacher-Course assignment；
+- 可管理全部课程教学内容与图谱；
 - 可查看全部学情。
 
 #### TEACH_ADMIN
@@ -57,7 +63,9 @@ sys_user(teacher)
 当前系统没有组织/院系 tenant 边界，因此 V0.6 将其视为平台级教学管理员：
 
 - 可访问所有课程；
+- 可创建/修改/停用 Course；
 - 可管理 Teacher-Course assignment；
+- 可管理全部课程教学内容与图谱；
 - 可查看全部学情。
 
 若未来增加组织域，再单独收紧，不在 V0.6 假造不存在的 tenant。
@@ -68,12 +76,18 @@ sys_user(teacher)
 
 包括：
 
-- 课程内容教学视图；
-- GraphVersion / Evidence 治理（若现有功能允许 TEACHER）；
-- 课程学生学情；
-- 学生答题/掌握度/推荐历史。
+- 已分配课程内容教学视图与维护；
+- 已分配课程的 KnowledgePoint / ExerciseUnit / Question 维护；
+- 已分配课程的 GraphVersion / Evidence 治理；
+- 已分配课程的学生学情；
+- 已分配课程的学生答题/掌握度/推荐历史。
 
-不得因为拥有 TEACHER 角色绕过课程归属。
+普通 TEACHER **不能**：
+
+- 任意创建平台 Course；
+- 修改/停用未分配或任意 Course；
+- 自行给自己分配 Course；
+- 因为拥有 TEACHER 角色绕过课程归属。
 
 #### STUDENT
 
@@ -100,11 +114,49 @@ requirePlatformTeachingAdmin(currentUser)
 1. student path 检查 enrollment；
 2. teacher path 检查 assignment；
 3. TEACH_ADMIN / SYSTEM_ADMIN 按上述平台级权限；
-4. GraphVersion ID、Evidence ID、KnowledgePoint ID 等“间接课程资源”必须先解析所属 course，再做授权；
+4. GraphVersion ID、Evidence ID、KnowledgePoint ID、ExerciseUnit ID、Question ID 等“间接课程资源”必须先解析所属 course，再做授权；
 5. 不能仅靠前端隐藏菜单；
-6. 不能仅靠 `@PreAuthorize(hasRole('TEACHER'))` 作为课程级授权。
+6. 不能仅靠 `@PreAuthorize(hasRole('TEACHER'))` 作为课程级授权；
+7. controller 的角色注解与 service 的 course-level authorization 必须同时存在，前者负责角色粗筛，后者负责资源归属。
 
-## 4. 现有 V0.3/V0.5 治理 API 的安全收紧
+## 4. 现有 Admin API 的安全收紧
+
+### 4.1 Course lifecycle
+
+当前 `AdminCourseController` 对普通 TEACHER 开放 create/update/disable。
+
+V0.6 固定改为：
+
+```text
+Course create/update/disable
+  -> SYSTEM_ADMIN / TEACH_ADMIN only
+```
+
+普通 TEACHER 不获得平台 Course 生命周期管理权。
+
+### 4.2 Course content
+
+现有 Question / ExerciseUnit / Knowledge 等管理API如果继续允许 TEACHER，必须按资源所属 Course 做 ACTIVE assignment 校验。
+
+例如：
+
+```text
+questionId
+ -> ExerciseUnit
+ -> courseId
+ -> teacher assignment
+```
+
+以及：
+
+```text
+knowledgePointId -> courseId -> assignment
+exerciseUnitId   -> courseId -> assignment
+```
+
+不得出现“有 TEACHER 角色即可改任意课程题库”的情况。
+
+### 4.3 Graph / Evidence governance
 
 当前图治理控制器允许 TEACHER 角色进入，但多个 API 以 `graphVersionId` 或 `evidenceId` 为入口。
 
@@ -125,7 +177,9 @@ resource -> courseId -> ACTIVE teacher assignment -> allow
 
 否则 403。
 
-这是 V0.6 的安全修复，不改变 Graph lifecycle 语义。
+TEACH_ADMIN 必须按当前平台级教学管理员语义正确纳入允许角色，不能因旧注解遗漏而被意外拒绝。
+
+这是 V0.6 的安全修复，不改变 Course、Question 或 Graph lifecycle 业务语义。
 
 ## 5. Teacher Analytics 数据权威
 
