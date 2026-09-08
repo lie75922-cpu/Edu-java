@@ -7,7 +7,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+
+import com.smartlearning.graph.domain.EvidenceReresolutionTrigger;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -130,6 +133,85 @@ public final class GraphApi {
             int candidateRelationsAggregated,
             int conflictCount,
             List<EvidenceConflictResponse> conflicts
+    ) {
+    }
+
+    public record EvidenceReresolutionRequest(
+            @NotEmpty @Size(max = 1_000) List<@NotNull @Positive Long> evidenceIds,
+            @NotNull EvidenceReresolutionTrigger triggerType
+    ) {
+        public EvidenceReresolutionRequest {
+            evidenceIds = evidenceIds == null ? List.of() : List.copyOf(evidenceIds);
+        }
+    }
+
+    public record EvidenceResolutionStateResponse(
+            String resolutionStatus,
+            String conflictCode,
+            String resolutionDetail,
+            Long sourceExerciseUnitId,
+            Long targetExerciseUnitId,
+            Long sourceKnowledgePointId,
+            Long targetKnowledgePointId
+    ) {
+    }
+
+    public record DraftRelationImpactResponse(
+            Long relationId,
+            Long sourceKnowledgePointId,
+            Long targetKnowledgePointId,
+            String action,
+            int beforeEvidenceCount,
+            int afterEvidenceCount,
+            String beforeReviewStatus,
+            String afterReviewStatus
+    ) {
+    }
+
+    public record EvidenceReresolutionItemResponse(
+            Long evidenceId,
+            EvidenceResponse rawEvidence,
+            EvidenceResolutionStateResponse currentResolution,
+            EvidenceResolutionStateResponse proposedResolution,
+            boolean resolutionChanged,
+            List<DraftRelationImpactResponse> affectedDraftRelations
+    ) {
+    }
+
+    public record EvidenceReresolutionResult(
+            Long graphVersionId,
+            String mode,
+            String triggerType,
+            int changedEvidenceCount,
+            int unchangedEvidenceCount,
+            List<EvidenceReresolutionItemResponse> evidence
+    ) {
+    }
+
+    public record EvidenceResolutionHistoryResponse(
+            Long id,
+            Long evidenceId,
+            Long graphVersionId,
+            String oldResolutionStatus,
+            String newResolutionStatus,
+            Long oldSourceExerciseUnitId,
+            Long oldTargetExerciseUnitId,
+            Long oldSourceKnowledgePointId,
+            Long oldTargetKnowledgePointId,
+            Long newSourceExerciseUnitId,
+            Long newTargetExerciseUnitId,
+            Long newSourceKnowledgePointId,
+            Long newTargetKnowledgePointId,
+            String oldConflictCode,
+            String newConflictCode,
+            String oldResolutionDetail,
+            String newResolutionDetail,
+            Long operatorId,
+            String triggerType,
+            String beforeRelationIdsJson,
+            String afterRelationIdsJson,
+            String reconciliationJson,
+            Instant createdAt
     ) {
     }
 

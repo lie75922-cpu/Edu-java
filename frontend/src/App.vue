@@ -64,7 +64,8 @@ const graphAdmin = reactive({
   version: { description: '', copyActive: false },
   manual: { sourceKnowledgePointId: '', targetKnowledgePointId: '', confidence: '1.0000' },
   evidenceJson: '[\n  {\n    "externalEvidenceId": "junyi-row-1",\n    "sourceExerciseExternalId": "exercise-a",\n    "targetExerciseExternalId": "exercise-b",\n    "rawPayload": { "source": "Junyi prerequisite" }\n  }\n]',
-  importResult: null
+  importResult: null,
+  reresolution: { evidenceIds: '', triggerType: 'MAPPING_CHANGE', result: null, history: [] }
 })
 
 const personalization = reactive({
@@ -638,6 +639,49 @@ async function importGraphEvidence(mode) {
   }
 }
 
+function reresolutionEvidenceIds() {
+  const values = String(graphAdmin.reresolution.evidenceIds || '')
+    .split(',').map(value => value.trim()).filter(Boolean).map(value => Number(value))
+  if (!values.length || values.some(value => !Number.isInteger(value) || value <= 0)) {
+    error.value = '请输入至少一个有效 Evidence ID，多个 ID 用逗号分隔。'
+    return null
+  }
+  return values
+}
+
+function selectEvidenceForReresolution(evidence) {
+  graphAdmin.reresolution.evidenceIds = String(evidence.id)
+  graphAdmin.reresolution.result = null
+}
+
+async function reresolveEvidence(mode) {
+  if (!graphAdmin.selectedVersion) {
+    error.value = '请先选择一个可编辑 Draft GraphVersion。'
+    return
+  }
+  const evidenceIds = reresolutionEvidenceIds()
+  if (!evidenceIds) return
+  const result = await run(() => api(
+    `/admin/graph-versions/${graphAdmin.selectedVersion.id}/evidence-reresolutions/${mode}`,
+    { method: 'POST', body: JSON.stringify({ evidenceIds, triggerType: graphAdmin.reresolution.triggerType }) }
+  ), mode === 'apply' ? 'Evidence 当前解析与目标 Draft 已重协调；尚未发布图。' : 'Evidence 重解析 dry-run 已完成，未写入持久化数据。')
+  if (result) {
+    graphAdmin.reresolution.result = result
+    if (mode === 'apply') {
+      await loadGraphAdmin()
+      await selectGraphVersion(graphAdmin.selectedVersion.id)
+    }
+  }
+}
+
+async function inspectEvidenceResolutionHistory(evidence) {
+  const result = await run(() => api(`/admin/evidence/${evidence.id}/resolution-history`))
+  if (result) {
+    graphAdmin.reresolution.evidenceIds = String(evidence.id)
+    graphAdmin.reresolution.history = result
+  }
+}
+
 async function validateGraphVersion() {
   if (!graphAdmin.selectedVersion) return
   const result = await run(() => api(`/admin/graph-versions/${graphAdmin.selectedVersion.id}/validate`, { method: 'POST' }))
@@ -669,7 +713,7 @@ onMounted(() => {
     <header>
       <div>
         <h1>Edu-java</h1>
-        <p>V0.4 规则掌握度、可解释推荐与 Published Graph 学习路径</p>
+        <p>V0.5 Evidence 重解析审计、规则掌握度与 Published Graph 学习路径</p>
       </div>
       <nav v-if="authenticated">
         <button @click="view = 'courses'; loadCourses()">课程</button>
@@ -1006,6 +1050,34 @@ onMounted(() => {
           </section>
 
           <section class="graph-detail">
+            <h3>V0.5 Evidence 重解析与 Draft 影响</h3>
+            <p>Raw external ID、source type 与 payload 不可改。仅重新计算当前 resolution，并只协调当前选择的 Draft；不会修改 Published/Archived 快照、active Neo4j 图或触发自动发布。</p>
+            <div class="inline-form">
+              <label>Evidence ID（逗号分隔）<input v-model="graphAdmin.reresolution.evidenceIds" placeholder="例如：12,13"></label>
+              <label>触发原因
+                <select v-model="graphAdmin.reresolution.triggerType">
+                  <option>ADMIN_REQUEST</option><option>MAPPING_CHANGE</option><option>CONFLICT_REVIEW</option>
+                </select>
+              </label>
+              <button @click="reresolveEvidence('dry-run')">重解析 Dry-run</button>
+              <button class="secondary" @click="reresolveEvidence('apply')">Apply 到当前 Draft</button>
+            </div>
+            <template v-if="graphAdmin.reresolution.result">
+              <p>{{ graphAdmin.reresolution.result.mode }} · changed {{ graphAdmin.reresolution.result.changedEvidenceCount }} · unchanged {{ graphAdmin.reresolution.result.unchangedEvidenceCount }}</p>
+              <article v-for="item in graphAdmin.reresolution.result.evidence" :key="item.evidenceId" class="admin-row">
+                <span>#{{ item.evidenceId }}：{{ item.currentResolution.resolutionStatus }} → {{ item.proposedResolution.resolutionStatus }}<small v-if="item.proposedResolution.conflictCode"> · conflict {{ item.proposedResolution.conflictCode }}</small></span>
+                <small>Draft changes：{{ item.affectedDraftRelations.map(change => `${change.action} (${change.beforeEvidenceCount}→${change.afterEvidenceCount})`).join('；') || '无' }}</small>
+              </article>
+            </template>
+            <h4>选中 Evidence 的 resolution history</h4>
+            <p v-if="graphAdmin.reresolution.history.length === 0">从下方课程 Evidence 点击“历史”查看每次 apply 的 before/after、operator、trigger 与 Draft 关系影响。</p>
+            <article v-for="history in graphAdmin.reresolution.history" :key="history.id" class="admin-row">
+              <span>#{{ history.id }} · Draft #{{ history.graphVersionId }} · {{ history.oldResolutionStatus }} → {{ history.newResolutionStatus }}</span>
+              <small>operator #{{ history.operatorId || '—' }} · {{ history.triggerType }} · {{ history.createdAt }}</small>
+            </article>
+          </section>
+
+          <section class="graph-detail">
             <h3>Validation issues</h3>
             <p v-if="graphAdmin.validationIssues.length === 0">尚无已保存的校验问题。</p>
             <article v-for="issue in graphAdmin.validationIssues" :key="issue.id" class="admin-row"><span>{{ issue.severity }} · {{ issue.issueCode }} · relation #{{ issue.relationId || '—' }}</span><small>{{ issue.detailJson }}</small></article>
@@ -1015,7 +1087,10 @@ onMounted(() => {
         <section class="graph-detail">
           <h3>课程 Evidence</h3>
           <p v-if="graphAdmin.evidence.length === 0">尚无 Evidence。</p>
-          <article v-for="evidence in graphAdmin.evidence" :key="evidence.id" class="admin-row"><span>#{{ evidence.id }} {{ evidence.sourceExternalId }} → {{ evidence.targetExternalId }} · {{ evidence.resolutionStatus }}</span><small>{{ evidence.conflictCode || 'resolved candidate eligible' }}</small></article>
+          <article v-for="evidence in graphAdmin.evidence" :key="evidence.id" class="admin-row">
+            <span>#{{ evidence.id }} {{ evidence.sourceExternalId }} → {{ evidence.targetExternalId }} · current {{ evidence.resolutionStatus }}<small> · {{ evidence.sourceType }} · raw {{ evidence.rawPayloadJson }}</small></span>
+            <span><small>{{ evidence.conflictCode || 'resolved candidate eligible' }}</small><button class="link" @click="selectEvidenceForReresolution(evidence)">选入重解析</button><button class="link" @click="inspectEvidenceResolutionHistory(evidence)">历史</button></span>
+          </article>
         </section>
       </section>
 

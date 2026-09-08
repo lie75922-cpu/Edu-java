@@ -3,6 +3,7 @@ package com.smartlearning.graph.api;
 import com.smartlearning.auth.domain.CurrentUser;
 import com.smartlearning.common.api.ApiResponse;
 import com.smartlearning.graph.application.EvidenceImportService;
+import com.smartlearning.graph.application.EvidenceReresolutionService;
 import com.smartlearning.graph.application.GraphValidationService;
 import com.smartlearning.graph.application.GraphVersionService;
 import jakarta.validation.Valid;
@@ -29,15 +30,18 @@ public class AdminGraphController {
     private final GraphVersionService graphVersionService;
     private final GraphValidationService graphValidationService;
     private final EvidenceImportService evidenceImportService;
+    private final EvidenceReresolutionService evidenceReresolutionService;
 
     public AdminGraphController(
             GraphVersionService graphVersionService,
             GraphValidationService graphValidationService,
-            EvidenceImportService evidenceImportService
+            EvidenceImportService evidenceImportService,
+            EvidenceReresolutionService evidenceReresolutionService
     ) {
         this.graphVersionService = graphVersionService;
         this.graphValidationService = graphValidationService;
         this.evidenceImportService = evidenceImportService;
+        this.evidenceReresolutionService = evidenceReresolutionService;
     }
 
     @PostMapping("/graph-versions")
@@ -105,6 +109,24 @@ public class AdminGraphController {
         return ApiResponse.ok(evidenceImportService.apply(graphVersionId, request, CurrentUser.from(jwt).id()));
     }
 
+    @PostMapping("/graph-versions/{graphVersionId}/evidence-reresolutions/dry-run")
+    public ApiResponse<GraphApi.EvidenceReresolutionResult> dryRunEvidenceReresolution(
+            @PathVariable long graphVersionId,
+            @Valid @RequestBody GraphApi.EvidenceReresolutionRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(evidenceReresolutionService.dryRun(graphVersionId, request, CurrentUser.from(jwt).id()));
+    }
+
+    @PostMapping("/graph-versions/{graphVersionId}/evidence-reresolutions/apply")
+    public ApiResponse<GraphApi.EvidenceReresolutionResult> applyEvidenceReresolution(
+            @PathVariable long graphVersionId,
+            @Valid @RequestBody GraphApi.EvidenceReresolutionRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(evidenceReresolutionService.apply(graphVersionId, request, CurrentUser.from(jwt).id()));
+    }
+
     @GetMapping("/graph-versions/{graphVersionId}/relations/{relationId}/evidence")
     public ApiResponse<List<GraphApi.EvidenceResponse>> relationEvidence(
             @PathVariable long graphVersionId,
@@ -136,6 +158,13 @@ public class AdminGraphController {
     @GetMapping("/evidence")
     public ApiResponse<List<GraphApi.EvidenceResponse>> listEvidence(@RequestParam long courseId) {
         return ApiResponse.ok(evidenceImportService.listEvidence(courseId));
+    }
+
+    @GetMapping("/evidence/{evidenceId}/resolution-history")
+    public ApiResponse<List<GraphApi.EvidenceResolutionHistoryResponse>> evidenceResolutionHistory(
+            @PathVariable long evidenceId
+    ) {
+        return ApiResponse.ok(evidenceReresolutionService.history(evidenceId));
     }
 
     @GetMapping("/evidence-imports/{importRunId}/conflicts")

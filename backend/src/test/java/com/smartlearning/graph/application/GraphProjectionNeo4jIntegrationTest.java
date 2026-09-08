@@ -7,9 +7,13 @@ import com.smartlearning.course.api.CourseApi;
 import com.smartlearning.course.application.CourseService;
 import com.smartlearning.course.infrastructure.persistence.CourseRepository;
 import com.smartlearning.graph.api.GraphApi;
+import com.smartlearning.graph.domain.EvidenceReresolutionTrigger;
 import com.smartlearning.graph.domain.GraphVersionStatus;
+import com.smartlearning.graph.domain.KnowledgeRelationEvidence;
 import com.smartlearning.graph.infrastructure.neo4j.Neo4jPublishedGraphStore;
 import com.smartlearning.graph.infrastructure.persistence.GraphVersionRepository;
+import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvidenceLinkRepository;
+import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvidenceRepository;
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationRepository;
 import com.smartlearning.knowledge.api.KnowledgeApi;
 import com.smartlearning.knowledge.application.KnowledgeService;
@@ -37,10 +41,12 @@ import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest(properties = {
@@ -91,9 +97,21 @@ class GraphProjectionNeo4jIntegrationTest {
     @Autowired
     private GraphQueryService graphQueryService;
     @Autowired
+    private EvidenceImportService evidenceImportService;
+    @Autowired
+    private EvidenceReresolutionService evidenceReresolutionService;
+    @Autowired
     private PublishedGraphStore publishedGraphStore;
     @Autowired
     private CourseRepository courseRepository;
+    @Autowired
+    private KnowledgeRelationRepository relationRepository;
+    @Autowired
+    private KnowledgeRelationEvidenceRepository evidenceRepository;
+    @Autowired
+    private KnowledgeRelationEvidenceLinkRepository evidenceLinkRepository;
+    @Autowired
+    private OutboxEventRepository outboxEventRepository;
     @Autowired
     private Driver neo4jDriver;
     @Autowired
@@ -195,6 +213,78 @@ class GraphProjectionNeo4jIntegrationTest {
         assertThat(graphQueryService.graph(courseId, administrator).edges()).hasSize(2);
     }
 
+    @Test
+    void reresolutionOnlyChangesExplicitDraftAndLeavesPublishedNeo4jSnapshotUntouched() {
+        int number = SEQUENCE.get();
+        ExerciseApi.ExerciseUnitResponse sourceExercise = createJunyiMappedExercise(pointA, number, "reresolve-source");
+        ExerciseApi.ExerciseUnitResponse targetExercise = createJunyiMappedExercise(pointB, number, "reresolve-target");
+        GraphApi.GraphVersionResponse v1 = graphVersionService.create(
+                new GraphApi.CreateGraphVersionRequest(courseId, "evidence published graph", false), administrator.id()
+        );
+        String externalEvidenceId = "neo4j-reresolution-" + number;
+        evidenceImportService.apply(v1.id(), new GraphApi.EvidenceImportRequest(List.of(
+                new GraphApi.RawPrerequisiteEvidenceRequest(
+                        externalEvidenceId, sourceExercise.externalId(), targetExercise.externalId(), Map.of("fixture", externalEvidenceId)
+                )
+        )), administrator.id());
+        KnowledgeRelationEvidence evidence = evidenceRepository.findByCourseIdAndSourceTypeAndExternalEvidenceId(
+                courseId, EvidenceResolutionResolver.JUNYI_RAW_PREREQUISITE, externalEvidenceId
+        ).orElseThrow();
+        var publishedRelation = relationRepository
+                .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
+                        v1.id(), pointA, pointB, "PREREQUISITE"
+                ).orElseThrow();
+        graphVersionService.reviewRelation(v1.id(), publishedRelation.getId(), new GraphApi.RelationReviewRequest("APPROVED"));
+        assertThat(graphValidationService.validate(v1.id()).hasErrors()).isFalse();
+        graphVersionService.requestPublish(v1.id());
+        assertThat(graphProjectionWorker.processNext()).isTrue();
+        v1 = graphVersionService.get(v1.id());
+        long publishedVersionId = v1.id();
+        assertThat(v1.status()).isEqualTo("PUBLISHED");
+
+        GraphApi.GraphVersionResponse v2 = graphVersionService.create(
+                new GraphApi.CreateGraphVersionRequest(courseId, "draft for evidence re-resolution", true), administrator.id()
+        );
+        exerciseUnitService.removeMapping(targetExercise.id(), pointB);
+        exerciseUnitService.upsertMapping(targetExercise.id(), new ExerciseApi.MappingRequest(
+                pointC, "V005_TEST", BigDecimal.ONE, true
+        ));
+        long outboxEventsBeforeReresolution = outboxEventRepository.count();
+
+        evidenceReresolutionService.apply(v2.id(), new GraphApi.EvidenceReresolutionRequest(
+                List.of(evidence.getId()), EvidenceReresolutionTrigger.MAPPING_CHANGE
+        ), administrator.id());
+
+        var historicalRelation = relationRepository
+                .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
+                        v1.id(), pointA, pointB, "PREREQUISITE"
+                ).orElseThrow();
+        var draftOldRelation = relationRepository
+                .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
+                        v2.id(), pointA, pointB, "PREREQUISITE"
+                ).orElseThrow();
+        var draftNewRelation = relationRepository
+                .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
+                        v2.id(), pointA, pointC, "PREREQUISITE"
+                ).orElseThrow();
+        assertThat(historicalRelation.getEvidenceCount()).isEqualTo(1);
+        assertThat(evidenceLinkRepository.findByRelationIdOrderByIdAsc(historicalRelation.getId())).hasSize(1);
+        assertThat(draftOldRelation.getEvidenceCount()).isEqualTo(0);
+        assertThat(draftOldRelation.getReviewStatus().name()).isEqualTo("REJECTED");
+        assertThat(draftNewRelation.getEvidenceCount()).isEqualTo(1);
+        assertThat(outboxEventRepository.count()).isEqualTo(outboxEventsBeforeReresolution);
+        assertThat(graphQueryService.graph(courseId, administrator).graphVersionId()).isEqualTo(v1.id());
+        assertThat(graphQueryService.graph(courseId, administrator).edges())
+                .extracting(GraphApi.GraphEdgeResponse::sourceKnowledgePointId, GraphApi.GraphEdgeResponse::targetKnowledgePointId)
+                .containsExactly(org.assertj.core.groups.Tuple.tuple(pointA, pointB));
+        assertThat(publishedGraphStore.graph(v1.id()).edges())
+                .extracting(PublishedGraphStore.ProjectionEdge::sourceKnowledgePointId, PublishedGraphStore.ProjectionEdge::targetKnowledgePointId)
+                .containsExactly(org.assertj.core.groups.Tuple.tuple(pointA, pointB));
+        assertThatThrownBy(() -> evidenceReresolutionService.apply(publishedVersionId, new GraphApi.EvidenceReresolutionRequest(
+                List.of(evidence.getId()), EvidenceReresolutionTrigger.MAPPING_CHANGE
+        ), administrator.id())).hasMessageContaining("immutable evidence re-resolution contexts");
+    }
+
     private void createFailureConstraint() {
         try (Session session = neo4jDriver.session()) {
             session.executeWrite(transaction -> {
@@ -251,6 +341,18 @@ class GraphProjectionNeo4jIntegrationTest {
         exerciseUnitService.upsertMapping(exercise.id(), new ExerciseApi.MappingRequest(
                 pointId, "PLATFORM", BigDecimal.ONE, true
         ));
+    }
+
+    private ExerciseApi.ExerciseUnitResponse createJunyiMappedExercise(long pointId, int number, String suffix) {
+        String externalId = "neo4j-" + number + "-" + suffix;
+        ExerciseApi.ExerciseUnitResponse exercise = exerciseUnitService.create(new ExerciseApi.ExerciseUnitRequest(
+                courseId, "JUNYI-" + externalId, externalId, "JUNYI_CATALOG", externalId,
+                "RESOLVED", "UNMAPPED", null, "ACTIVE"
+        ));
+        exerciseUnitService.upsertMapping(exercise.id(), new ExerciseApi.MappingRequest(
+                pointId, "V005_TEST", BigDecimal.ONE, true
+        ));
+        return exercise;
     }
 
     private long constraintCount() {

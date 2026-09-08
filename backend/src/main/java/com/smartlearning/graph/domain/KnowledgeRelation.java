@@ -84,6 +84,17 @@ public class KnowledgeRelation {
         evidenceCount++;
     }
 
+    /** Keeps the denormalized count aligned with the actual per-relation Evidence links. */
+    public void reconcileEvidenceCount(int count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("evidence count cannot be negative");
+        }
+        evidenceCount = count;
+        if (count == 0 && "EVIDENCE".equals(relationSource)) {
+            reviewStatus = RelationReviewStatus.REJECTED;
+        }
+    }
+
     public KnowledgeRelation copyForGraphVersion(long targetGraphVersionId, Long copiedBy) {
         return new KnowledgeRelation(
                 targetGraphVersionId,

@@ -19,19 +19,19 @@ public class KnowledgeRelationEvidence {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "course_id", nullable = false)
+    @Column(name = "course_id", nullable = false, updatable = false)
     private Long courseId;
 
-    @Column(name = "source_type", nullable = false, length = 48)
+    @Column(name = "source_type", nullable = false, length = 48, updatable = false)
     private String sourceType;
 
-    @Column(name = "external_evidence_id", nullable = false, length = 128)
+    @Column(name = "external_evidence_id", nullable = false, length = 128, updatable = false)
     private String externalEvidenceId;
 
-    @Column(name = "source_external_id", nullable = false, length = 128)
+    @Column(name = "source_external_id", nullable = false, length = 128, updatable = false)
     private String sourceExternalId;
 
-    @Column(name = "target_external_id", nullable = false, length = 128)
+    @Column(name = "target_external_id", nullable = false, length = 128, updatable = false)
     private String targetExternalId;
 
     @Column(name = "source_exercise_unit_id")
@@ -46,7 +46,7 @@ public class KnowledgeRelationEvidence {
     @Column(name = "target_knowledge_point_id")
     private Long targetKnowledgePointId;
 
-    @Column(name = "raw_payload_json", nullable = false, columnDefinition = "JSON")
+    @Column(name = "raw_payload_json", nullable = false, columnDefinition = "JSON", updatable = false)
     private String rawPayloadJson;
 
     @Enumerated(EnumType.STRING)
@@ -97,6 +97,45 @@ public class KnowledgeRelationEvidence {
 
     public boolean isResolved() {
         return resolutionStatus == EvidenceResolutionStatus.RESOLVED;
+    }
+
+    /**
+     * Raw source identity and payload are insert-only. V005 may change only this derived resolution projection.
+     */
+    public void applyResolution(ResolutionState resolution) {
+        this.sourceExerciseUnitId = resolution.sourceExerciseUnitId();
+        this.targetExerciseUnitId = resolution.targetExerciseUnitId();
+        this.sourceKnowledgePointId = resolution.sourceKnowledgePointId();
+        this.targetKnowledgePointId = resolution.targetKnowledgePointId();
+        this.resolutionStatus = resolution.status();
+        this.conflictCode = resolution.conflictCode();
+        this.resolutionDetail = resolution.detail();
+    }
+
+    public ResolutionState resolutionState() {
+        return new ResolutionState(
+                resolutionStatus,
+                conflictCode,
+                resolutionDetail,
+                sourceExerciseUnitId,
+                targetExerciseUnitId,
+                sourceKnowledgePointId,
+                targetKnowledgePointId
+        );
+    }
+
+    public record ResolutionState(
+            EvidenceResolutionStatus status,
+            String conflictCode,
+            String detail,
+            Long sourceExerciseUnitId,
+            Long targetExerciseUnitId,
+            Long sourceKnowledgePointId,
+            Long targetKnowledgePointId
+    ) {
+        public boolean isResolved() {
+            return status == EvidenceResolutionStatus.RESOLVED;
+        }
     }
 
     public Long getId() {
