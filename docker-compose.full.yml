@@ -1,0 +1,193 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-edu}
+      MYSQL_USER: ${MYSQL_USER:-edu}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in the release environment file}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the release environment file}
+      TZ: UTC
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      # Neo4j 5.26 requires the fixed initial username and an explicit private password.
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in the release environment file}
+      NEO4J_server_memory_pagecache_size: 256M
+      NEO4J_server_memory_heap_initial__size: 256M
+      NEO4J_server_memory_heap_max__size: 512M
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      SERVER_PORT: 8080
+      MYSQL_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-edu}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+      MYSQL_USER: ${MYSQL_USER:-edu}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in the release environment file}
+      RELEASE_MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the release environment file}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in the release environment file}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the release environment file}
+      JWT_ISSUER: ${JWT_ISSUER:-https://edu-java.local}
+      JWT_ACCESS_TOKEN_TTL_SECONDS: ${JWT_ACCESS_TOKEN_TTL_SECONDS:-3600}
+      APP_RELEASE_MODE: "true"
+      APP_BUILD_VERSION: ${APP_BUILD_VERSION:-0.7.0-rc}
+      APP_BUILD_TIME: ${APP_BUILD_TIME:-local}
+      APP_DEMO_SEED_ENABLED: ${APP_DEMO_SEED_ENABLED:-true}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8081}
+      APP_GRAPH_PROJECTION_INITIAL_DELAY_MS: "1000"
+      APP_GRAPH_PROJECTION_POLL_INTERVAL_MS: "1000"
+      APP_MASTERY_WORKER_INITIAL_DELAY_MS: "1000"
+      APP_MASTERY_WORKER_POLL_INTERVAL_MS: "1000"
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health/readiness >/dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      # nginx is deliberately bound only to the explicit IPv4 listener in nginx.conf.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  e2e:
+    build:
+      context: ./e2e
+    environment:
+      BASE_URL: http://frontend
+      API_BASE_URL: http://backend:8080
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    profiles: ["test"]
+    volumes:
+      - ./artifacts:/e2e/artifacts
+
+  mysql-backup:
+    image: mysql:8.4
+    profiles: ["ops"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-edu}
+      MYSQL_PWD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the release environment file}
+    volumes:
+      - ./artifacts:/backup
+    entrypoint: ["sh", "-ec"]
+    command:
+      - >-
+        exec mysqldump --single-transaction --routines --events -hmysql -uroot "$${MYSQL_DATABASE}"
+        > /backup/mysql-v07-release-readiness.sql
+
+  mysql-restore:
+    image: mysql:8.4
+    profiles: ["ops"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-edu}
+      MYSQL_PWD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the release environment file}
+    volumes:
+      - ./artifacts:/backup:ro
+    entrypoint: ["sh", "-ec"]
+    command:
+      - >-
+        test -s /backup/mysql-v07-release-readiness.sql &&
+        exec mysql -hmysql -uroot "$${MYSQL_DATABASE}" < /backup/mysql-v07-release-readiness.sql
+
+  mysql-validate:
+    image: mysql:8.4
+    profiles: ["ops"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-edu}
+      MYSQL_PWD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in the release environment file}
+    entrypoint: ["sh", "-ec"]
+    command:
+      - >-
+        mysql -hmysql -uroot -N "$${MYSQL_DATABASE}" -e
+        "SELECT 'flyway_migration_rows', COUNT(*) FROM flyway_schema_history WHERE success = 1;
+        SELECT 'flyway_versions', GROUP_CONCAT(version ORDER BY installed_rank) FROM flyway_schema_history WHERE success = 1;
+        SELECT 'platform_users', COUNT(*) FROM sys_user;
+        SELECT 'active_courses', COUNT(*) FROM course WHERE status = 'ACTIVE';
+        SELECT 'answer_records', COUNT(*) FROM answer_record;
+        SELECT 'mastery_rows', COUNT(*) FROM student_knowledge_mastery;
+        SELECT 'published_graph_versions', COUNT(*) FROM graph_version WHERE status = 'PUBLISHED';
+        SELECT 'published_relations', COUNT(*)
+          FROM knowledge_relation relation_row
+          JOIN graph_version graph_version_row ON graph_version_row.id = relation_row.graph_version_id
+          WHERE graph_version_row.status = 'PUBLISHED' AND relation_row.review_status = 'APPROVED';"
+
+volumes:
+  mysql_data:
+  redis_data:
+  neo4j_data:
+  neo4j_logs:

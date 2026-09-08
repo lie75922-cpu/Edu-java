@@ -1,0 +1,14 @@
+{
+  "name": "edu-java-release-e2e",
+  "private": true,
+  "version": "0.7.0",
+  "type": "module",
+  "scripts": {
+    "smoke": "node smoke.mjs",
+    "e2e": "playwright test",
+    "performance": "node performance.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.51.1"
+  }
+}
