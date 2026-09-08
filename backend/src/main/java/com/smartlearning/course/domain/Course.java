@@ -29,6 +29,9 @@ public class Course {
     @Column(nullable = false, length = 20)
     private String status;
 
+    @Column(name = "active_graph_version_id")
+    private Long activeGraphVersionId;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
 
@@ -56,6 +59,10 @@ public class Course {
         this.status = "DISABLED";
     }
 
+    public void activateGraphVersion(Long graphVersionId) {
+        this.activeGraphVersionId = graphVersionId;
+    }
+
     public Long getId() {
         return id;
     }
@@ -74,5 +81,9 @@ public class Course {
 
     public String getStatus() {
         return status;
+    }
+
+    public Long getActiveGraphVersionId() {
+        return activeGraphVersionId;
     }
 }

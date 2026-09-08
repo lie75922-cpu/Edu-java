@@ -13,4 +13,6 @@ public interface ExerciseKnowledgeRepository extends JpaRepository<ExerciseKnowl
     Optional<ExerciseKnowledge> findByExerciseUnitIdAndKnowledgePointId(Long exerciseUnitId, Long knowledgePointId);
 
     long countByExerciseUnitId(Long exerciseUnitId);
+
+    long countByKnowledgePointId(Long knowledgePointId);
 }
