@@ -1,0 +1,100 @@
+{
+  "adapter_contract_smoke": {
+    "blocking_reasons": [
+      "No local executable GEAR-CD model source or dependency declaration was supplied.",
+      "No auditable reference numeric-concept to frozen 40-Topic mapping exists.",
+      "No auditable reference Exercise identity to frozen 624-Exercise mapping exists."
+    ],
+    "executed": false,
+    "forbidden_actions_not_taken": [
+      "No full Medium GEAR-CD training.",
+      "No inferred identity mapping.",
+      "No raw prerequisite publication."
+    ]
+  },
+  "environment": {
+    "cuda_available": false,
+    "python": "3.12.14",
+    "torch": "2.3.1+cpu",
+    "torch_distribution": "2.3.1"
+  },
+  "frozen_model_input": {
+    "exercise_num": 624,
+    "student_num": 10000,
+    "topic_num": 40
+  },
+  "model": "GEAR-CD",
+  "model_smoke_executed": false,
+  "preflight_status": "PASS_WITH_COLD_START_LIMITATION",
+  "production_integration_changed": false,
+  "reference_inventory": {
+    "archive_present": true,
+    "archive_size_bytes": 5130254,
+    "dependency_declaration_count": 0,
+    "directed_graph": {
+      "numeric_nodes": 776,
+      "raw_rows": 988,
+      "self_loops": 2,
+      "unique_edges": 981
+    },
+    "extracted_data_present": true,
+    "python_source_file_count": 0,
+    "test_structure": {
+      "first_record_keys": [
+        "log_num",
+        "logs",
+        "user_id"
+      ],
+      "first_record_value_types": {
+        "log_num": "int",
+        "logs": "list",
+        "user_id": "int"
+      },
+      "record_count": 10000,
+      "top_level": "list"
+    },
+    "train_structure": {
+      "first_record_keys": [
+        "exer_id",
+        "knowledge_code",
+        "score",
+        "user_id"
+      ],
+      "first_record_value_types": {
+        "exer_id": "int",
+        "knowledge_code": "list",
+        "score": "int",
+        "user_id": "int"
+      },
+      "record_count": 279086,
+      "top_level": "list"
+    },
+    "undirected_graph": {
+      "numeric_nodes": 362,
+      "raw_rows": 1040,
+      "self_loops": 1,
+      "unique_edges": 1040
+    }
+  },
+  "resource_measurement": "NOT_AVAILABLE_NO_EXECUTABLE_MODEL_PROCESS",
+  "scope": {
+    "allowed": [
+      "Local reference archive/runtime inventory",
+      "Environment compatibility inspection",
+      "Frozen input adapter-contract inspection",
+      "Tiny structural smoke only when a verifiable runtime and identity mapping exist"
+    ],
+    "full_medium_training_requires": "A new Owner/architect approval after the smoke report.",
+    "model": "GEAR-CD",
+    "prohibited": [
+      "Full Medium training",
+      "Any production integration",
+      "Inventing a numeric-concept to frozen-Topic mapping",
+      "Treating raw prerequisite evidence as a Published Graph"
+    ],
+    "scope": "smoke_only"
+  },
+  "status": "SMOKE_BLOCKED_NO_VERIFIED_RUNTIME_OR_COMMON_IDENTITY_MAPPING",
+  "test_evaluation_count": 0
+}
+

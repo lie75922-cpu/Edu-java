@@ -1,0 +1,189 @@
+{
+  "bad_cases": {
+    "false_negative_count": 1415,
+    "false_positive_count": 8827,
+    "held_out_student_protocol": "all validation/test students use neutral zero-history embeddings",
+    "test_rows_on_exercises_unseen_in_train": 119,
+    "unseen_exercise_metrics": {
+      "acc": 0.5126050420168067,
+      "auc": 0.5484737139626907,
+      "rmse": 0.567548930644989
+    }
+  },
+  "checkpoint": {
+    "path": "model-service/experiments/model0/checkpoints/ncdm_best.pt",
+    "size_bytes": 1767380
+  },
+  "dataset_name": "JUNYI_MID_MODEL_V1",
+  "device": "cpu",
+  "epoch_records": [
+    {
+      "epoch": 1,
+      "mean_train_bce": 0.48316571359731714,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.6657851194254012,
+        "rmse": 0.376853346824646
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.000856920745993989,
+        "total_seconds": 0.02375469999969937
+      }
+    },
+    {
+      "epoch": 2,
+      "mean_train_bce": 0.45759010010836076,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.7204708341656659,
+        "rmse": 0.36854249238967896
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0008911330761348771,
+        "total_seconds": 0.024703100003534928
+      }
+    },
+    {
+      "epoch": 3,
+      "mean_train_bce": 0.39410579022096126,
+      "validation": {
+        "acc": 0.8334114930918798,
+        "auc": 0.7466515192335996,
+        "rmse": 0.354147344827652
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0008811550809897843,
+        "total_seconds": 0.024426500000117812
+      }
+    },
+    {
+      "epoch": 4,
+      "mean_train_bce": 0.3496205119454131,
+      "validation": {
+        "acc": 0.8298041196205043,
+        "auc": 0.7462198344498615,
+        "rmse": 0.35892146825790405
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0009105732115028085,
+        "total_seconds": 0.025241999996069353
+      }
+    },
+    {
+      "epoch": 5,
+      "mean_train_bce": 0.32904874426977976,
+      "validation": {
+        "acc": 0.8319685437033296,
+        "auc": 0.7447248880225799,
+        "rmse": 0.3560887277126312
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.00085334223155879,
+        "total_seconds": 0.02365550000104122
+      }
+    },
+    {
+      "epoch": 6,
+      "mean_train_bce": 0.3180085463183267,
+      "validation": {
+        "acc": 0.8197034739006529,
+        "auc": 0.7426900026522132,
+        "rmse": 0.36198967695236206
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0008946574798184516,
+        "total_seconds": 0.024800799998047296
+      }
+    },
+    {
+      "epoch": 7,
+      "mean_train_bce": 0.3122111121002509,
+      "validation": {
+        "acc": 0.818368745716244,
+        "auc": 0.7374505040765029,
+        "rmse": 0.36409103870391846
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0009089066051297458,
+        "total_seconds": 0.025195800000801682
+      }
+    }
+  ],
+  "hyperparameters": {
+    "batch_size": 4096,
+    "dropout": 0.2,
+    "early_stopping_patience": 4,
+    "hidden_dims": [
+      128,
+      64
+    ],
+    "learning_rate": 0.002,
+    "max_epochs": 20,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+    "weight_decay": 0.0
+  },
+  "implementation": {
+    "adapter_policy": "Use the maintained NCDM architecture through a local split-safe runner; do not use the toolkit random interaction split helper.",
+    "license": "MIT",
+    "package": "inscdkit",
+    "package_version": "1.3.1",
+    "reference_component": "inscd.models.neural.ncdm.NCDM",
+    "reference_repository": "data-pipeline/.data/reference/InsCD",
+    "runtime_adapter": "model-service/experiments/model0/scripts/inscd_adapter.py",
+    "runtime_adapter_reason": "The local inscdkit 1.3.1 distribution pinned torch 2.4.0, whose Windows fbgemm dependency could not load because libomp140.x86_64.dll is unavailable. The adapter preserves the referenced NCDM/Default/NCD_IF equations and avoids the toolkit's incompatible random interaction split path."
+  },
+  "model": "NCDM",
+  "preflight_status": "PASS_WITH_COLD_START_LIMITATION",
+  "production_integration_changed": false,
+  "resources": {
+    "gpu": "none",
+    "peak_gpu_allocated_bytes": null,
+    "peak_gpu_reserved_bytes": null,
+    "peak_process_rss_bytes": 363937792
+  },
+  "runtime_versions": {
+    "numpy": "1.26.4",
+    "psutil": "6.1.1",
+    "python": "3.12.14",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.1+cpu"
+  },
+  "seed": 20260907,
+  "selection": {
+    "selected_epoch": 3,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+    "test_membership_changed": false,
+    "test_read_before_selection": false,
+    "validation_metrics": {
+      "acc": 0.8334114930918798,
+      "auc": 0.7466515192335996,
+      "rmse": 0.354147344827652
+    }
+  },
+  "status": "COMPLETED",
+  "student_split_protocol": {
+    "held_out_student_policy": "Neutral zero-history embedding: validation and test student embeddings are fixed to zero before validation/test prediction and are never calibrated from held-out responses.",
+    "split_strategy": "frozen_student_level",
+    "test_evaluation_policy": "One final test evaluation only after the validation-selected epoch is frozen; a local ledger blocks an accidental second evaluation.",
+    "test_membership_changes_allowed": false
+  },
+  "test_evaluation_count": 1,
+  "test_inference": {
+    "milliseconds_per_interaction": 0.0012224949663617063,
+    "total_seconds": 0.06982280000374885
+  },
+  "test_metrics": {
+    "acc": 0.8206775803204062,
+    "auc": 0.7567751615795157,
+    "doa": null,
+    "doa_status": "NOT_APPLICABLE: InsCD's pairwise mastery agreement definition is available, but all held-out student embeddings are intentionally neutral zero-history rows, so test-set mastery ordering is not an individually fitted diagnosis.",
+    "rmse": 0.3619505763053894
+  },
+  "training_wall_seconds": 5.58981749999657,
+  "validation_inference": {
+    "milliseconds_per_interaction": 0.0008811550809897843,
+    "total_seconds": 0.024426500000117812
+  }
+}
+

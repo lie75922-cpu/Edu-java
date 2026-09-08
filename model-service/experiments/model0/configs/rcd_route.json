@@ -1,0 +1,11 @@
+{
+  "model": "RCD",
+  "route": "conditional_same_dataset_comparison",
+  "required_conditions": [
+    "An auditable mapping from every RCD numeric concept node used by the comparison graph to the frozen JUNYI_MID_MODEL_V1 Topic/Q-matrix semantics, without inferred identifiers.",
+    "A documented exercise identity mapping from the RCD reference data to the frozen derived Exercise index, without relying on row order or coincidental numeric values.",
+    "The resulting common concept graph must remain raw/reference evidence and must not be treated as a Published Graph."
+  ],
+  "on_missing_conditions": "Emit NOT_COMPARABLE_ON_COMMON_GRAPH, do not train RCD on a mismatched graph, and do not place a reference reproduction in the fair comparison table."
+}
+

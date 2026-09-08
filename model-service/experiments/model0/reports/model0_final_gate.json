@@ -1,0 +1,55 @@
+{
+  "production_integration_changed": false,
+  "reasons": [
+    "The frozen student-disjoint split has no Owner-approved held-out-student calibration protocol; evaluation therefore measures only zero-history response prediction, not individually fitted diagnosis.",
+    "ORCDF did not improve the shared cold-start test AUC over NCDM and used materially more peak process RAM.",
+    "RCD lacks an auditable common concept and Exercise identity mapping, so it cannot support a fair comparison.",
+    "GEAR-CD has no verified local executable runtime or common identity mapping; only a blocked smoke audit is available.",
+    "DOA is not applicable under neutral held-out embeddings, leaving no valid held-out mastery-order evidence."
+  ],
+  "recommendation_integration_started": false,
+  "status": "NO_GO",
+  "test_ledger": {
+    "NCDM": {
+      "metrics": {
+        "acc": 0.8206775803204062,
+        "auc": 0.7567751615795157,
+        "rmse": 0.3619505763053894
+      },
+      "policy": "one final test evaluation after validation selection",
+      "selection": {
+        "selected_epoch": 3,
+        "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+        "test_membership_changed": false,
+        "test_read_before_selection": false,
+        "validation_metrics": {
+          "acc": 0.8334114930918798,
+          "auc": 0.7466515192335996,
+          "rmse": 0.354147344827652
+        }
+      },
+      "status": "COMPLETED"
+    },
+    "ORCDF_NCD": {
+      "metrics": {
+        "acc": 0.8132189442353147,
+        "auc": 0.6381440872703795,
+        "rmse": 0.4724927842617035
+      },
+      "policy": "one final test evaluation after validation selection",
+      "selection": {
+        "selected_epoch": 8,
+        "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+        "test_membership_changed": false,
+        "test_read_before_selection": false,
+        "validation_metrics": {
+          "acc": 0.827639695537679,
+          "auc": 0.622967511510089,
+          "rmse": 0.4712425768375397
+        }
+      },
+      "status": "COMPLETED"
+    }
+  }
+}
+

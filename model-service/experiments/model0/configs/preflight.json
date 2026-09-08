@@ -1,0 +1,19 @@
+{
+  "dataset_name": "JUNYI_MID_MODEL_V1",
+  "parent_dataset": "JUNYI_MID",
+  "source_medium_root": "data-pipeline/.data/generated/medium",
+  "derived_data_root": "model-service/experiments/model0/data/junyi_mid_model_v1",
+  "frozen_student_split": {
+    "strategy": "student_level",
+    "train": 7000,
+    "valid": 1000,
+    "test": 2000,
+    "member_changes_allowed": false
+  },
+  "exact_duplicate_policy": "Retain the first full-record occurrence in source order; remove later full-record-equal occurrences only from the derived model input.",
+  "unknown_exercise_policy": "Exclude from Q-matrix-based model input and report separately.",
+  "unmapped_topic_policy": "Exclude an observed exercise if its metadata has no single non-missing Topic mapping; do not infer a replacement concept.",
+  "topic_columns": 40,
+  "raw_prerequisite_policy": "Measure only as raw evidence in the candidate-specific induced graph; do not publish or use it as a production graph."
+}
+

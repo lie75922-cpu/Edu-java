@@ -1,0 +1,31 @@
+{
+  "dataset_name": "JUNYI_MID_MODEL_V1",
+  "model": "NCDM",
+  "implementation": {
+    "reference_repository": "data-pipeline/.data/reference/InsCD",
+    "package": "inscdkit",
+    "package_version": "1.3.1",
+    "license": "MIT",
+    "reference_component": "inscd.models.neural.ncdm.NCDM",
+    "adapter_policy": "Use the maintained NCDM architecture through a local split-safe runner; do not use the toolkit random interaction split helper."
+  },
+  "seed": 20260907,
+  "device_preference": "cuda:0",
+  "data_protocol": {
+    "split_strategy": "frozen_student_level",
+    "test_membership_changes_allowed": false,
+    "held_out_student_policy": "Neutral zero-history embedding: validation and test student embeddings are fixed to zero before validation/test prediction and are never calibrated from held-out responses.",
+    "test_evaluation_policy": "One final test evaluation only after the validation-selected epoch is frozen; a local ledger blocks an accidental second evaluation."
+  },
+  "training": {
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "learning_rate": 0.002,
+    "weight_decay": 0.0,
+    "batch_size": 4096,
+    "max_epochs": 20,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch"
+  }
+}
+

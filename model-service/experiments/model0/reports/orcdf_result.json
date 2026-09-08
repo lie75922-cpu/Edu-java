@@ -1,0 +1,267 @@
+{
+  "bad_cases": {
+    "false_negative_count": 0,
+    "false_positive_count": 10668,
+    "held_out_student_protocol": "all validation/test students use neutral zero-history embeddings",
+    "test_rows_on_exercises_unseen_in_train": 119,
+    "unseen_exercise_metrics": {
+      "acc": 0.5126050420168067,
+      "auc": 0.4040418315432448,
+      "rmse": 0.5009447932243347
+    }
+  },
+  "checkpoint": {
+    "path": "model-service/experiments/model0/checkpoints/orcdf_ncd_best.pt",
+    "size_bytes": 1452602
+  },
+  "comparison_to_ncdm": {
+    "additional_checkpoint_bytes": -314778,
+    "additional_peak_process_rss_bytes": 863522816,
+    "additional_training_wall_seconds": 13.253595700000005,
+    "interpretation_limit": "The two models share the same zero-history held-out-student protocol. This is not evidence of personalized diagnostic quality for fitted test students.",
+    "status": "COMPARABLE_COLD_START_PROTOCOL_ONLY",
+    "test_acc_delta": -0.007458636085091452,
+    "test_auc_delta": -0.11863107430913622,
+    "test_rmse_delta": 0.11054220795631409
+  },
+  "dataset_name": "JUNYI_MID_MODEL_V1",
+  "device": "cpu",
+  "epoch_records": [
+    {
+      "classification_bce": 0.768140435218811,
+      "epoch": 1,
+      "flip_graph_construction_seconds": 0.9687320000011823,
+      "flipped_train_outcome_count": 10044,
+      "ssl_loss": 0.015284044668078423,
+      "total_loss": 0.7834244966506958,
+      "validation": {
+        "acc": 0.17236030446232098,
+        "auc": 0.5389116825403857,
+        "rmse": 0.5122294425964355
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0020287724108906603,
+        "total_seconds": 0.056239600002299994
+      }
+    },
+    {
+      "classification_bce": 0.7177979946136475,
+      "epoch": 2,
+      "flip_graph_construction_seconds": 1.1576692999951774,
+      "flipped_train_outcome_count": 9994,
+      "ssl_loss": 0.015283995307981968,
+      "total_loss": 0.7330819964408875,
+      "validation": {
+        "acc": 0.17236030446232098,
+        "auc": 0.5640744665283011,
+        "rmse": 0.506595253944397
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0018290537857595815,
+        "total_seconds": 0.05070319999504136
+      }
+    },
+    {
+      "classification_bce": 0.7065438032150269,
+      "epoch": 3,
+      "flip_graph_construction_seconds": 0.9749452000032761,
+      "flipped_train_outcome_count": 9983,
+      "ssl_loss": 0.015283945947885513,
+      "total_loss": 0.7218277454376221,
+      "validation": {
+        "acc": 0.44706179430756465,
+        "auc": 0.5854759407297394,
+        "rmse": 0.5007597208023071
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0021486634679849996,
+        "total_seconds": 0.05956309999601217
+      }
+    },
+    {
+      "classification_bce": 0.6950617432594299,
+      "epoch": 4,
+      "flip_graph_construction_seconds": 1.1718292000005022,
+      "flipped_train_outcome_count": 9894,
+      "ssl_loss": 0.015283863991498947,
+      "total_loss": 0.7103456258773804,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.5950585775689902,
+        "rmse": 0.49485403299331665
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.002005696042672495,
+        "total_seconds": 0.05559989999892423
+      }
+    },
+    {
+      "classification_bce": 0.6834069490432739,
+      "epoch": 5,
+      "flip_graph_construction_seconds": 1.0108099999997648,
+      "flipped_train_outcome_count": 10025,
+      "ssl_loss": 0.01528374943882227,
+      "total_loss": 0.6986907124519348,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.6041072140728692,
+        "rmse": 0.4889295995235443
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.001879174632782947,
+        "total_seconds": 0.05209259999537608
+      }
+    },
+    {
+      "classification_bce": 0.6721586585044861,
+      "epoch": 6,
+      "flip_graph_construction_seconds": 0.9914333999986411,
+      "flipped_train_outcome_count": 9960,
+      "ssl_loss": 0.015283582732081413,
+      "total_loss": 0.6874422430992126,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.6122738761084557,
+        "rmse": 0.48300692439079285
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0020556473431640496,
+        "total_seconds": 0.056984599999850616
+      }
+    },
+    {
+      "classification_bce": 0.6607058048248291,
+      "epoch": 7,
+      "flip_graph_construction_seconds": 1.2431844999955501,
+      "flipped_train_outcome_count": 10077,
+      "ssl_loss": 0.015283394604921341,
+      "total_loss": 0.6759892106056213,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.6202737918915181,
+        "rmse": 0.4771038591861725
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0018268568953854478,
+        "total_seconds": 0.05064229999698
+      }
+    },
+    {
+      "classification_bce": 0.6494781374931335,
+      "epoch": 8,
+      "flip_graph_construction_seconds": 1.0783060000030673,
+      "flipped_train_outcome_count": 10081,
+      "ssl_loss": 0.015283135697245598,
+      "total_loss": 0.6647612452507019,
+      "validation": {
+        "acc": 0.827639695537679,
+        "auc": 0.622967511510089,
+        "rmse": 0.4712425768375397
+      },
+      "validation_inference": {
+        "milliseconds_per_interaction": 0.0016580823203411045,
+        "total_seconds": 0.045963700002175756
+      }
+    }
+  ],
+  "hyperparameters": {
+    "dropout": 0.2,
+    "early_stopping_patience": 3,
+    "flip_ratio": 0.05,
+    "gcn_layers": 2,
+    "hidden_dims": [
+      128,
+      64
+    ],
+    "latent_dim": 32,
+    "learning_rate": 0.001,
+    "max_epochs": 8,
+    "optimization_unit": "one full retained-train split step per epoch; required because the reference ORCDF contrastive objective is graph-global and this CPU-only run must not silently substitute a sampled loss",
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+    "ssl_temperature": 3.0,
+    "ssl_weight": 0.001,
+    "weight_decay": 0.0
+  },
+  "implementation": {
+    "adapter_policy": "Use the maintained ORCDF response-graph semantics through a local split-safe runner; no raw prerequisite evidence is supplied as a model graph.",
+    "license": "MIT",
+    "package": "inscdkit",
+    "package_version": "1.3.1",
+    "reference_component": "inscd.models.graph.orcdf.ORCDF with NCD_IF",
+    "reference_repository": "data-pipeline/.data/reference/InsCD",
+    "runtime_adapter": "model-service/experiments/model0/scripts/inscd_adapter.py",
+    "runtime_adapter_reason": "The local inscdkit 1.3.1 distribution pinned torch 2.4.0, whose Windows fbgemm dependency could not load because libomp140.x86_64.dll is unavailable. The adapter preserves the referenced ORCDF response-graph and NCD_IF equations, uses sparse adjacency rather than the reference dense temporary matrix, and avoids the toolkit's incompatible random interaction split path."
+  },
+  "model": "ORCDF-NCD",
+  "preflight_status": "PASS_WITH_COLD_START_LIMITATION",
+  "production_integration_changed": false,
+  "resources": {
+    "gpu": "none",
+    "peak_gpu_allocated_bytes": null,
+    "peak_gpu_reserved_bytes": null,
+    "peak_process_rss_bytes": 1227460608
+  },
+  "response_graph": {
+    "base_graph_construction_seconds": 0.8101319999987027,
+    "exercise_topic_edges": 624,
+    "nodes": 10664,
+    "prerequisite_edges": "Not used. Raw prerequisite evidence is neither a Published Graph nor an ORCDF input in this experiment.",
+    "q_edge_semantics": "Frozen Exercise-to-Topic Q-matrix edges, included in both graph views.",
+    "response_edge_semantics": "Train-only student-to-exercise response edges, split by correct and incorrect outcome; repeated same-outcome pairs are weighted after sparse coalescing.",
+    "right_normalized_adjacency_nonzeros": 70848,
+    "right_response_rows": 163856,
+    "ssl_student_node_scope": "train students only; held-out students are excluded from the SSL term",
+    "student_exercise_edges": "Only retained train rows; separate right and wrong relations; repeated student-exercise rows are coalesced as weighted adjacency entries by the reference implementation.",
+    "total_flip_graph_construction_seconds": 8.596909599997161,
+    "train_response_rows": 199392,
+    "unique_right_student_exercise_pairs": 29468,
+    "unique_wrong_student_exercise_pairs": 16956,
+    "wrong_normalized_adjacency_nonzeros": 45824,
+    "wrong_response_rows": 35536
+  },
+  "runtime_versions": {
+    "numpy": "1.26.4",
+    "psutil": "6.1.1",
+    "python": "3.12.14",
+    "scikit-learn": "1.5.2",
+    "scipy": "1.13.1",
+    "torch": "2.3.1+cpu"
+  },
+  "seed": 20260907,
+  "selection": {
+    "selected_epoch": 8,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+    "test_membership_changed": false,
+    "test_read_before_selection": false,
+    "validation_metrics": {
+      "acc": 0.827639695537679,
+      "auc": 0.622967511510089,
+      "rmse": 0.4712425768375397
+    }
+  },
+  "status": "COMPLETED",
+  "student_split_protocol": {
+    "held_out_student_policy": "Neutral zero-history embedding: response-graph construction uses train rows only, and validation/test student base embeddings are fixed to zero with no calibration from held-out responses.",
+    "split_strategy": "frozen_student_level",
+    "test_evaluation_policy": "One final test evaluation only after the validation-selected epoch is frozen; a local ledger blocks an accidental second evaluation.",
+    "test_membership_changes_allowed": false
+  },
+  "test_evaluation_count": 1,
+  "test_inference": {
+    "milliseconds_per_interaction": 0.0012346966646036982,
+    "total_seconds": 0.07051969999884022
+  },
+  "test_metrics": {
+    "acc": 0.8132189442353147,
+    "auc": 0.6381440872703795,
+    "doa": null,
+    "doa_status": "NOT_APPLICABLE: InsCD's pairwise mastery agreement definition is available, but all held-out student embeddings are intentionally neutral zero-history rows, so test-set mastery ordering is not an individually fitted diagnosis.",
+    "rmse": 0.4724927842617035
+  },
+  "training_wall_seconds": 18.843413199996576,
+  "validation_inference": {
+    "milliseconds_per_interaction": 0.0016580823203411045,
+    "total_seconds": 0.045963700002175756
+  }
+}
+

@@ -1,0 +1,18 @@
+{
+  "model": "GEAR-CD",
+  "scope": "smoke_only",
+  "prohibited": [
+    "Full Medium training",
+    "Any production integration",
+    "Inventing a numeric-concept to frozen-Topic mapping",
+    "Treating raw prerequisite evidence as a Published Graph"
+  ],
+  "allowed": [
+    "Local reference archive/runtime inventory",
+    "Environment compatibility inspection",
+    "Frozen input adapter-contract inspection",
+    "Tiny structural smoke only when a verifiable runtime and identity mapping exist"
+  ],
+  "full_medium_training_requires": "A new Owner/architect approval after the smoke report."
+}
+
