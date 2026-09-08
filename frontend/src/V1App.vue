@@ -49,10 +49,10 @@ function choose(view) {
   <div v-else class="app-shell">
     <aside class="sidebar">
       <div class="brand-block">
-        <div class="brand-mark">离</div>
+        <div class="brand-mark">数</div>
         <div>
-          <strong>离散数学智慧教学平台</strong>
-          <small>知识图谱 · 个性化学习 · 教学评价</small>
+          <strong>数学智慧学习平台</strong>
+          <small>知识图谱 · 学习分析 · 个性化推荐</small>
         </div>
       </div>
 
@@ -68,15 +68,15 @@ function choose(view) {
       </nav>
 
       <div class="sidebar-note">
-        <strong>课程重点</strong>
-        <p>数理逻辑、集合论与关系、图论、代数结构</p>
+        <strong>平台主线</strong>
+        <p>学习数据 → 知识结构 → 学习诊断 → 个性化推荐 → 学习路径</p>
       </div>
     </aside>
 
     <div class="main-column">
       <header class="topbar">
         <div>
-          <p class="eyebrow">《离散数学》数字教材知识图谱建设与应用</p>
+          <p class="eyebrow">基于知识图谱与学习分析的中文智能学习平台</p>
           <h1>{{ currentView }}</h1>
         </div>
         <div class="user-area">
