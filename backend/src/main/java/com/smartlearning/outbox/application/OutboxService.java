@@ -42,4 +42,18 @@ public class OutboxService {
             throw new IllegalStateException("unable to serialize outbox event", ex);
         }
     }
+
+    public OutboxEvent enqueueGraphRebuild(long graphVersionId, long courseId) {
+        try {
+            String payload = objectMapper.writeValueAsString(Map.of(
+                    "graphVersionId", graphVersionId,
+                    "courseId", courseId
+            ));
+            return outboxEventRepository.save(new OutboxEvent(
+                    "GRAPH_REBUILD_REQUEST", "GRAPH_VERSION", String.valueOf(graphVersionId), payload
+            ));
+        } catch (Exception ex) {
+            throw new IllegalStateException("unable to serialize graph projection outbox event", ex);
+        }
+    }
 }

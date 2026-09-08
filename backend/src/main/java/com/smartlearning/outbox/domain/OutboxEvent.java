@@ -7,6 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "outbox_event")
 public class OutboxEvent {
@@ -35,6 +37,12 @@ public class OutboxEvent {
 
     @Column(name = "version", nullable = false)
     private long version;
+
+    @Column(name = "processed_at")
+    private Instant processedAt;
+
+    @Column(name = "last_error", columnDefinition = "TEXT")
+    private String lastError;
 
     protected OutboxEvent() {
     }
@@ -71,5 +79,30 @@ public class OutboxEvent {
 
     public String getStatus() {
         return status;
+    }
+
+    public void markDone() {
+        this.status = "DONE";
+        this.processedAt = Instant.now();
+        this.lastError = null;
+    }
+
+    public void markFailed(String error) {
+        this.status = "FAILED";
+        this.retryCount++;
+        this.processedAt = Instant.now();
+        this.lastError = error;
+    }
+
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    public Instant getProcessedAt() {
+        return processedAt;
+    }
+
+    public String getLastError() {
+        return lastError;
     }
 }

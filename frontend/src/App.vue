@@ -43,10 +43,40 @@ const admin = reactive({
   seedResult: null
 })
 
+const graph = reactive({
+  courseId: '',
+  data: null,
+  search: '',
+  selected: null,
+  pathFrom: '',
+  pathTo: '',
+  pathResult: null
+})
+
+const graphAdmin = reactive({
+  courseId: '',
+  versions: [],
+  selectedVersion: null,
+  relations: [],
+  validationIssues: [],
+  evidence: [],
+  relationEvidence: [],
+  version: { description: '', copyActive: false },
+  manual: { sourceKnowledgePointId: '', targetKnowledgePointId: '', confidence: '1.0000' },
+  evidenceJson: '[\n  {\n    "externalEvidenceId": "junyi-row-1",\n    "sourceExerciseExternalId": "exercise-a",\n    "targetExerciseExternalId": "exercise-b",\n    "rawPayload": { "source": "Junyi prerequisite" }\n  }\n]',
+  importResult: null
+})
+
 const authenticated = computed(() => Boolean(session.value?.accessToken))
 const roles = computed(() => session.value?.user?.roles || [])
 const canManage = computed(() => roles.value.includes('SYSTEM_ADMIN') || roles.value.includes('TEACHER'))
 const canImport = computed(() => roles.value.includes('SYSTEM_ADMIN'))
+const filteredGraphNodes = computed(() => {
+  const nodes = graph.data?.nodes || []
+  const query = graph.search.trim().toLowerCase()
+  if (!query) return nodes
+  return nodes.filter(node => `${node.knowledgeCode} ${node.knowledgeName}`.toLowerCase().includes(query))
+})
 
 function setMessage(message = '', failure = '') {
   notice.value = message
@@ -386,6 +416,177 @@ async function runSeed(mode) {
   if (result) admin.seedResult = result
 }
 
+async function openGraph() {
+  const courseId = numberOrNull(graph.courseId) || selectedCourse.value?.id
+  if (!courseId) {
+    error.value = '请先进入课程，或输入已加入课程的 ID。'
+    return
+  }
+  const result = await run(() => api(`/courses/${courseId}/graph`))
+  if (result) {
+    graph.courseId = String(courseId)
+    graph.data = result
+    graph.selected = null
+    graph.pathResult = null
+    view.value = 'graph'
+  }
+}
+
+async function inspectGraphNode(node, direction) {
+  const suffix = direction === 'prerequisites' ? 'prerequisites' : 'successors'
+  const result = await run(() => api(`/knowledge-points/${node.id}/${suffix}`))
+  if (result) graph.selected = { node, direction, graph: result }
+}
+
+async function findGraphPath() {
+  const courseId = numberOrNull(graph.courseId)
+  const from = numberOrNull(graph.pathFrom)
+  const to = numberOrNull(graph.pathTo)
+  if (!courseId || !from || !to) {
+    error.value = '请输入课程 ID、起点和终点 KnowledgePoint ID。'
+    return
+  }
+  const result = await run(() => api(`/courses/${courseId}/graph/path?from=${from}&to=${to}`))
+  if (result) graph.pathResult = result
+}
+
+async function loadGraphAdmin() {
+  const courseId = numberOrNull(graphAdmin.courseId)
+  if (!courseId) {
+    error.value = '请输入课程 ID。'
+    return
+  }
+  const loaded = await run(async () => Promise.all([
+    api(`/admin/graph-versions?courseId=${courseId}`),
+    api(`/admin/evidence?courseId=${courseId}`)
+  ]))
+  if (loaded) {
+    const [versions, evidence] = loaded
+    graphAdmin.versions = versions
+    graphAdmin.evidence = evidence
+  }
+}
+
+async function createGraphVersion() {
+  const courseId = numberOrNull(graphAdmin.courseId)
+  if (!courseId) {
+    error.value = '请输入课程 ID。'
+    return
+  }
+  const result = await run(() => api('/admin/graph-versions', {
+    method: 'POST',
+    body: JSON.stringify({
+      courseId,
+      description: graphAdmin.version.description || null,
+      copyActive: graphAdmin.version.copyActive
+    })
+  }), 'GraphVersion 已创建。')
+  if (result) {
+    graphAdmin.version.description = ''
+    await loadGraphAdmin()
+    await selectGraphVersion(result.id)
+  }
+}
+
+async function selectGraphVersion(versionId) {
+  const loaded = await run(async () => Promise.all([
+    api(`/admin/graph-versions/${versionId}`),
+    api(`/admin/graph-versions/${versionId}/relations`),
+    api(`/admin/graph-versions/${versionId}/validation-issues`)
+  ]))
+  if (loaded) {
+    const [version, relations, validationIssues] = loaded
+    graphAdmin.selectedVersion = version
+    graphAdmin.relations = relations
+    graphAdmin.validationIssues = validationIssues
+    graphAdmin.relationEvidence = []
+  }
+}
+
+async function addManualGraphRelation() {
+  if (!graphAdmin.selectedVersion) {
+    error.value = '请先选择 Draft GraphVersion。'
+    return
+  }
+  const sourceKnowledgePointId = numberOrNull(graphAdmin.manual.sourceKnowledgePointId)
+  const targetKnowledgePointId = numberOrNull(graphAdmin.manual.targetKnowledgePointId)
+  if (!sourceKnowledgePointId || !targetKnowledgePointId) {
+    error.value = '请输入两个 KnowledgePoint ID。'
+    return
+  }
+  const result = await run(() => api(`/admin/graph-versions/${graphAdmin.selectedVersion.id}/relations`, {
+    method: 'POST',
+    body: JSON.stringify({
+      sourceKnowledgePointId,
+      targetKnowledgePointId,
+      confidence: numberOrNull(graphAdmin.manual.confidence)
+    })
+  }), '人工关系已加入 Draft。')
+  if (result) await selectGraphVersion(graphAdmin.selectedVersion.id)
+}
+
+async function reviewGraphRelation(relation, reviewStatus) {
+  if (!graphAdmin.selectedVersion) return
+  const result = await run(() => api(
+    `/admin/graph-versions/${graphAdmin.selectedVersion.id}/relations/${relation.id}/review`,
+    { method: 'PUT', body: JSON.stringify({ reviewStatus }) }
+  ), `关系已${reviewStatus === 'APPROVED' ? '批准' : '拒绝'}。`)
+  if (result) await selectGraphVersion(graphAdmin.selectedVersion.id)
+}
+
+async function inspectRelationEvidence(relation) {
+  if (!graphAdmin.selectedVersion) return
+  const result = await run(() => api(
+    `/admin/graph-versions/${graphAdmin.selectedVersion.id}/relations/${relation.id}/evidence`
+  ))
+  if (result) graphAdmin.relationEvidence = result
+}
+
+async function importGraphEvidence(mode) {
+  if (!graphAdmin.selectedVersion) {
+    error.value = '请先选择 Draft GraphVersion。'
+    return
+  }
+  let parsed
+  try {
+    parsed = JSON.parse(graphAdmin.evidenceJson)
+  } catch {
+    error.value = 'Evidence 输入必须是合法 JSON。'
+    return
+  }
+  const payload = Array.isArray(parsed) ? { evidence: parsed } : parsed
+  const result = await run(() => api(
+    `/admin/graph-versions/${graphAdmin.selectedVersion.id}/evidence-imports/${mode}`,
+    { method: 'POST', body: JSON.stringify(payload) }
+  ), mode === 'apply' ? 'Evidence 已导入 Draft。' : 'Evidence dry-run 已完成。')
+  if (result) {
+    graphAdmin.importResult = result
+    await loadGraphAdmin()
+    await selectGraphVersion(graphAdmin.selectedVersion.id)
+  }
+}
+
+async function validateGraphVersion() {
+  if (!graphAdmin.selectedVersion) return
+  const result = await run(() => api(`/admin/graph-versions/${graphAdmin.selectedVersion.id}/validate`, { method: 'POST' }))
+  if (result) {
+    notice.value = result.status === 'READY' ? '校验通过，版本已 READY。' : '校验发现阻断问题，版本已标记为 VALIDATION_FAILED。'
+    await selectGraphVersion(graphAdmin.selectedVersion.id)
+  }
+}
+
+async function publishGraphVersion() {
+  if (!graphAdmin.selectedVersion) return
+  const result = await run(() => api(`/admin/graph-versions/${graphAdmin.selectedVersion.id}/publish`, { method: 'POST' }), '发布请求已写入 GRAPH_REBUILD_REQUEST outbox。')
+  if (result) await selectGraphVersion(graphAdmin.selectedVersion.id)
+}
+
+async function retryGraphProjection() {
+  if (!graphAdmin.selectedVersion) return
+  const result = await run(() => api(`/admin/graph-versions/${graphAdmin.selectedVersion.id}/retry-projection`, { method: 'POST' }), '投影重试请求已写入 outbox。')
+  if (result) await selectGraphVersion(graphAdmin.selectedVersion.id)
+}
+
 onMounted(() => {
   if (authenticated.value) loadCourses()
 })
@@ -396,10 +597,11 @@ onMounted(() => {
     <header>
       <div>
         <h1>Edu-java</h1>
-        <p>V0.2 课程、知识点、ExerciseUnit、题目与答题闭环</p>
+        <p>V0.3 知识关系证据治理与版本化 Published Graph</p>
       </div>
       <nav v-if="authenticated">
         <button @click="view = 'courses'; loadCourses()">课程</button>
+        <button @click="openGraph">知识图</button>
         <button @click="loadHistory">学习记录</button>
         <button v-if="canManage" @click="view = 'admin'; loadCourses()">管理</button>
         <button class="secondary" @click="logout">退出</button>
@@ -451,6 +653,48 @@ onMounted(() => {
         <div><strong>{{ exercise.exerciseCode }} · {{ exercise.exerciseName }}</strong><p>{{ exercise.knowledgePoints.map(point => point.knowledgeName).join('、') || 'UNMAPPED' }}</p></div>
         <button @click="startExercise(exercise)">开始答题</button>
       </article>
+    </section>
+
+    <section v-else-if="view === 'graph'" class="card">
+      <div class="section-title">
+        <div><h2>Published Knowledge Graph</h2><p v-if="graph.data">当前 GraphVersion：#{{ graph.data.graphVersionId }}</p></div>
+        <button class="secondary" @click="openGraph">刷新</button>
+      </div>
+      <label>课程 ID <input v-model="graph.courseId" type="number" @change="openGraph"></label>
+      <p v-if="!graph.data">该课程尚无 Published Graph。只有投影成功后才可查询。</p>
+      <template v-else>
+        <label>搜索 KnowledgePoint <input v-model="graph.search" placeholder="按编码或名称搜索"></label>
+        <div class="graph-layout">
+          <section>
+            <h3>知识点（{{ filteredGraphNodes.length }}/{{ graph.data.nodes.length }}）</h3>
+            <article v-for="node in filteredGraphNodes" :key="node.id" class="graph-node">
+              <div><strong>#{{ node.id }} · {{ node.knowledgeName }}</strong><small>{{ node.knowledgeCode }}</small></div>
+              <span><button class="link" @click="inspectGraphNode(node, 'prerequisites')">前驱</button><button class="link" @click="inspectGraphNode(node, 'successors')">后继</button></span>
+            </article>
+          </section>
+          <section>
+            <h3>正式边（{{ graph.data.edges.length }}）</h3>
+            <p v-if="graph.data.edges.length === 0">该版本没有已发布的先修边。</p>
+            <article v-for="edge in graph.data.edges" :key="edge.relationId" class="graph-edge">
+              #{{ edge.sourceKnowledgePointId }} → #{{ edge.targetKnowledgePointId }}
+            </article>
+          </section>
+        </div>
+        <section v-if="graph.selected" class="graph-detail">
+          <h3>{{ graph.selected.node.knowledgeName }} 的{{ graph.selected.direction === 'prerequisites' ? '前驱' : '后继' }}</h3>
+          <p>GraphVersion #{{ graph.selected.graph.graphVersionId }}</p>
+          <p>{{ graph.selected.graph.nodes.map(node => `#${node.id} ${node.knowledgeName}`).join('、') || '无直接关系。' }}</p>
+        </section>
+        <section class="graph-detail">
+          <h3>两点路径查询</h3>
+          <div class="inline-form">
+            <label>起点 KnowledgePoint ID <input v-model="graph.pathFrom" type="number"></label>
+            <label>终点 KnowledgePoint ID <input v-model="graph.pathTo" type="number"></label>
+            <button @click="findGraphPath">查询路径</button>
+          </div>
+          <p v-if="graph.pathResult">GraphVersion #{{ graph.pathResult.graphVersionId }}：{{ graph.pathResult.knowledgePointIds.length ? graph.pathResult.knowledgePointIds.map(id => `#${id}`).join(' → ') : '两点之间无有向先修路径。' }}</p>
+        </section>
+      </template>
     </section>
 
     <section v-else-if="view === 'question' && activeQuestion" class="card narrow">
@@ -557,6 +801,74 @@ onMounted(() => {
         <article v-for="question in admin.questions" :key="question.id" class="admin-row"><span>#{{ question.id }} {{ question.questionType }} · {{ question.stem.slice(0, 24) }}</span><span><button class="link" @click="editQuestion(question)">编辑</button><button class="link danger" @click="disableQuestion(question)">禁用</button></span></article>
       </section>
 
+      <section class="card wide">
+        <h2>V0.3 Knowledge Relation Governance</h2>
+        <p>Evidence 只形成 Draft candidate；只有通过校验、异步 Neo4j 投影成功的版本才会成为课程 active graph。</p>
+        <div class="inline-form">
+          <label>课程 ID <input v-model="graphAdmin.courseId" type="number"></label>
+          <button class="secondary" @click="loadGraphAdmin">加载 GraphVersion 与 Evidence</button>
+        </div>
+        <form class="compact-form" @submit.prevent="createGraphVersion">
+          <label>新版本说明 <input v-model="graphAdmin.version.description" maxlength="500"></label>
+          <label><input v-model="graphAdmin.version.copyActive" type="checkbox"> 从当前 active Published Graph 复制为 Draft</label>
+          <button>创建 GraphVersion</button>
+        </form>
+        <h3>GraphVersion</h3>
+        <p v-if="graphAdmin.versions.length === 0">尚未加载或该课程没有版本。</p>
+        <article v-for="version in graphAdmin.versions" :key="version.id" class="admin-row">
+          <span>#{{ version.id }} · v{{ version.versionNo }} · {{ version.status }}<small v-if="version.active"> · 当前 active</small><small v-if="version.failureReason"> · {{ version.failureReason }}</small></span>
+          <button class="link" @click="selectGraphVersion(version.id)">查看治理详情</button>
+        </article>
+
+        <template v-if="graphAdmin.selectedVersion">
+          <section class="graph-detail">
+            <h3>版本 #{{ graphAdmin.selectedVersion.id }} · {{ graphAdmin.selectedVersion.status }}</h3>
+            <p v-if="graphAdmin.selectedVersion.failureReason" class="error">Projection/validation failure：{{ graphAdmin.selectedVersion.failureReason }}</p>
+            <div class="inline-actions">
+              <button @click="validateGraphVersion">运行 GraphValidator</button>
+              <button class="secondary" :disabled="graphAdmin.selectedVersion.status !== 'READY'" @click="publishGraphVersion">发布</button>
+              <button v-if="graphAdmin.selectedVersion.status === 'PROJECTION_FAILED'" class="secondary" @click="retryGraphProjection">重试投影</button>
+            </div>
+          </section>
+
+          <section class="graph-detail">
+            <h3>手工关系</h3>
+            <div class="inline-form">
+              <label>Source KnowledgePoint ID <input v-model="graphAdmin.manual.sourceKnowledgePointId" type="number"></label>
+              <label>Target KnowledgePoint ID <input v-model="graphAdmin.manual.targetKnowledgePointId" type="number"></label>
+              <label>Confidence <input v-model="graphAdmin.manual.confidence" type="number" min="0" max="1" step="0.0001"></label>
+              <button @click="addManualGraphRelation">加入 Draft</button>
+            </div>
+            <article v-for="relation in graphAdmin.relations" :key="relation.id" class="admin-row">
+              <span>#{{ relation.id }} {{ relation.sourceKnowledgeName }} → {{ relation.targetKnowledgeName }} · {{ relation.reviewStatus }} · Evidence {{ relation.evidenceCount }}</span>
+              <span><button class="link" @click="inspectRelationEvidence(relation)">Evidence</button><button v-if="relation.reviewStatus === 'CANDIDATE'" class="link" @click="reviewGraphRelation(relation, 'APPROVED')">批准</button><button v-if="relation.reviewStatus !== 'REJECTED'" class="link danger" @click="reviewGraphRelation(relation, 'REJECTED')">拒绝</button></span>
+            </article>
+            <p v-if="graphAdmin.relationEvidence.length">当前关系 Evidence：{{ graphAdmin.relationEvidence.map(evidence => `#${evidence.id} ${evidence.resolutionStatus}`).join('；') }}</p>
+          </section>
+
+          <section class="graph-detail">
+            <h3>Junyi raw prerequisite Evidence importer</h3>
+            <p>外部 Exercise ID 必须唯一解析到 ExerciseUnit；未解析、歧义和同知识点自环会保留为 Evidence conflict，不会写入正式图。</p>
+            <textarea v-model="graphAdmin.evidenceJson" class="code seed"></textarea>
+            <button @click="importGraphEvidence('dry-run')">Dry-run</button>
+            <button class="secondary" @click="importGraphEvidence('apply')">Apply</button>
+            <pre v-if="graphAdmin.importResult">{{ JSON.stringify(graphAdmin.importResult, null, 2) }}</pre>
+          </section>
+
+          <section class="graph-detail">
+            <h3>Validation issues</h3>
+            <p v-if="graphAdmin.validationIssues.length === 0">尚无已保存的校验问题。</p>
+            <article v-for="issue in graphAdmin.validationIssues" :key="issue.id" class="admin-row"><span>{{ issue.severity }} · {{ issue.issueCode }} · relation #{{ issue.relationId || '—' }}</span><small>{{ issue.detailJson }}</small></article>
+          </section>
+        </template>
+
+        <section class="graph-detail">
+          <h3>课程 Evidence</h3>
+          <p v-if="graphAdmin.evidence.length === 0">尚无 Evidence。</p>
+          <article v-for="evidence in graphAdmin.evidence" :key="evidence.id" class="admin-row"><span>#{{ evidence.id }} {{ evidence.sourceExternalId }} → {{ evidence.targetExternalId }} · {{ evidence.resolutionStatus }}</span><small>{{ evidence.conflictCode || 'resolved candidate eligible' }}</small></article>
+        </section>
+      </section>
+
       <section v-if="canImport" class="card wide">
         <h2>受控 Junyi catalog seed importer</h2>
         <p>仅接受 Area、Topic 和 Exercise 元数据；不会接收用户、ProblemLog、先修关系或评分关系。</p>
@@ -615,5 +927,14 @@ textarea { min-height: 76px; resize: vertical; }
 .code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; min-height: 155px; }
 .seed { min-height: 250px; }
 pre { overflow: auto; padding: 14px; background: #101827; color: #dbeafe; border-radius: 8px; }
+.graph-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 18px 0; }
+.graph-node, .graph-edge { padding: 10px 0; border-top: 1px solid #e6ebf3; }
+.graph-node { display: flex; justify-content: space-between; gap: 12px; }
+.graph-node small, .admin-row small { display: block; color: #66728a; margin-top: 3px; overflow-wrap: anywhere; }
+.graph-detail { margin-top: 18px; padding: 16px; border: 1px solid #d9e1ef; border-radius: 8px; background: #fafcff; }
+.inline-form, .inline-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.inline-form label { flex: 1 1 180px; }
+.compact-form { grid-template-columns: minmax(220px, 1fr) auto auto; align-items: end; margin: 12px 0; }
+@media (max-width: 800px) { .graph-layout { grid-template-columns: 1fr; } .compact-form { grid-template-columns: 1fr; } }
 @media (max-width: 800px) { header { align-items: flex-start; flex-direction: column; } .admin-grid { grid-template-columns: 1fr; } }
 </style>
