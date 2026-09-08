@@ -1,6 +1,6 @@
 # V1 产品重构：本轮直接实现与当前边界
 
-本文件记录 PR #34 当前 head 的真实实现状态。若与较早的“中文离散数学 Demo”描述冲突，以 `docs/V1_MATH_PLATFORM_BASELINE.md` 为准。
+本文件记录 PR #34 当前实现状态。若与较早的“中文离散数学 Demo”描述冲突，以 `docs/V1_MATH_PLATFORM_BASELINE.md` 为准。
 
 平台当前定位：**基于知识图谱与学习分析的中文数学智能学习平台**。
 
@@ -127,15 +127,15 @@ AnswerRecord
 - 生成学习路径；
 - 查看知识图谱节点及前置/后继关系。
 
-### 7. 浏览器 E2E 与 release Gate 已跑通
+### 7. Release Gate：最终最新 HEAD 已全绿
 
-PR #34 最新已验证 head（在本文件更新前）：
+最终验证 HEAD：
 
-- SHA：`a0448ae781ba4f88b6189606bbca5f46c62f45fd`
-- GitHub Actions CI run：`#158`
-- run id：`34232579762`
+- SHA：`fcb728cb96c3e69b20bf4552425930d165029317`
+- GitHub Actions CI run：`#162`
+- run id：`34278717249`
 
-结果：
+最终结果：
 
 ```text
 backend            PASS
@@ -145,7 +145,7 @@ compose-config     PASS
 full-stack-release PASS
 ```
 
-`full-stack-release` 内实际完成：
+`full-stack-release` 实际完成：
 
 - 隔离 release 配置生成；
 - full release stack build/start；
@@ -155,15 +155,11 @@ full-stack-release PASS
 - browser artifacts upload；
 - clean shutdown。
 
-E2E JUnit：1 test / 0 failures / 0 errors。
+在前一代码等价 head `d89650cdc64ec5938be3271aa5cb8e1d2f20d8fd` 的 run #161 中，最新浏览器 artifact 已人工复核：13 张真实页面截图完整，JUnit 为 1 test / 0 failures / 0 errors。最终 run #162 同样通过 real browser E2E；最后一次变更仅加强 Codex 本地路径与执行约束，不改变产品代码。
 
-浏览器 artifact 已生成 13 张真实页面截图，覆盖登录、学生首页、课程学习、知识点练习、练习反馈、个性化学习与路径、知识图谱、教师工作台、学生详情、管理工作台、数据与算法、教师授权、知识图谱治理。
+## 当前不能在本会话环境真实完成的工作
 
-本文件更新会产生新 head，因此最终 merge 仍必须以**更新后的最新 head CI 5/5 全绿**为准。
-
-## 当前不能伪造为已完成的工作
-
-以下内容仍未完成，统一由 `docs/CODEX_REAL_DATA_INTEGRATION_TASK.md` 作为下一阶段执行单：
+以下内容统一由 `docs/CODEX_REAL_DATA_INTEGRATION_TASK.md` 作为本机下一阶段执行单：
 
 1. 本机 Junyi 原始 CSV -> deterministic business export；
 2. 真实 Area / Topic / Exercise 的中文 display mapping 与审核状态；
