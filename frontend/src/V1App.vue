@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import LoginView from './v1/views/LoginView.vue'
 import StudentHomeView from './v1/views/StudentHomeView.vue'
 import StudentCourseView from './v1/views/StudentCourseView.vue'
@@ -29,6 +29,12 @@ const menus = computed(() => {
   if (canManage.value) return [...adminMenus, ...teacherMenus]
   if (canTeach.value) return teacherMenus
   return studentMenus
+})
+
+watchEffect(() => {
+  if (authenticated.value && !menus.value.includes(currentView.value)) {
+    currentView.value = menus.value[0] || '首页'
+  }
 })
 
 function choose(view) {
@@ -93,6 +99,7 @@ function choose(view) {
         <TeacherWorkspaceView v-else-if="canTeach && currentView === '教师工作台'" />
         <AdminWorkspaceView v-else-if="canManage && currentView === '管理工作台'" />
         <StudentHomeView v-else-if="isStudent" />
+        <AdminWorkspaceView v-else-if="canManage" />
         <TeacherWorkspaceView v-else-if="canTeach" />
       </main>
     </div>
