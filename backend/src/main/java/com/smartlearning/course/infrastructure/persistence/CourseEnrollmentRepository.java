@@ -4,10 +4,13 @@ import com.smartlearning.course.domain.CourseEnrollment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
+import java.util.List;
 
 public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollment, Long> {
 
     boolean existsByStudentIdAndCourseIdAndStatus(Long studentId, Long courseId, String status);
 
     Optional<CourseEnrollment> findByStudentIdAndCourseId(Long studentId, Long courseId);
+
+    List<CourseEnrollment> findByStudentIdAndStatusOrderByCourseIdAsc(Long studentId, String status);
 }

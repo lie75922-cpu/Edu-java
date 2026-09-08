@@ -1,7 +1,9 @@
 package com.smartlearning.graph.application;
 
+import com.smartlearning.auth.domain.CurrentUser;
 import com.smartlearning.common.exception.ConflictException;
 import com.smartlearning.common.exception.NotFoundException;
+import com.smartlearning.course.application.CourseAccessService;
 import com.smartlearning.graph.api.GraphApi;
 import com.smartlearning.graph.domain.GraphVersion;
 import com.smartlearning.graph.domain.KnowledgeRelation;
@@ -42,6 +44,7 @@ public class EvidenceImportService {
     private final KnowledgeRelationEvidenceConflictRepository conflictRepository;
     private final EvidenceResolutionResolver evidenceResolutionResolver;
     private final ObjectMapper objectMapper;
+    private final CourseAccessService courseAccessService;
 
     public EvidenceImportService(
             GraphVersionRepository graphVersionRepository,
@@ -51,7 +54,8 @@ public class EvidenceImportService {
             KnowledgeRelationEvidenceImportRunRepository importRunRepository,
             KnowledgeRelationEvidenceConflictRepository conflictRepository,
             EvidenceResolutionResolver evidenceResolutionResolver,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CourseAccessService courseAccessService
     ) {
         this.graphVersionRepository = graphVersionRepository;
         this.evidenceRepository = evidenceRepository;
@@ -61,6 +65,48 @@ public class EvidenceImportService {
         this.conflictRepository = conflictRepository;
         this.evidenceResolutionResolver = evidenceResolutionResolver;
         this.objectMapper = objectMapper;
+        this.courseAccessService = courseAccessService;
+    }
+
+    @Transactional(readOnly = true)
+    public GraphApi.EvidenceImportResult dryRunForTeaching(
+            long graphVersionId,
+            GraphApi.EvidenceImportRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return dryRun(graphVersionId, request, user.id());
+    }
+
+    @Transactional
+    public GraphApi.EvidenceImportResult applyForTeaching(
+            long graphVersionId,
+            GraphApi.EvidenceImportRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return apply(graphVersionId, request, user.id());
+    }
+
+    public List<GraphApi.EvidenceResponse> listEvidenceForTeaching(long courseId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(courseId, user);
+        return listEvidence(courseId);
+    }
+
+    public List<GraphApi.EvidenceResponse> listEvidenceForRelationForTeaching(
+            long graphVersionId,
+            long relationId,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return listEvidenceForRelation(graphVersionId, relationId);
+    }
+
+    public List<GraphApi.EvidenceConflictResponse> conflictsForTeaching(long importRunId, CurrentUser user) {
+        KnowledgeRelationEvidenceImportRun run = importRunRepository.findById(importRunId)
+                .orElseThrow(() -> new NotFoundException("evidence import run does not exist"));
+        courseAccessService.requireTeachingAccess(run.getCourseId(), user);
+        return conflicts(importRunId);
     }
 
     @Transactional(readOnly = true)
@@ -103,6 +149,13 @@ public class EvidenceImportService {
             throw new NotFoundException("evidence import run does not exist");
         }
         return conflictRepository.findByImportRunIdOrderByIdAsc(importRunId).stream().map(this::toConflictResponse).toList();
+    }
+
+    private GraphVersion requireTeachingVersion(long graphVersionId, CurrentUser user) {
+        GraphVersion version = graphVersionRepository.findById(graphVersionId)
+                .orElseThrow(() -> new NotFoundException("graph version does not exist"));
+        courseAccessService.requireTeachingAccess(version.getCourseId(), user);
+        return version;
     }
 
     private GraphApi.EvidenceImportResult execute(

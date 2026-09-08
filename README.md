@@ -2,7 +2,7 @@
 
 **基于知识图谱与个性化学习分析的 Java 智能教学平台**
 
-> 当前阶段：**V0.5 平台主链已完成；MODEL-0A / MODEL-0R / MODEL-1 实验已归档；下一阶段并行推进 MODEL-2 个体化信号终止 Gate 与 V0.6 教师课程权限/学情分析。**
+> 当前阶段：**V0.6 教师课程授权与学情分析已完成；MODEL-0A / MODEL-0R / MODEL-1 实验保持既有归档结论。**
 
 本项目按真实软件工程与研究流程推进：
 
@@ -129,6 +129,27 @@ immutable Raw Evidence
 - dry-run 零持久化副作用；
 - PUBLISHED / ARCHIVED relation 与 active Neo4j 图完全不被重写。
 
+### V0.6 — Teacher Course Authorization + Learning Analytics ✅
+
+先修复课程级权限，再开放教师分析：
+
+```text
+ACTIVE teacher-course assignment
+  -> assigned ACTIVE Course only
+  -> teaching content / Graph / Evidence governance
+  -> course overview / KnowledgePoint analytics
+  -> paginated student heatmap / high-error Question / student detail
+```
+
+已实现：
+
+- Flyway V006 `course_teacher_assignment` 和最小分析索引；
+- SYSTEM_ADMIN / TEACH_ADMIN 的 Course lifecycle 与教师分配；
+- 普通 TEACHER 仅访问 ACTIVE assigned Course，且既有 Knowledge、Exercise、Question、Graph、Evidence 间接资源均回溯课程后鉴权；
+- Platform Business Domain 教师课程列表、概览、OBSERVED / UNKNOWN mastery、分页 heatmap、高错题、学生作答 / mastery history / recommendation context；
+- 教师工作台和教师分配管理界面；
+- MySQL 8.4 Testcontainers 跨课程 403 演练与受控本地查询测量。
+
 ---
 
 ## 2. 数据与领域基线
@@ -252,11 +273,9 @@ MODEL-2 是强制停止 Gate，结果只允许：
 
 ---
 
-## 4. 下一工程阶段：V0.6 Teacher Analytics ▶
+## 4. V0.6 Teacher Analytics ✅
 
-V0.6 不等待 MODEL-2。
-
-独立安全审查发现，当前早期实现对 TEACHER 的课程权限过宽。V0.6 首先增加：
+V0.6 先消除了早期实现中 TEACHER 课程权限过宽的问题，并新增：
 
 ```text
 course_teacher_assignment
@@ -264,7 +283,7 @@ course_teacher_assignment
 
 并将普通 TEACHER 收紧到 **ACTIVE assigned Course only**。
 
-随后实现：
+随后已实现：
 
 - assigned course list；
 - course overview；
@@ -273,7 +292,7 @@ course_teacher_assignment
 - high-error questions；
 - student detail / recent answers / mastery history / recommendation context。
 
-同时回归修复既有 Question / Exercise / Knowledge / Graph / Evidence 管理入口的跨 Course 越权风险。
+既有 Question / Exercise / Knowledge / Graph / Evidence 管理入口已回归验证跨 Course 越权拒绝。
 
 Junyi Research Student / ProblemLog 不会作为教师端班级成员展示。
 
@@ -363,6 +382,7 @@ Edu-java/
 - `docs/ADR/0009-teacher-course-authorization-and-analytics-boundary.md`
 - `docs/V0.6_SCOPE_AND_ACCEPTANCE.md`
 - `docs/V0.6_AUTHORIZATION_MATRIX.md`
+- `docs/V0.6_IMPLEMENTATION.md`
 
 ---
 

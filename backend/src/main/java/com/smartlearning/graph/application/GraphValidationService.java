@@ -1,6 +1,8 @@
 package com.smartlearning.graph.application;
 
+import com.smartlearning.auth.domain.CurrentUser;
 import com.smartlearning.common.exception.NotFoundException;
+import com.smartlearning.course.application.CourseAccessService;
 import com.smartlearning.graph.api.GraphApi;
 import com.smartlearning.graph.domain.GraphValidationIssue;
 import com.smartlearning.graph.domain.GraphValidator;
@@ -35,6 +37,7 @@ public class GraphValidationService {
     private final GraphValidationIssueRepository issueRepository;
     private final GraphValidator graphValidator;
     private final ObjectMapper objectMapper;
+    private final CourseAccessService courseAccessService;
 
     public GraphValidationService(
             GraphVersionRepository graphVersionRepository,
@@ -43,7 +46,8 @@ public class GraphValidationService {
             ExerciseKnowledgeRepository exerciseKnowledgeRepository,
             GraphValidationIssueRepository issueRepository,
             GraphValidator graphValidator,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            CourseAccessService courseAccessService
     ) {
         this.graphVersionRepository = graphVersionRepository;
         this.relationRepository = relationRepository;
@@ -52,6 +56,20 @@ public class GraphValidationService {
         this.issueRepository = issueRepository;
         this.graphValidator = graphValidator;
         this.objectMapper = objectMapper;
+        this.courseAccessService = courseAccessService;
+    }
+
+    @Transactional
+    public ValidationOutcome validateForTeaching(long graphVersionId, CurrentUser user) {
+        GraphVersion version = requireVersion(graphVersionId);
+        courseAccessService.requireTeachingAccess(version.getCourseId(), user);
+        return validate(graphVersionId);
+    }
+
+    public List<GraphApi.GraphValidationIssueResponse> listIssuesForTeaching(long graphVersionId, CurrentUser user) {
+        GraphVersion version = requireVersion(graphVersionId);
+        courseAccessService.requireTeachingAccess(version.getCourseId(), user);
+        return listIssues(graphVersionId);
     }
 
     @Transactional

@@ -66,6 +66,57 @@ public class ExerciseUnitService {
                 .toList();
     }
 
+    public List<ExerciseApi.ExerciseUnitResponse> listForTeaching(long courseId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(courseId, user);
+        return listForAdmin(courseId);
+    }
+
+    @Transactional
+    public ExerciseApi.ExerciseUnitResponse createForTeaching(ExerciseApi.ExerciseUnitRequest request, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return create(request);
+    }
+
+    @Transactional
+    public ExerciseApi.ExerciseUnitResponse updateForTeaching(
+            long exerciseUnitId,
+            ExerciseApi.ExerciseUnitRequest request,
+            CurrentUser user
+    ) {
+        ExerciseUnit existing = requireExercise(exerciseUnitId);
+        courseAccessService.requireTeachingAccess(existing.getCourseId(), user);
+        courseAccessService.requireTeachingAccess(request.courseId(), user);
+        return update(exerciseUnitId, request);
+    }
+
+    @Transactional
+    public void disableForTeaching(long exerciseUnitId, CurrentUser user) {
+        courseAccessService.requireTeachingAccess(requireExercise(exerciseUnitId).getCourseId(), user);
+        disable(exerciseUnitId);
+    }
+
+    @Transactional
+    public ExerciseApi.ExerciseUnitResponse upsertMappingForTeaching(
+            long exerciseUnitId,
+            ExerciseApi.MappingRequest request,
+            CurrentUser user
+    ) {
+        ExerciseUnit exercise = requireExercise(exerciseUnitId);
+        KnowledgePoint point = knowledgeService.requirePoint(request.knowledgePointId());
+        courseAccessService.requireTeachingAccess(exercise.getCourseId(), user);
+        courseAccessService.requireTeachingAccess(point.getCourseId(), user);
+        return upsertMapping(exerciseUnitId, request);
+    }
+
+    @Transactional
+    public void removeMappingForTeaching(long exerciseUnitId, long knowledgePointId, CurrentUser user) {
+        ExerciseUnit exercise = requireExercise(exerciseUnitId);
+        KnowledgePoint point = knowledgeService.requirePoint(knowledgePointId);
+        courseAccessService.requireTeachingAccess(exercise.getCourseId(), user);
+        courseAccessService.requireTeachingAccess(point.getCourseId(), user);
+        removeMapping(exerciseUnitId, knowledgePointId);
+    }
+
     public ExerciseApi.ExerciseUnitResponse get(long exerciseUnitId, CurrentUser user) {
         ExerciseUnit exercise = requireExercise(exerciseUnitId);
         courseAccessService.requireCourseAccess(exercise.getCourseId(), user);

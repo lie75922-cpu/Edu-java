@@ -21,7 +21,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/questions")
-@PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'TEACHER')")
+@PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'TEACH_ADMIN', 'TEACHER')")
 public class AdminQuestionController {
 
     private final QuestionService questionService;
@@ -31,13 +31,19 @@ public class AdminQuestionController {
     }
 
     @GetMapping
-    public ApiResponse<List<QuestionApi.AdminQuestionResponse>> list(@RequestParam long exerciseUnitId) {
-        return ApiResponse.ok(questionService.listForAdmin(exerciseUnitId));
+    public ApiResponse<List<QuestionApi.AdminQuestionResponse>> list(
+            @RequestParam long exerciseUnitId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(questionService.listForTeaching(exerciseUnitId, CurrentUser.from(jwt)));
     }
 
     @GetMapping("/{questionId}")
-    public ApiResponse<QuestionApi.AdminQuestionResponse> get(@PathVariable long questionId) {
-        return ApiResponse.ok(questionService.getForAdmin(questionId));
+    public ApiResponse<QuestionApi.AdminQuestionResponse> get(
+            @PathVariable long questionId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(questionService.getForTeaching(questionId, CurrentUser.from(jwt)));
     }
 
     @PostMapping
@@ -45,20 +51,21 @@ public class AdminQuestionController {
             @Valid @RequestBody QuestionApi.QuestionRequest request,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        return ApiResponse.ok(questionService.create(request, CurrentUser.from(jwt).id()));
+        return ApiResponse.ok(questionService.createForTeaching(request, CurrentUser.from(jwt)));
     }
 
     @PutMapping("/{questionId}")
     public ApiResponse<QuestionApi.AdminQuestionResponse> update(
             @PathVariable long questionId,
-            @Valid @RequestBody QuestionApi.QuestionRequest request
+            @Valid @RequestBody QuestionApi.QuestionRequest request,
+            @AuthenticationPrincipal Jwt jwt
     ) {
-        return ApiResponse.ok(questionService.update(questionId, request));
+        return ApiResponse.ok(questionService.updateForTeaching(questionId, request, CurrentUser.from(jwt)));
     }
 
     @DeleteMapping("/{questionId}")
-    public ApiResponse<Void> disable(@PathVariable long questionId) {
-        questionService.disable(questionId);
+    public ApiResponse<Void> disable(@PathVariable long questionId, @AuthenticationPrincipal Jwt jwt) {
+        questionService.disableForTeaching(questionId, CurrentUser.from(jwt));
         return ApiResponse.ok(null);
     }
 }

@@ -25,8 +25,8 @@ public class CourseController {
     }
 
     @GetMapping
-    public ApiResponse<List<CourseApi.CourseResponse>> list() {
-        return ApiResponse.ok(courseService.listActiveCourses());
+    public ApiResponse<List<CourseApi.CourseResponse>> list(@AuthenticationPrincipal Jwt jwt) {
+        return ApiResponse.ok(courseService.listAccessibleCourses(CurrentUser.from(jwt)));
     }
 
     @GetMapping("/{courseId}")

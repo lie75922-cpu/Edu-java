@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/courses")
-@PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'TEACHER')")
+@PreAuthorize("hasAnyRole('SYSTEM_ADMIN', 'TEACH_ADMIN')")
 public class AdminCourseController {
 
     private final CourseService courseService;

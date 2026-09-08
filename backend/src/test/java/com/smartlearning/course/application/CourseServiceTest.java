@@ -4,6 +4,7 @@ import com.smartlearning.course.api.CourseApi;
 import com.smartlearning.course.domain.Course;
 import com.smartlearning.course.infrastructure.persistence.CourseEnrollmentRepository;
 import com.smartlearning.course.infrastructure.persistence.CourseRepository;
+import com.smartlearning.course.infrastructure.persistence.CourseTeacherAssignmentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -25,6 +26,8 @@ class CourseServiceTest {
     private CourseEnrollmentRepository enrollmentRepository;
     @Mock
     private CourseAccessService courseAccessService;
+    @Mock
+    private CourseTeacherAssignmentRepository assignmentRepository;
 
     @Test
     void courseCreateUpdateAndDisableFollowSoftDeleteContract() {
@@ -34,7 +37,7 @@ class CourseServiceTest {
             ReflectionTestUtils.setField(course, "id", 7L);
             return course;
         });
-        CourseService service = new CourseService(courseRepository, enrollmentRepository, courseAccessService);
+        CourseService service = new CourseService(courseRepository, enrollmentRepository, courseAccessService, assignmentRepository);
 
         CourseApi.CourseResponse created = service.create(new CourseApi.CourseRequest("MATH-1", "Math", "Initial", "ACTIVE"));
         when(courseRepository.findById(7L)).thenReturn(Optional.of(course("MATH-1", "Math", "Initial", "ACTIVE")));
