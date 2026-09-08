@@ -3,15 +3,15 @@ import { expect, test } from '@playwright/test'
 const apiBase = (process.env.API_BASE_URL || 'http://localhost:8080').replace(/\/$/, '')
 const demoPassword = 'LocalDemoOnly!2026'
 
-async function login(page, username) {
+async function login(page, username, heading) {
   await page.goto('/')
   await page.getByLabel('用户名').fill(username)
   await page.getByLabel('密码').fill(demoPassword)
-  await page.getByRole('button', { name: '登录', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '已授权课程' })).toBeVisible()
+  await page.getByRole('button', { name: '登录平台', exact: true }).click()
+  await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible()
 }
 
-async function courseFor(username) {
+async function courseFor(username, code) {
   const response = await fetch(`${apiBase}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -24,47 +24,56 @@ async function courseFor(username) {
     headers: { Authorization: `Bearer ${token}` }
   })
   expect(coursesResponse.status).toBe(200)
-  return (await coursesResponse.json()).data[0]
+  const courses = (await coursesResponse.json()).data
+  return courses.find(course => course.courseCode === code)
 }
 
-test('student, teacher, authorization, and admin release journeys use the real full stack', async ({ page }) => {
-  const courseA = await courseFor('demo-student-alice')
-  const courseB = await courseFor('demo-student-dave')
+test('中文离散数学学生、教师、管理员真实全栈流程', async ({ page }) => {
+  const courseA = await courseFor('demo-student-alice', 'DM-101')
+  const courseB = await courseFor('demo-student-dave', 'DM-GRAPH-201')
+  expect(courseA).toBeTruthy()
+  expect(courseB).toBeTruthy()
 
-  await login(page, 'demo-student-alice')
-  await page.getByRole('button', { name: '进入课程', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Demo Algebra Foundations' })).toBeVisible()
-  await page.getByRole('button', { name: '开始答题', exact: true }).first().click()
-  await expect(page.getByRole('heading', { name: '题目' })).toBeVisible()
-  await page.locator('input[type="radio"]').first().check()
+  // 学生：课程 -> 练习 -> 个性化推荐 -> 学习路径 -> 知识图谱。
+  await login(page, 'demo-student-alice', '首页')
+  await expect(page.getByText('离散数学智慧教学平台')).toBeVisible()
+  await page.getByRole('button', { name: '课程学习', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '离散数学', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: /第一章 数理逻辑/ })).toBeVisible()
+
+  const propositionRow = page.locator('.knowledge-row').filter({ hasText: '命题与逻辑联结词' })
+  await expect(propositionRow).toBeVisible()
+  await propositionRow.getByRole('button', { name: '开始练习', exact: true }).click()
+  await expect(page.getByText('设 p 为真、q 为假')).toBeVisible()
+  await page.locator('.answer-option').first().click()
   await page.getByRole('button', { name: '提交答案', exact: true }).click()
-  await expect(page.getByRole('heading', { name: /回答正确|回答不正确/ })).toBeVisible()
-  await page.getByRole('button', { name: '我的学习', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '我的知识掌握与学习建议' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: '我的知识掌握情况' })).toBeVisible()
-  await page.getByRole('button', { name: '生成推荐快照', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '推荐练习与原因' })).toBeVisible()
-  const target = await page.evaluate(async courseId => {
-    const session = JSON.parse(localStorage.getItem('edu-session'))
-    const response = await fetch(`/api/v1/courses/${courseId}/knowledge-points`, {
-      headers: { Authorization: `Bearer ${session.accessToken}` }
-    })
-    const payload = await response.json()
-    return payload.data.find(point => point.knowledgeCode === 'DEMO-ALG-APPLICATION')?.id
-  }, courseA.id)
-  expect(target).toBeTruthy()
-  await page.getByLabel('目标 KnowledgePoint ID').fill(String(target))
-  await page.getByRole('button', { name: '查询学习路径', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '目标知识点学习路径' })).toBeVisible()
+  await expect(page.getByText(/回答正确|还需要再巩固/)).toBeVisible()
+  await page.getByRole('button', { name: '完成本次练习', exact: true }).click()
 
-  await page.getByRole('button', { name: '退出', exact: true }).click()
-  await login(page, 'demo-teacher-a')
-  await page.getByRole('button', { name: '教师工作台', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '教师课程工作台' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'KnowledgePoint 学情' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'Student × KnowledgePoint 掌握度热力表' })).toBeVisible()
-  await page.getByRole('button', { name: /Demo Student/ }).first().click()
-  await expect(page.getByText('课程学情')).toBeVisible()
+  await page.getByRole('button', { name: '个性化学习', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '我的学习建议与路径', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '更新学习建议', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '下一步学什么', exact: true })).toBeVisible()
+  const targetSelect = page.locator('.path-controls select')
+  await targetSelect.selectOption({ label: '命题逻辑推理理论' })
+  await page.getByRole('button', { name: '生成学习路径', exact: true }).click()
+  await expect(page.locator('.learning-path .path-step').first()).toBeVisible()
+
+  await page.getByRole('button', { name: '知识图谱', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '离散数学知识地图', exact: true })).toBeVisible()
+  await expect(page.getByText('命题与逻辑联结词', { exact: true }).first()).toBeVisible()
+
+  // 教师：课程学情 -> 知识点 -> 热力图 -> 学生详情；跨课程仍然403。
+  await page.getByRole('button', { name: '退出登录', exact: true }).click()
+  await login(page, 'demo-teacher-a', '教师工作台')
+  await expect(page.getByRole('heading', { name: '离散数学', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '班级知识掌握概览', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '学生 × 知识点掌握情况', exact: true })).toBeVisible()
+  const firstStudent = page.locator('.heatmap-wrap tbody .text-button.strong').first()
+  await expect(firstStudent).toBeVisible()
+  await firstStudent.click()
+  await expect(page.getByRole('heading', { name: '学生学情详情', exact: true })).toBeVisible()
+
   const denial = await page.evaluate(async courseId => {
     const session = JSON.parse(localStorage.getItem('edu-session'))
     const response = await fetch(`/api/v1/teacher/courses/${courseId}/analytics/overview`, {
@@ -75,17 +84,13 @@ test('student, teacher, authorization, and admin release journeys use the real f
   }, courseB.id)
   expect(denial).toEqual({ status: 403, code: 'FORBIDDEN' })
 
-  await page.getByRole('button', { name: '退出', exact: true }).click()
-  await login(page, 'demo-admin')
-  await page.getByRole('button', { name: '管理', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '教师课程分配' })).toBeVisible()
-  await expect(page.getByRole('heading', { name: 'V0.3 Knowledge Relation Governance' })).toBeVisible()
-  const courseCard = page.locator('section.card').filter({ has: page.getByRole('heading', { name: '课程管理' }) })
-  await courseCard.getByLabel('课程 ID').fill(String(courseA.id))
-  await courseCard.getByRole('button', { name: '加载分配', exact: true }).click()
-  await expect(courseCard.getByText('Teacher A')).toBeVisible()
-  const graphCard = page.locator('section.card').filter({ has: page.getByRole('heading', { name: 'V0.3 Knowledge Relation Governance' }) })
-  await graphCard.getByLabel('课程 ID').fill(String(courseA.id))
-  await graphCard.getByRole('button', { name: '加载 GraphVersion 与 Evidence', exact: true }).click()
-  await expect(graphCard.getByRole('heading', { name: 'GraphVersion', exact: true })).toBeVisible()
+  // 管理员：模块化管理工作台 -> 教师授权 -> 知识图谱治理。
+  await page.getByRole('button', { name: '退出登录', exact: true }).click()
+  await login(page, 'demo-admin', '管理工作台')
+  await expect(page.getByRole('heading', { name: '教学平台管理', exact: true })).toBeVisible()
+  await expect(page.getByText('当前课程知识点')).toBeVisible()
+  await page.getByRole('button', { name: '教师授权', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '分配教师到课程', exact: true })).toBeVisible()
+  await page.getByRole('button', { name: '知识图谱治理', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '图谱版本', exact: true })).toBeVisible()
 })
