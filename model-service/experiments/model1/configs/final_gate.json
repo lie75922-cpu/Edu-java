@@ -1,0 +1,22 @@
+{
+  "allowed_statuses": [
+    "GO_FINE_CONCEPT_GRAPH_MODELS",
+    "CONDITIONAL_GO",
+    "NO_GO_CONCEPT_LAYER"
+  ],
+  "concept_gate": {
+    "require_strict_test_auc_delta_over_validation_selected_baseline": true,
+    "require_paired_bootstrap_lower_bound_above_zero": true,
+    "minimum_median_concept_standard_deviation": 0.01,
+    "maximum_mean_pairwise_cosine": 0.995,
+    "minimum_train_coverage_fraction": 0.95,
+    "maximum_constant_concept_fraction": 0.05,
+    "require_no_nonfinite_mastery_values": true,
+    "require_topic_aggregation_stable": true
+  },
+  "interpretation": {
+    "go": "The fine ModelConcept NCDM improves over the validation-selected non-personalized baseline with paired-bootstrap support, clears all pre-registered diagnosis sanity checks, and may authorize a separately controlled graph-model stage.",
+    "conditional": "Prediction improves but a declared non-terminal diagnosis-readiness issue requires an additional authorized diagnostic review; it never authorizes production integration.",
+    "no_go": "The fine ModelConcept NCDM does not clear every Concept Gate condition. Stop without stacking graph models."
+  }
+}

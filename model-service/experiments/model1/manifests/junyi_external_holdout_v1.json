@@ -1,0 +1,137 @@
+{
+  "chronological_partitions": {
+    "future_leakage": "Train labels only fit models and rate estimates; validation selects; final test is read once after configuration is frozen.",
+    "interaction_counts": {
+      "test": 260693,
+      "train": 768280,
+      "valid": 254748
+    },
+    "materialisation": {
+      "selected_scope_rows": 1283721,
+      "sequence_length_maximum": 15798,
+      "sequence_length_median": 79.0,
+      "sequence_length_minimum": 20,
+      "valid_binary_label_rows": 1283721
+    },
+    "ordering": "time_done ascending with original ProblemLog source row as stable tie-breaker.",
+    "split": "For every retained sequence (all have at least 20 rows): floor(0.60*n) train/history, floor(0.20*n) validation, remaining final test."
+  },
+  "concept_catalog": {
+    "candidate_model_concept_count": 624,
+    "path": "model-service/experiments/model1/manifests/model_concept_catalog_v1.json",
+    "topic_count": 40
+  },
+  "dataset_name": "JUNYI_EXTERNAL_HOLDOUT_V1",
+  "derived_local_artifacts": {
+    "files": [
+      "frozen_membership.json",
+      "student_index_map.json",
+      "exercise_index_map.json",
+      "topic_index_map.json",
+      "q_c40_topic.csv",
+      "q_fine_exercise.csv",
+      "interactions_train.csv",
+      "interactions_valid.csv",
+      "interactions_test.csv"
+    ],
+    "root": "model-service/experiments/model1/data/junyi_external_holdout_v1",
+    "tracked_by_git": false
+  },
+  "product_boundaries": {
+    "java_mastery_provider_changed": false,
+    "published_graph_changed": false,
+    "recommendation_changed": false,
+    "rule_mastery_changed": false
+  },
+  "selection": {
+    "candidate_students_with_any_eligible_timestamp": 237277,
+    "correct_label_used": false,
+    "eligible_external_students": 90997,
+    "fields_used": [
+      "user_id",
+      "exercise",
+      "time_done"
+    ],
+    "minimum_eligible_chronological_interactions": 20,
+    "policy": {
+      "allocation": "Proportional by eligible-student stratum, floor quotas followed by descending fractional remainder and stable stratum order.",
+      "correct_label_used": false,
+      "eligible_exercise_scope": "Observed and one-Topic Q-eligible Exercises from the frozen original Medium materialization.",
+      "fields_used": [
+        "user_id",
+        "exercise",
+        "time_done"
+      ],
+      "replacement": "No replacement or post-result substitution.",
+      "sequence_length_strata": [
+        "20-49",
+        "50-99",
+        "100-199",
+        "200-499",
+        "500-plus"
+      ],
+      "within_stratum_order": "Sort anonymous external IDs, then deterministic shuffle using seed plus stratum index."
+    },
+    "seed": 20260908,
+    "source_scan": {
+      "current_eligible_exercise_scope_rows": 25801342,
+      "external_scope_rows_with_empty_student": 0,
+      "external_scope_rows_with_invalid_timestamp": 0,
+      "raw_problem_log_rows_scanned": 25925992,
+      "rows_excluded_for_original_medium_membership": 1397963
+    },
+    "strata": [
+      {
+        "eligible_students": 32475,
+        "maximum_sequence_length": 49,
+        "minimum_sequence_length": 20,
+        "selected_students": 1784,
+        "stratum": "20-49"
+      },
+      {
+        "eligible_students": 19005,
+        "maximum_sequence_length": 99,
+        "minimum_sequence_length": 50,
+        "selected_students": 1044,
+        "stratum": "50-99"
+      },
+      {
+        "eligible_students": 14449,
+        "maximum_sequence_length": 199,
+        "minimum_sequence_length": 100,
+        "selected_students": 794,
+        "stratum": "100-199"
+      },
+      {
+        "eligible_students": 13730,
+        "maximum_sequence_length": 499,
+        "minimum_sequence_length": 200,
+        "selected_students": 755,
+        "stratum": "200-499"
+      },
+      {
+        "eligible_students": 11338,
+        "maximum_sequence_length": 21910,
+        "minimum_sequence_length": 500,
+        "selected_students": 623,
+        "stratum": "500-plus"
+      }
+    ],
+    "target_students": 5000
+  },
+  "source_boundary": {
+    "original_medium_membership": "data-pipeline/.data/generated/medium/split_membership.json",
+    "parent_manifest": "data-pipeline/manifests/junyi_mid_v1.json",
+    "raw_inputs": "Supplied explicitly at execution time; raw source rows are never tracked."
+  },
+  "status": "FROZEN_BEFORE_MODEL_TRAINING",
+  "student_membership": {
+    "local_member_list_path": "model-service/experiments/model1/data/junyi_external_holdout_v1/frozen_membership.json",
+    "original_medium_overlap": 0,
+    "original_medium_student_count": 10000,
+    "selected_before_model_training": true,
+    "student_count": 5000,
+    "tracked_by_git": false
+  },
+  "version": "1.0.0-model1"
+}

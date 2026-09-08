@@ -1,0 +1,59 @@
+{
+  "dataset_name": "JUNYI_EXTERNAL_HOLDOUT_V1",
+  "seed": 20260908,
+  "device_preference": "cuda:0",
+  "data_protocol": {
+    "split": "Per-student chronological 60/20/20 with time_done ascending and original source-row tie-breaker.",
+    "future_leakage": "Only train/history labels fit NCDM and rate baselines. Validation selects all candidates and the comparator before the final test rows are opened.",
+    "final_test_policy": "One final evaluation after the fixed configuration and validation selections; an ignored ledger rejects a repeated candidate evaluation."
+  },
+  "baselines": {
+    "global": "Train/history global correct rate only.",
+    "exercise": "Train/history Exercise historical correct rate with global fallback for an Exercise absent from train/history.",
+    "topic": "Train/history Topic historical correct rate with global fallback for a Topic absent from train/history."
+  },
+  "ncdm": {
+    "reference_component": "InsCD NCDM / Default extractor / NCD_IF equations through the archived split-safe adapter.",
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "learning_rate": 0.002,
+    "weight_decay": 0.0,
+    "batch_size": 4096,
+    "max_epochs": 20,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch",
+    "comparison_boundary": "C40_TOPIC and C_FINE_EXERCISE use this same architecture and optimizer schedule. Only Q-matrix and ModelConcept cardinality differ.",
+    "onehot_q_execution": "Algebraically equivalent first-layer selection for the sole nonzero Q input; it preserves NCDM parameters and interaction equations while avoiding known-zero dense multiplications."
+  },
+  "candidates": {
+    "C40_TOPIC": {
+      "q_matrix": "q_c40_topic.csv",
+      "concept_definition": "Eligible Exercise maps to exactly one frozen business Topic."
+    },
+    "C_FINE_EXERCISE": {
+      "q_matrix": "q_fine_exercise.csv",
+      "concept_definition": "Eligible Exercise maps to exactly one sequential ModelConcept; Q is identity-style."
+    }
+  },
+  "bootstrap": {
+    "resamples": 500,
+    "confidence_level": 0.95,
+    "seed_offset": 701,
+    "method": "Paired nonparametric bootstrap over final-test interactions; report-only and never used for model selection."
+  },
+  "mastery_sanity": {
+    "anonymous_case_count": 20,
+    "pairwise_cosine_sample_size": 256,
+    "minimum_median_concept_standard_deviation": 0.01,
+    "maximum_mean_pairwise_cosine": 0.995,
+    "constant_column_standard_deviation_tolerance": 1e-12,
+    "maximum_constant_concept_fraction": 0.05,
+    "minimum_train_coverage_fraction": 0.95,
+    "topic_aggregation_minimum_median_standard_deviation": 0.01,
+    "topic_aggregation_maximum_mean_pairwise_cosine": 0.995
+  },
+  "doa": {
+    "definition": "Exercise-conditioned pairwise future-response agreement: later correct versus later incorrect students on the same Exercise are ordered by the relevant Q-selected mastery fitted from train/history; ties score one half.",
+    "test_labels_used_only_for_scoring": true
+  }
+}

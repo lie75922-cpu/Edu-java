@@ -1,0 +1,3794 @@
+{
+  "candidate_model_concept_count": 624,
+  "catalog_name": "JUNYI_MODEL_CONCEPT_CATALOG_V1",
+  "model_concept_definition": "One current Q-eligible Exercise external ID maps to one sequential algorithm-layer ModelConcept. This does not change business KnowledgePoint or Question identities.",
+  "model_concepts": [
+    {
+      "exercise_external_id": "absolute_value",
+      "model_concept_id": 0,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "absolute_value_add_sub",
+      "model_concept_id": 1,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "absolute_value_add_sub_properties",
+      "model_concept_id": 2,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "absolute_value_equations",
+      "model_concept_id": 3,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "absolute_value_of_complex_numbers",
+      "model_concept_id": 4,
+      "topic": "complex-numbers",
+      "topic_id": 8
+    },
+    {
+      "exercise_external_id": "absolute_values_meaning",
+      "model_concept_id": 5,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "add_subtract_negative_fractions",
+      "model_concept_id": 6,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_centimeter_and_millimeter",
+      "model_concept_id": 7,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_complex_numbers",
+      "model_concept_id": 8,
+      "topic": "complex-numbers",
+      "topic_id": 8
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_decimals_word_problems",
+      "model_concept_id": 9,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_fractions",
+      "model_concept_id": 10,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_negative_numbers",
+      "model_concept_id": 11,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_polynomials",
+      "model_concept_id": 12,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_radicals",
+      "model_concept_id": 13,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "adding_and_subtracting_within_20",
+      "model_concept_id": 14,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "adding_decimals",
+      "model_concept_id": 15,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "adding_decimals_0.5",
+      "model_concept_id": 16,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "adding_decimals_2",
+      "model_concept_id": 17,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "adding_fractions",
+      "model_concept_id": 18,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "adding_fractions_with_common_denominators",
+      "model_concept_id": 19,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "adding_negative_numbers",
+      "model_concept_id": 20,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "adding_subtracting_carry_2",
+      "model_concept_id": 21,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "adding_subtracting_carry_3",
+      "model_concept_id": 22,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "adding_subtracting_mixed_numbers_0.5",
+      "model_concept_id": 23,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "adding_subtracting_mixed_numbers_1",
+      "model_concept_id": 24,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "adding_subtracting_no_carry_3",
+      "model_concept_id": 25,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "adding_vectors",
+      "model_concept_id": 26,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "addition_1",
+      "model_concept_id": 27,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "addition_2",
+      "model_concept_id": 28,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "addition_3",
+      "model_concept_id": 29,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "addition_4",
+      "model_concept_id": 30,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "addition_of_vary_denominator_fraction",
+      "model_concept_id": 31,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "addition_two_numbers",
+      "model_concept_id": 32,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "addition_within_20",
+      "model_concept_id": 33,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "advanced_fraction",
+      "model_concept_id": 34,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "age_problems",
+      "model_concept_id": 35,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "age_problems_new",
+      "model_concept_id": 36,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "age_word_problems",
+      "model_concept_id": 37,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "alternate_exterior_angles",
+      "model_concept_id": 38,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "alternate_interior_angles",
+      "model_concept_id": 39,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "alternate_interior_angles_2",
+      "model_concept_id": 40,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "altitude_and_hypotenuse",
+      "model_concept_id": 41,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "angle_addition_postulate",
+      "model_concept_id": 42,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "angle_bisector_theorem",
+      "model_concept_id": 43,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "angle_of_osculation",
+      "model_concept_id": 44,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "angle_rotation",
+      "model_concept_id": 45,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "angle_types",
+      "model_concept_id": 46,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "angles_1",
+      "model_concept_id": 47,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "angles_2",
+      "model_concept_id": 48,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "angles_of_a_polygon",
+      "model_concept_id": 49,
+      "topic": "quadrilaterals-and-polygons",
+      "topic_id": 23
+    },
+    {
+      "exercise_external_id": "application_add_large_nums",
+      "model_concept_id": 50,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "application_division_large_nums",
+      "model_concept_id": 51,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "application_of_linear_equations_1",
+      "model_concept_id": 52,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "application_of_scientific_notation",
+      "model_concept_id": 53,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "application_of_scientific_notation_2",
+      "model_concept_id": 54,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "applications_of_index",
+      "model_concept_id": 55,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "approximate_number",
+      "model_concept_id": 56,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "arc_length_and_circular_sector_area",
+      "model_concept_id": 57,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "area_1",
+      "model_concept_id": 58,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "area_of_a_circle",
+      "model_concept_id": 59,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "area_of_a_circle2",
+      "model_concept_id": 60,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "area_of_parallelograms",
+      "model_concept_id": 61,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "area_of_squares_and_rectangles",
+      "model_concept_id": 62,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "area_of_triangles_1",
+      "model_concept_id": 63,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "area_of_triangular_shapes",
+      "model_concept_id": 64,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "area_relationship_larger_narrow_graph",
+      "model_concept_id": 65,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "area_relationship_larger_narrow_num",
+      "model_concept_id": 66,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "area_unit_cm_square",
+      "model_concept_id": 67,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "areas_of_circles_and_sectors",
+      "model_concept_id": 68,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "areas_of_kites",
+      "model_concept_id": 69,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "areas_of_rhombi",
+      "model_concept_id": 70,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "areas_of_trapezoids",
+      "model_concept_id": 71,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "areas_of_trapezoids_rhombi_and_kites",
+      "model_concept_id": 72,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "arithmetic_means",
+      "model_concept_id": 73,
+      "topic": "sequence_and_series",
+      "topic_id": 29
+    },
+    {
+      "exercise_external_id": "arithmetic_sequences_3",
+      "model_concept_id": 74,
+      "topic": "sequence_and_series",
+      "topic_id": 29
+    },
+    {
+      "exercise_external_id": "arithmetic_series",
+      "model_concept_id": 75,
+      "topic": "sequence_and_series",
+      "topic_id": 29
+    },
+    {
+      "exercise_external_id": "arithmetic_series_1",
+      "model_concept_id": 76,
+      "topic": "sequence_and_series",
+      "topic_id": 29
+    },
+    {
+      "exercise_external_id": "arithmetic_word_problems",
+      "model_concept_id": 77,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "arithmetic_word_problems_1",
+      "model_concept_id": 78,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "arithmetic_word_problems_2",
+      "model_concept_id": 79,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "average_word_problems",
+      "model_concept_id": 80,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "axis_of_symmetry",
+      "model_concept_id": 81,
+      "topic": "transformations",
+      "topic_id": 35
+    },
+    {
+      "exercise_external_id": "basic_concept_of_circumcenter",
+      "model_concept_id": 82,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "basic_concept_of_congruent_triangles",
+      "model_concept_id": 83,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "basic_concept_of_similar_shapes",
+      "model_concept_id": 84,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "basic_concepts_of_probability_1",
+      "model_concept_id": 85,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "basic_concepts_of_probability_2",
+      "model_concept_id": 86,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "calculations_using_similar_shapes",
+      "model_concept_id": 87,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "chain_rule_1",
+      "model_concept_id": 88,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "chickens_and_rabbits_questions",
+      "model_concept_id": 89,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "circles_and_arcs",
+      "model_concept_id": 90,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "circumferential_angle",
+      "model_concept_id": 91,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "combinations_of_polynomials",
+      "model_concept_id": 92,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "combining_like_terms_1",
+      "model_concept_id": 93,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "combining_like_terms_2",
+      "model_concept_id": 94,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "combining_like_terms_with_two_variables",
+      "model_concept_id": 95,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "common_factor",
+      "model_concept_id": 96,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "common_form_for_life",
+      "model_concept_id": 97,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "comparing_absolute_values",
+      "model_concept_id": 98,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "comparing_fractions_1",
+      "model_concept_id": 99,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "comparing_fractions_2",
+      "model_concept_id": 100,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "comparing_improper_fractions_and_mixed_numbers",
+      "model_concept_id": 101,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "comparison_between_numbers_within_ten",
+      "model_concept_id": 102,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "comparison_between_numbers_within_ten_0.5",
+      "model_concept_id": 103,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "complementary_and_supplementary_angles",
+      "model_concept_id": 104,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "complementary_angles",
+      "model_concept_id": 105,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "completing_the_square_1",
+      "model_concept_id": 106,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "completing_the_square_2",
+      "model_concept_id": 107,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "composite_numbers",
+      "model_concept_id": 108,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "compound_inequalities",
+      "model_concept_id": 109,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "computing_law_with_power",
+      "model_concept_id": 110,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "conditional_statements_2",
+      "model_concept_id": 111,
+      "topic": "logical-reasoning",
+      "topic_id": 16
+    },
+    {
+      "exercise_external_id": "cone_surface_arc",
+      "model_concept_id": 112,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "congruency_postulates",
+      "model_concept_id": 113,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "congruent_angles",
+      "model_concept_id": 114,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "congruent_segments",
+      "model_concept_id": 115,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "congruent_triangles_1",
+      "model_concept_id": 116,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "congruent_triangles_2",
+      "model_concept_id": 117,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "constant_function_and_a_fuction",
+      "model_concept_id": 118,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "converse_inverse_and_contrapositive",
+      "model_concept_id": 119,
+      "topic": "logical-reasoning",
+      "topic_id": 16
+    },
+    {
+      "exercise_external_id": "converting_between_slope_intercept_and_standard_form",
+      "model_concept_id": 120,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "converting_decimals_to_fractions_1",
+      "model_concept_id": 121,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "converting_decimals_to_fractions_2",
+      "model_concept_id": 122,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "converting_decimals_to_percents",
+      "model_concept_id": 123,
+      "topic": "ratio-percentage",
+      "topic_id": 27
+    },
+    {
+      "exercise_external_id": "converting_fractions_to_decimals",
+      "model_concept_id": 124,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "converting_mixed_numbers_and_improper_fractions",
+      "model_concept_id": 125,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "converting_percents_to_decimals",
+      "model_concept_id": 126,
+      "topic": "ratio-percentage",
+      "topic_id": 27
+    },
+    {
+      "exercise_external_id": "converting_repeating_decimals_to_fractions_1",
+      "model_concept_id": 127,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "converting_repeating_decimals_to_fractions_2",
+      "model_concept_id": 128,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "coordination_bctest_cap",
+      "model_concept_id": 129,
+      "topic": "biology",
+      "topic_id": 5
+    },
+    {
+      "exercise_external_id": "corresponding_angles",
+      "model_concept_id": 130,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "corresponding_angles_2",
+      "model_concept_id": 131,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "count_number_to_100",
+      "model_concept_id": 132,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "count_number_to_20_2",
+      "model_concept_id": 133,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "count_numbers",
+      "model_concept_id": 134,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "count_one_by_one_1",
+      "model_concept_id": 135,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "counting_1",
+      "model_concept_id": 136,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "counting_2",
+      "model_concept_id": 137,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "creating_bar_charts_1",
+      "model_concept_id": 138,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "creating_box_and_whisker_plots",
+      "model_concept_id": 139,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "cross_multiplication_advanced",
+      "model_concept_id": 140,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "cube_roots",
+      "model_concept_id": 141,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "date_and_weekday",
+      "model_concept_id": 142,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "decimal_multiplier_calculation",
+      "model_concept_id": 143,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "decimals_distributive_law_of_multiplication",
+      "model_concept_id": 144,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "decimals_on_the_number_line_1",
+      "model_concept_id": 145,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "decimals_on_the_number_line_2",
+      "model_concept_id": 146,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "define_one_function",
+      "model_concept_id": 147,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "definition_opposite_number",
+      "model_concept_id": 148,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "degrees_to_radians",
+      "model_concept_id": 149,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "denominator_comparison",
+      "model_concept_id": 150,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "dependent_probability",
+      "model_concept_id": 151,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "derivative_intuition",
+      "model_concept_id": 152,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "derivatives_1",
+      "model_concept_id": 153,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "direct_and_inverse_variation",
+      "model_concept_id": 154,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "discount_tax_and_tip_word_problems",
+      "model_concept_id": 155,
+      "topic": "ratio-percentage",
+      "topic_id": 27
+    },
+    {
+      "exercise_external_id": "distance_between_point_and_line",
+      "model_concept_id": 156,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "distance_formula",
+      "model_concept_id": 157,
+      "topic": "pythagorean-theorem",
+      "topic_id": 22
+    },
+    {
+      "exercise_external_id": "distributive_property",
+      "model_concept_id": 158,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "dividing_complex_numbers",
+      "model_concept_id": 159,
+      "topic": "complex-numbers",
+      "topic_id": 8
+    },
+    {
+      "exercise_external_id": "dividing_decimals",
+      "model_concept_id": 160,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "dividing_decimals_0.5",
+      "model_concept_id": 161,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "dividing_decimals_1",
+      "model_concept_id": 162,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "dividing_decimals_2",
+      "model_concept_id": 163,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "dividing_fractions",
+      "model_concept_id": 164,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "dividing_fractions_0.5",
+      "model_concept_id": 165,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "dividing_fractions_word_problems",
+      "model_concept_id": 166,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "dividing_polynomials",
+      "model_concept_id": 167,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "dividing_polynomials_1",
+      "model_concept_id": 168,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "dividing_polynomials_2",
+      "model_concept_id": 169,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "dividing_polynomials_3",
+      "model_concept_id": 170,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "dividing_polynomials_4",
+      "model_concept_id": 171,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "dividing_polynomials_5",
+      "model_concept_id": 172,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "dividing_polynomials_6",
+      "model_concept_id": 173,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "divisibility",
+      "model_concept_id": 174,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "divisibility_0.5",
+      "model_concept_id": 175,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "divisibility_intuition",
+      "model_concept_id": 176,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "divisibility_tests",
+      "model_concept_id": 177,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "division_0.5",
+      "model_concept_id": 178,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_0.9",
+      "model_concept_id": 179,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_1",
+      "model_concept_id": 180,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_1.4",
+      "model_concept_id": 181,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_1.5",
+      "model_concept_id": 182,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_2",
+      "model_concept_id": 183,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_2.9",
+      "model_concept_id": 184,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_3",
+      "model_concept_id": 185,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_4",
+      "model_concept_id": 186,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_word_problems_1",
+      "model_concept_id": 187,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "division_word_problems_2",
+      "model_concept_id": 188,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "domain_and_range_0.5",
+      "model_concept_id": 189,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "domain_of_a_function",
+      "model_concept_id": 190,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "empirical_rule",
+      "model_concept_id": 191,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "equation_of_a_circle_1",
+      "model_concept_id": 192,
+      "topic": "conic-sections",
+      "topic_id": 10
+    },
+    {
+      "exercise_external_id": "equation_of_a_circle_2",
+      "model_concept_id": 193,
+      "topic": "conic-sections",
+      "topic_id": 10
+    },
+    {
+      "exercise_external_id": "equation_of_a_line",
+      "model_concept_id": 194,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "equation_of_an_ellipse",
+      "model_concept_id": 195,
+      "topic": "conic-sections",
+      "topic_id": 10
+    },
+    {
+      "exercise_external_id": "equivalent_fractions",
+      "model_concept_id": 196,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "equivalent_fractions_2",
+      "model_concept_id": 197,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "equivalent_fractions_conversion",
+      "model_concept_id": 198,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "estimation_three-digit_add_sub",
+      "model_concept_id": 199,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "estimation_with_decimals",
+      "model_concept_id": 200,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "eval_expressions_w_two_var",
+      "model_concept_id": 201,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "evaluating_expressions_1",
+      "model_concept_id": 202,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "evaluating_expressions_2",
+      "model_concept_id": 203,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "even_and_odd_functions",
+      "model_concept_id": 204,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "exploring_angle_pairs_1",
+      "model_concept_id": 205,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "exploring_mean_and_median",
+      "model_concept_id": 206,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "exponent_rules",
+      "model_concept_id": 207,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "exponents_1",
+      "model_concept_id": 208,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "exponents_2",
+      "model_concept_id": 209,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "exponents_3",
+      "model_concept_id": 210,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "exponents_4",
+      "model_concept_id": 211,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "expressing_ratios_as_fractions",
+      "model_concept_id": 212,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "expressions_with_unknown_variables",
+      "model_concept_id": 213,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "expressions_with_unknown_variables_2",
+      "model_concept_id": 214,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "factoring_difference_of_squares_1",
+      "model_concept_id": 215,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factoring_difference_of_squares_2",
+      "model_concept_id": 216,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factoring_difference_of_squares_3",
+      "model_concept_id": 217,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factoring_polynomials_1",
+      "model_concept_id": 218,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factoring_polynomials_2",
+      "model_concept_id": 219,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factoring_polynomials_by_grouping_1",
+      "model_concept_id": 220,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factoring_polynomials_with_two_variables",
+      "model_concept_id": 221,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factorization_by_add_sub_square",
+      "model_concept_id": 222,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "factorization_quadratic_polynomial",
+      "model_concept_id": 223,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "finding_axis_of_symmetry",
+      "model_concept_id": 224,
+      "topic": "transformations",
+      "topic_id": 35
+    },
+    {
+      "exercise_external_id": "fraction_integer",
+      "model_concept_id": 225,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "fraction_of_one_step_to_unknow_formula",
+      "model_concept_id": 226,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "fraction_word_problems_1",
+      "model_concept_id": 227,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "fractional_division_life_problem",
+      "model_concept_id": 228,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "fractions_on_the_number_line_1",
+      "model_concept_id": 229,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "fractions_on_the_number_line_2",
+      "model_concept_id": 230,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "fractions_on_the_number_line_3",
+      "model_concept_id": 231,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "functions_1",
+      "model_concept_id": 232,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "functions_2",
+      "model_concept_id": 233,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "functions_3",
+      "model_concept_id": 234,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "gcd_and_lcm_word_problems",
+      "model_concept_id": 235,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "gcd_of_life",
+      "model_concept_id": 236,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "geometric_construction",
+      "model_concept_id": 237,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "geometry_about_circle_concept",
+      "model_concept_id": 238,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "geometry_categorial_proposition",
+      "model_concept_id": 239,
+      "topic": "quadrilaterals-and-polygons",
+      "topic_id": 23
+    },
+    {
+      "exercise_external_id": "geometry_identification_concept",
+      "model_concept_id": 240,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "geometry_proofs_1",
+      "model_concept_id": 241,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "geometry_proofs_2",
+      "model_concept_id": 242,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "get_gcd_and_lcm",
+      "model_concept_id": 243,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "graphing_inequalities",
+      "model_concept_id": 244,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "graphing_linear_equations",
+      "model_concept_id": 245,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "graphing_parabolas_0.5",
+      "model_concept_id": 246,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "graphing_parabolas_1",
+      "model_concept_id": 247,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "graphing_parabolas_2",
+      "model_concept_id": 248,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "graphing_points",
+      "model_concept_id": 249,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "graphing_points_2",
+      "model_concept_id": 250,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "graphing_points_fraction_1",
+      "model_concept_id": 251,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "graphing_points_fraction_2",
+      "model_concept_id": 252,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "graphing_scaling",
+      "model_concept_id": 253,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "graphing_systems_of_equations",
+      "model_concept_id": 254,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "graphing_systems_of_inequalities",
+      "model_concept_id": 255,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "graphs_of_sine_and_cosine",
+      "model_concept_id": 256,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "greatest_common_divisor",
+      "model_concept_id": 257,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "halves_and_fourths",
+      "model_concept_id": 258,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "herons_formula",
+      "model_concept_id": 259,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "hundred_million_adding_and_subtracting",
+      "model_concept_id": 260,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "identifying_points_1",
+      "model_concept_id": 261,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "identifying_points_2",
+      "model_concept_id": 262,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "imaginary_unit_powers",
+      "model_concept_id": 263,
+      "topic": "complex-numbers",
+      "topic_id": 8
+    },
+    {
+      "exercise_external_id": "independent_probability",
+      "model_concept_id": 264,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "inequalities_and_expressions",
+      "model_concept_id": 265,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "inequalities_on_a_number_line",
+      "model_concept_id": 266,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "inscribed_angles_1",
+      "model_concept_id": 267,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "inscribed_angles_2",
+      "model_concept_id": 268,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "inscribed_angles_3",
+      "model_concept_id": 269,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "integer_arithmetic",
+      "model_concept_id": 270,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "integers_multiply_decimals",
+      "model_concept_id": 271,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "integers_multiply_decimals2",
+      "model_concept_id": 272,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "interpreting_linear_equations",
+      "model_concept_id": 273,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "inverse_proportional_calculation",
+      "model_concept_id": 274,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "judging_axis_of_symmetry",
+      "model_concept_id": 275,
+      "topic": "transformations",
+      "topic_id": 35
+    },
+    {
+      "exercise_external_id": "kg_g_arithmatic",
+      "model_concept_id": 276,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "kg_g_time_div",
+      "model_concept_id": 277,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "kg_g_unit_transform",
+      "model_concept_id": 278,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "kg_g_unit_transform2",
+      "model_concept_id": 279,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "l_ml_arithmatic",
+      "model_concept_id": 280,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "l_ml_time_div",
+      "model_concept_id": 281,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "l_ml_transform",
+      "model_concept_id": 282,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "l_ml_word_problem",
+      "model_concept_id": 283,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "lcm_word_problems",
+      "model_concept_id": 284,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "least_common_multiple",
+      "model_concept_id": 285,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "least_common_multiple_and_greatest_common_divisor_word_problems",
+      "model_concept_id": 286,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "lhopitals_rule",
+      "model_concept_id": 287,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "limits_1",
+      "model_concept_id": 288,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "limits_2",
+      "model_concept_id": 289,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "line_graph_intuition",
+      "model_concept_id": 290,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "line_relationships",
+      "model_concept_id": 291,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "linear_equations_1",
+      "model_concept_id": 292,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "linear_equations_2",
+      "model_concept_id": 293,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "linear_equations_3",
+      "model_concept_id": 294,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "linear_equations_4",
+      "model_concept_id": 295,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "linear_equations_word_problems_2",
+      "model_concept_id": 296,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "linear_inequalities",
+      "model_concept_id": 297,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "lines_plane_vertical_parallel",
+      "model_concept_id": 298,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "logarithms_1",
+      "model_concept_id": 299,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "logarithms_2",
+      "model_concept_id": 300,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "logical_arguments_deductive_reasoning",
+      "model_concept_id": 301,
+      "topic": "logical-reasoning",
+      "topic_id": 16
+    },
+    {
+      "exercise_external_id": "make_a_line_by_ruler_and_compasses",
+      "model_concept_id": 302,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "marking_inequalities_range_on_a_number_line",
+      "model_concept_id": 303,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "markup_and_commission_word_problems",
+      "model_concept_id": 304,
+      "topic": "ratio-percentage",
+      "topic_id": 27
+    },
+    {
+      "exercise_external_id": "matrix_add_sub_2",
+      "model_concept_id": 305,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "matrix_add_sub_3",
+      "model_concept_id": 306,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "matrix_add_zero_negative",
+      "model_concept_id": 307,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "matrix_basic_distance",
+      "model_concept_id": 308,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "matrix_basic_percentage",
+      "model_concept_id": 309,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "matrix_basic_product",
+      "model_concept_id": 310,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "matrix_mul_zero_one",
+      "model_concept_id": 311,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "mean_median_and_mode",
+      "model_concept_id": 312,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "meaning_congruent_planar_graph",
+      "model_concept_id": 313,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "measuring_and_comparing_angles",
+      "model_concept_id": 314,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "measuring_angles",
+      "model_concept_id": 315,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "measuring_segments",
+      "model_concept_id": 316,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "meters_and_centimeters",
+      "model_concept_id": 317,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "metric_area_unit_comparison",
+      "model_concept_id": 318,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "metric_area_unit_conversion",
+      "model_concept_id": 319,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "metric_weight_unit_conversion",
+      "model_concept_id": 320,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "metric_weight_unit_selection",
+      "model_concept_id": 321,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "metric_weight_unit_word_problem",
+      "model_concept_id": 322,
+      "topic": "unit-conversion",
+      "topic_id": 38
+    },
+    {
+      "exercise_external_id": "midpoint_coordinates",
+      "model_concept_id": 323,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "midpoint_formula",
+      "model_concept_id": 324,
+      "topic": "pythagorean-theorem",
+      "topic_id": 22
+    },
+    {
+      "exercise_external_id": "midpoint_of_a_segment",
+      "model_concept_id": 325,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "millimeter_and_centimeter",
+      "model_concept_id": 326,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "morning_afternoon_night",
+      "model_concept_id": 327,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "moving_points",
+      "model_concept_id": 328,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "multiple_brackets",
+      "model_concept_id": 329,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "multiple_proportions_reasoning",
+      "model_concept_id": 330,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "multiple_unit_transate",
+      "model_concept_id": 331,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "multiplication_0.5",
+      "model_concept_id": 332,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_1",
+      "model_concept_id": 333,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_1.5",
+      "model_concept_id": 334,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_2",
+      "model_concept_id": 335,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_3",
+      "model_concept_id": 336,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_4",
+      "model_concept_id": 337,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_and_division_order",
+      "model_concept_id": 338,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplication_association_word_problems",
+      "model_concept_id": 339,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "multiplication_formula_1",
+      "model_concept_id": 340,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplication_formula_add",
+      "model_concept_id": 341,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplication_formula_minus",
+      "model_concept_id": 342,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplication_formula_sub",
+      "model_concept_id": 343,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplication_word_problems",
+      "model_concept_id": 344,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplicative_problems",
+      "model_concept_id": 345,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "multiply_by_tens",
+      "model_concept_id": 346,
+      "topic": "multiplication-division",
+      "topic_id": 17
+    },
+    {
+      "exercise_external_id": "multiplying_and_dividing_negative_numbers",
+      "model_concept_id": 347,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "multiplying_and_dividing_scientific_notation",
+      "model_concept_id": 348,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "multiplying_complex_numbers",
+      "model_concept_id": 349,
+      "topic": "complex-numbers",
+      "topic_id": 8
+    },
+    {
+      "exercise_external_id": "multiplying_decimal_integer",
+      "model_concept_id": 350,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "multiplying_decimals",
+      "model_concept_id": 351,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "multiplying_expressions_0.5",
+      "model_concept_id": 352,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplying_expressions_1",
+      "model_concept_id": 353,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplying_fractions",
+      "model_concept_id": 354,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "multiplying_fractions_0.5",
+      "model_concept_id": 355,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "multiplying_fractions_word_problems",
+      "model_concept_id": 356,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "multiplying_mixed_numbers_1",
+      "model_concept_id": 357,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "multiplying_polynomials",
+      "model_concept_id": 358,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "multiplying_radicals",
+      "model_concept_id": 359,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "narrative_and_opposite_narrative",
+      "model_concept_id": 360,
+      "topic": "logical-reasoning",
+      "topic_id": 16
+    },
+    {
+      "exercise_external_id": "negative_number_word_problems",
+      "model_concept_id": 361,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "new_definitions_1",
+      "model_concept_id": 362,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "notation_calculation_type",
+      "model_concept_id": 363,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "number_line",
+      "model_concept_id": 364,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "number_line_0.5",
+      "model_concept_id": 365,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "number_line_0.7",
+      "model_concept_id": 366,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "number_line_2",
+      "model_concept_id": 367,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "number_line_3",
+      "model_concept_id": 368,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "number_line_4",
+      "model_concept_id": 369,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "number_properties_terminology_1",
+      "model_concept_id": 370,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "number_sequence_within_ten",
+      "model_concept_id": 371,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "number_within_fifty",
+      "model_concept_id": 372,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "one_more_one_less",
+      "model_concept_id": 373,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "one_step_equation_problems",
+      "model_concept_id": 374,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "one_step_equations",
+      "model_concept_id": 375,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "one_step_inequalities",
+      "model_concept_id": 376,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "operations_with_negative_numbers",
+      "model_concept_id": 377,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "order_of_operations",
+      "model_concept_id": 378,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "ordering_fractions",
+      "model_concept_id": 379,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "ordering_improper_fractions_and_mixed_numbers",
+      "model_concept_id": 380,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "ordering_negative_numbers",
+      "model_concept_id": 381,
+      "topic": "absolute-value",
+      "topic_id": 0
+    },
+    {
+      "exercise_external_id": "ordering_numbers",
+      "model_concept_id": 382,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "parabola_intuition_1",
+      "model_concept_id": 383,
+      "topic": "conic-sections",
+      "topic_id": 10
+    },
+    {
+      "exercise_external_id": "parabola_intuition_3",
+      "model_concept_id": 384,
+      "topic": "conic-sections",
+      "topic_id": 10
+    },
+    {
+      "exercise_external_id": "parallel_and_perpendicular",
+      "model_concept_id": 385,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "parallel_lines_1",
+      "model_concept_id": 386,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "parallel_lines_2",
+      "model_concept_id": 387,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "parallel_lines_proportion",
+      "model_concept_id": 388,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "parts_of_circles",
+      "model_concept_id": 389,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "percentage_concept",
+      "model_concept_id": 390,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "percentage_word_problems_1",
+      "model_concept_id": 391,
+      "topic": "ratio-percentage",
+      "topic_id": 27
+    },
+    {
+      "exercise_external_id": "percentage_word_problems_2",
+      "model_concept_id": 392,
+      "topic": "ratio-percentage",
+      "topic_id": 27
+    },
+    {
+      "exercise_external_id": "perimeter_1",
+      "model_concept_id": 393,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "perimeter_deduction",
+      "model_concept_id": 394,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "perimeter_of_combined_shapes",
+      "model_concept_id": 395,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "perimeter_of_sector",
+      "model_concept_id": 396,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "perimeter_of_squares_and_rectangles",
+      "model_concept_id": 397,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "permutations_1",
+      "model_concept_id": 398,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "place_value",
+      "model_concept_id": 399,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "place_value_big_number",
+      "model_concept_id": 400,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "place_value_concept",
+      "model_concept_id": 401,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "planar_graph_resizing",
+      "model_concept_id": 402,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "planting_problems",
+      "model_concept_id": 403,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "plugging_in_values",
+      "model_concept_id": 404,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "point_slope_form",
+      "model_concept_id": 405,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "points_lines_and_planes",
+      "model_concept_id": 406,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "polynomial_concept_and_proper_noun",
+      "model_concept_id": 407,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "position_relation_between_circle_point",
+      "model_concept_id": 408,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "power_rule",
+      "model_concept_id": 409,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "prime_factorization",
+      "model_concept_id": 410,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "prime_numbers",
+      "model_concept_id": 411,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "probability_1",
+      "model_concept_id": 412,
+      "topic": "probability",
+      "topic_id": 21
+    },
+    {
+      "exercise_external_id": "product_rule",
+      "model_concept_id": 413,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "properties_of_incenters",
+      "model_concept_id": 414,
+      "topic": "quadrilaterals-and-polygons",
+      "topic_id": 23
+    },
+    {
+      "exercise_external_id": "properties_of_numbers_1",
+      "model_concept_id": 415,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "properties_of_numbers_2",
+      "model_concept_id": 416,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "proportional_calculation",
+      "model_concept_id": 417,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "proportional_or_inverse_proportional",
+      "model_concept_id": 418,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "proportions_1",
+      "model_concept_id": 419,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "proportions_2",
+      "model_concept_id": 420,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "proportions_inner_outer_product",
+      "model_concept_id": 421,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "pyramidal_prism",
+      "model_concept_id": 422,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "pythagorean_theorem_1",
+      "model_concept_id": 423,
+      "topic": "pythagorean-theorem",
+      "topic_id": 22
+    },
+    {
+      "exercise_external_id": "quadratic_equation",
+      "model_concept_id": 424,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "quadratic_function_concept",
+      "model_concept_id": 425,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "quadratic_function_maximum_and_minimum",
+      "model_concept_id": 426,
+      "topic": "algebra-functions",
+      "topic_id": 2
+    },
+    {
+      "exercise_external_id": "quadratic_polynomial_word_problem",
+      "model_concept_id": 427,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "quadratics_word_problems",
+      "model_concept_id": 428,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "quadrilateral_angles",
+      "model_concept_id": 429,
+      "topic": "quadrilaterals-and-polygons",
+      "topic_id": 23
+    },
+    {
+      "exercise_external_id": "quadrilateral_types",
+      "model_concept_id": 430,
+      "topic": "quadrilaterals-and-polygons",
+      "topic_id": 23
+    },
+    {
+      "exercise_external_id": "quotient_rule",
+      "model_concept_id": 431,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "radians_and_degrees",
+      "model_concept_id": 432,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "radians_to_degrees",
+      "model_concept_id": 433,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "radical_equations",
+      "model_concept_id": 434,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "radical_multiplication_and_division",
+      "model_concept_id": 435,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "radius_and_diameter",
+      "model_concept_id": 436,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "radius_angle",
+      "model_concept_id": 437,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "radius_diameter_and_circumference",
+      "model_concept_id": 438,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "radius_diameter_and_circumference_1",
+      "model_concept_id": 439,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "radius_diameter_and_circumference_314_1",
+      "model_concept_id": 440,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "range_of_triangle_sides_2",
+      "model_concept_id": 441,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "range_quarter_case_chart",
+      "model_concept_id": 442,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "rate_problems_0.5",
+      "model_concept_id": 443,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "rate_problems_1",
+      "model_concept_id": 444,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "rate_problems_2",
+      "model_concept_id": 445,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "rate_unit_transform",
+      "model_concept_id": 446,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "rates_and_ratios",
+      "model_concept_id": 447,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "ratio",
+      "model_concept_id": 448,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "ratio_and_the_ratio_of",
+      "model_concept_id": 449,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "ratio_discount",
+      "model_concept_id": 450,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "ratio_money",
+      "model_concept_id": 451,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "ratio_word_problems",
+      "model_concept_id": 452,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "re_graphics",
+      "model_concept_id": 453,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "reading_bar_charts_1",
+      "model_concept_id": 454,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_bar_charts_2",
+      "model_concept_id": 455,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_bar_charts_3",
+      "model_concept_id": 456,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_fractions_in_chinese",
+      "model_concept_id": 457,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "reading_line_charts_1",
+      "model_concept_id": 458,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_pictographs_1",
+      "model_concept_id": 459,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_pictographs_2",
+      "model_concept_id": 460,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_stem_and_leaf_plots",
+      "model_concept_id": 461,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_tables_1",
+      "model_concept_id": 462,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "reading_tables_2",
+      "model_concept_id": 463,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "realizing_inequalities",
+      "model_concept_id": 464,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "recognize_decimal_percentile_position",
+      "model_concept_id": 465,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "recognize_graph_zoom_effect",
+      "model_concept_id": 466,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "recognize_num_less_than_10000",
+      "model_concept_id": 467,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "recognizing_conic_sections",
+      "model_concept_id": 468,
+      "topic": "conic-sections",
+      "topic_id": 10
+    },
+    {
+      "exercise_external_id": "recognizing_factoring",
+      "model_concept_id": 469,
+      "topic": "polynomials",
+      "topic_id": 20
+    },
+    {
+      "exercise_external_id": "recognizing_fractions",
+      "model_concept_id": 470,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "recognizing_fractions_0.5",
+      "model_concept_id": 471,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "recognizing_rays_lines_and_line_segments",
+      "model_concept_id": 472,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "recognizing_shapes",
+      "model_concept_id": 473,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "recording_life_problem_by_expressions",
+      "model_concept_id": 474,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "regrouping_decimals",
+      "model_concept_id": 475,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "regular_number_of_columns",
+      "model_concept_id": 476,
+      "topic": "sequence_and_series",
+      "topic_id": 29
+    },
+    {
+      "exercise_external_id": "relationships_linear_equations",
+      "model_concept_id": 477,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "represent_by_symbol_addend",
+      "model_concept_id": 478,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "represent_by_symbol_multiplier",
+      "model_concept_id": 479,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "representing_numbers",
+      "model_concept_id": 480,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "rounding_numbers",
+      "model_concept_id": 481,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "rounding_whole_numbers",
+      "model_concept_id": 482,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "same_side_exterior_angles",
+      "model_concept_id": 483,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "same_side_exterior_angles_2",
+      "model_concept_id": 484,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "same_side_interior_angles",
+      "model_concept_id": 485,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "scale",
+      "model_concept_id": 486,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "scaling_vectors",
+      "model_concept_id": 487,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "scientific_notation",
+      "model_concept_id": 488,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "scientific_notation_decimals",
+      "model_concept_id": 489,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "scientific_notation_intuition",
+      "model_concept_id": 490,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "sectors_as_fraction_of_circles_1",
+      "model_concept_id": 491,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "sectors_as_fraction_of_circles_2",
+      "model_concept_id": 492,
+      "topic": "circle-properties",
+      "topic_id": 7
+    },
+    {
+      "exercise_external_id": "segment_addition",
+      "model_concept_id": 493,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "separation_and_union",
+      "model_concept_id": 494,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "sequences_word_problems",
+      "model_concept_id": 495,
+      "topic": "sequence_and_series",
+      "topic_id": 29
+    },
+    {
+      "exercise_external_id": "shaded_areas",
+      "model_concept_id": 496,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "sides_and_angles_of_simple_shapes",
+      "model_concept_id": 497,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "significant_figures_1",
+      "model_concept_id": 498,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "similar_triangles_1",
+      "model_concept_id": 499,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "similar_triangles_2",
+      "model_concept_id": 500,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "similar_triangles_review",
+      "model_concept_id": 501,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "simplificate_ractional_formula",
+      "model_concept_id": 502,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "simplify_expressions_w_two_var_1",
+      "model_concept_id": 503,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "simplify_expressions_w_two_var_2",
+      "model_concept_id": 504,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "simplify_expressions_w_two_var_3",
+      "model_concept_id": 505,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "simplify_the_root_type",
+      "model_concept_id": 506,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "simplifying_expressions_with_exponents",
+      "model_concept_id": 507,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "simplifying_fractions",
+      "model_concept_id": 508,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "simplifying_radicals",
+      "model_concept_id": 509,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "slope_intercept_form",
+      "model_concept_id": 510,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "slope_of_a_line",
+      "model_concept_id": 511,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "solid_geometry",
+      "model_concept_id": 512,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "solutions_to_systems_of_equations",
+      "model_concept_id": 513,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "solving_for_the_x-intercept",
+      "model_concept_id": 514,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "solving_for_the_y-intercept",
+      "model_concept_id": 515,
+      "topic": "linear-equations-and-inequalitie",
+      "topic_id": 15
+    },
+    {
+      "exercise_external_id": "solving_linear_equations",
+      "model_concept_id": 516,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "solving_linear_inequalities",
+      "model_concept_id": 517,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "solving_quadratics_by_factoring",
+      "model_concept_id": 518,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "solving_quadratics_by_factoring_2",
+      "model_concept_id": 519,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "solving_quadratics_by_taking_the_square_root",
+      "model_concept_id": 520,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "solving_similar_triangles_1",
+      "model_concept_id": 521,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "solving_similar_triangles_2",
+      "model_concept_id": 522,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "special_derivatives",
+      "model_concept_id": 523,
+      "topic": "calculus",
+      "topic_id": 6
+    },
+    {
+      "exercise_external_id": "special_right_triangles",
+      "model_concept_id": 524,
+      "topic": "pythagorean-theorem",
+      "topic_id": 22
+    },
+    {
+      "exercise_external_id": "speed_applying",
+      "model_concept_id": 525,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "speed_equal_to_distance_divide_time",
+      "model_concept_id": 526,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "square_cm_square_m_unit_transform",
+      "model_concept_id": 527,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "square_root_calculation_3",
+      "model_concept_id": 528,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "square_roots",
+      "model_concept_id": 529,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "square_roots_2",
+      "model_concept_id": 530,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "statistical_table_and_chart",
+      "model_concept_id": 531,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "subtracting_decimals",
+      "model_concept_id": 532,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "subtracting_decimals_0.5",
+      "model_concept_id": 533,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "subtracting_fractions",
+      "model_concept_id": 534,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "subtracting_fractions_with_common_denominators",
+      "model_concept_id": 535,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "subtraction_1",
+      "model_concept_id": 536,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "subtraction_2",
+      "model_concept_id": 537,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "subtraction_3",
+      "model_concept_id": 538,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "subtraction_4",
+      "model_concept_id": 539,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "subtraction_and_addition",
+      "model_concept_id": 540,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "subtraction_of_vary_denominator_fraction",
+      "model_concept_id": 541,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "supplementary_angles",
+      "model_concept_id": 542,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "surface_area_of_cylinders",
+      "model_concept_id": 543,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "surface_area_of_rectangular_boxes",
+      "model_concept_id": 544,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "symmetry_concept_and_application",
+      "model_concept_id": 545,
+      "topic": "transformations",
+      "topic_id": 35
+    },
+    {
+      "exercise_external_id": "systems_of_equations",
+      "model_concept_id": 546,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "systems_of_equations_with_elimination",
+      "model_concept_id": 547,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "systems_of_equations_with_elimination_0.5",
+      "model_concept_id": 548,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "systems_of_equations_with_substitution",
+      "model_concept_id": 549,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "systems_of_equations_word_problems",
+      "model_concept_id": 550,
+      "topic": "systems-of-eq-and-ineq",
+      "topic_id": 33
+    },
+    {
+      "exercise_external_id": "telling_time",
+      "model_concept_id": 551,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "telling_time_0.5",
+      "model_concept_id": 552,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "telling_time_2",
+      "model_concept_id": 553,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "telling_time_comparing",
+      "model_concept_id": 554,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "the_complex_plane",
+      "model_concept_id": 555,
+      "topic": "complex-numbers",
+      "topic_id": 8
+    },
+    {
+      "exercise_external_id": "the_four_arithmetic_exponentially",
+      "model_concept_id": 556,
+      "topic": "exponents-radicals",
+      "topic_id": 12
+    },
+    {
+      "exercise_external_id": "the_fundamental_theorem_of_arithmetic",
+      "model_concept_id": 557,
+      "topic": "factors-multiples",
+      "topic_id": 13
+    },
+    {
+      "exercise_external_id": "time_terminology",
+      "model_concept_id": 558,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_units_transformation_1",
+      "model_concept_id": 559,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_units_transformation_2",
+      "model_concept_id": 560,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_units_transformation_3",
+      "model_concept_id": 561,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_word_problem_1",
+      "model_concept_id": 562,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_word_problem_2",
+      "model_concept_id": 563,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_word_problem_3",
+      "model_concept_id": 564,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_word_problem_4",
+      "model_concept_id": 565,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "time_word_problem_5",
+      "model_concept_id": 566,
+      "topic": "telling-time",
+      "topic_id": 34
+    },
+    {
+      "exercise_external_id": "triangle_angles_1",
+      "model_concept_id": 567,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "triangle_angles_sum",
+      "model_concept_id": 568,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "triangle_central_core_concept",
+      "model_concept_id": 569,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "triangle_inequality_theorem",
+      "model_concept_id": 570,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "triangle_length_of_side",
+      "model_concept_id": 571,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "triangle_types",
+      "model_concept_id": 572,
+      "topic": "triangle-properties",
+      "topic_id": 36
+    },
+    {
+      "exercise_external_id": "triangles_congruent_nature_sss",
+      "model_concept_id": 573,
+      "topic": "congruent-triangles",
+      "topic_id": 9
+    },
+    {
+      "exercise_external_id": "triangles_similar_nature",
+      "model_concept_id": 574,
+      "topic": "similar-triangle",
+      "topic_id": 30
+    },
+    {
+      "exercise_external_id": "trig_identities_1",
+      "model_concept_id": 575,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "trigonometry_0.5",
+      "model_concept_id": 576,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "trigonometry_1",
+      "model_concept_id": 577,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "trigonometry_1.5",
+      "model_concept_id": 578,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "trigonometry_2",
+      "model_concept_id": 579,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "understand_circle",
+      "model_concept_id": 580,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "understand_coins",
+      "model_concept_id": 581,
+      "topic": "addition-subtraction",
+      "topic_id": 1
+    },
+    {
+      "exercise_external_id": "understand_equivalent_axiom",
+      "model_concept_id": 582,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "understand_large_numbers_and_conversion",
+      "model_concept_id": 583,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "understand_length_unit",
+      "model_concept_id": 584,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "understand_range_of_graphie",
+      "model_concept_id": 585,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "understanding_comparing_angle",
+      "model_concept_id": 586,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "understanding_decimals_place_value",
+      "model_concept_id": 587,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "understanding_km",
+      "model_concept_id": 588,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "understanding_moving_the_decimal",
+      "model_concept_id": 589,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "understanding_square_rectangular",
+      "model_concept_id": 590,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "unit_circle",
+      "model_concept_id": 591,
+      "topic": "trigonometry",
+      "topic_id": 37
+    },
+    {
+      "exercise_external_id": "unit_conversion_rate",
+      "model_concept_id": 592,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "units",
+      "model_concept_id": 593,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "variables_word_problems_1",
+      "model_concept_id": 594,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "variance",
+      "model_concept_id": 595,
+      "topic": "statistics",
+      "topic_id": 32
+    },
+    {
+      "exercise_external_id": "vector_add_sub_two",
+      "model_concept_id": 596,
+      "topic": "vectors-matrix",
+      "topic_id": 39
+    },
+    {
+      "exercise_external_id": "vertex_of_a_parabola",
+      "model_concept_id": 597,
+      "topic": "quadtratics",
+      "topic_id": 24
+    },
+    {
+      "exercise_external_id": "vertical_and_parallel",
+      "model_concept_id": 598,
+      "topic": "basic-geometry",
+      "topic_id": 4
+    },
+    {
+      "exercise_external_id": "vertical_angles",
+      "model_concept_id": 599,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "vertical_angles_2",
+      "model_concept_id": 600,
+      "topic": "segments-and-angles",
+      "topic_id": 28
+    },
+    {
+      "exercise_external_id": "vertical_concepts",
+      "model_concept_id": 601,
+      "topic": "parallel-and-perpendicular-lines",
+      "topic_id": 19
+    },
+    {
+      "exercise_external_id": "volume_and_cc",
+      "model_concept_id": 602,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_box",
+      "model_concept_id": 603,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_box_cover",
+      "model_concept_id": 604,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_box_nocover",
+      "model_concept_id": 605,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_container",
+      "model_concept_id": 606,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_container_hight",
+      "model_concept_id": 607,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_of_cylinders",
+      "model_concept_id": 608,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_of_rectangular_boxes",
+      "model_concept_id": 609,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_of_rectangular_boxes_2",
+      "model_concept_id": 610,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_of_rectangular_boxes_3",
+      "model_concept_id": 611,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_of_triangular_prisms",
+      "model_concept_id": 612,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_space",
+      "model_concept_id": 613,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "volume_unit_conversion",
+      "model_concept_id": 614,
+      "topic": "area-perimeter-and-volume",
+      "topic_id": 3
+    },
+    {
+      "exercise_external_id": "word_problem_formula_translate",
+      "model_concept_id": 615,
+      "topic": "order-of-operations",
+      "topic_id": 18
+    },
+    {
+      "exercise_external_id": "writing_and_interpreting_decimals",
+      "model_concept_id": 616,
+      "topic": "decimals",
+      "topic_id": 11
+    },
+    {
+      "exercise_external_id": "writing_expressions_1",
+      "model_concept_id": 617,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "writing_expressions_2",
+      "model_concept_id": 618,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "writing_expressions_3",
+      "model_concept_id": 619,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "writing_expressions_w_two_var",
+      "model_concept_id": 620,
+      "topic": "solving-linear-equations-and-inequalities",
+      "topic_id": 31
+    },
+    {
+      "exercise_external_id": "writing_fractions_1",
+      "model_concept_id": 621,
+      "topic": "fractions",
+      "topic_id": 14
+    },
+    {
+      "exercise_external_id": "writing_proportions",
+      "model_concept_id": 622,
+      "topic": "rates-and-ratios",
+      "topic_id": 26
+    },
+    {
+      "exercise_external_id": "z_scores_2",
+      "model_concept_id": 623,
+      "topic": "statistics",
+      "topic_id": 32
+    }
+  ],
+  "topic_column_order": [
+    "absolute-value",
+    "addition-subtraction",
+    "algebra-functions",
+    "area-perimeter-and-volume",
+    "basic-geometry",
+    "biology",
+    "calculus",
+    "circle-properties",
+    "complex-numbers",
+    "congruent-triangles",
+    "conic-sections",
+    "decimals",
+    "exponents-radicals",
+    "factors-multiples",
+    "fractions",
+    "linear-equations-and-inequalitie",
+    "logical-reasoning",
+    "multiplication-division",
+    "order-of-operations",
+    "parallel-and-perpendicular-lines",
+    "polynomials",
+    "probability",
+    "pythagorean-theorem",
+    "quadrilaterals-and-polygons",
+    "quadtratics",
+    "quantity-sense",
+    "rates-and-ratios",
+    "ratio-percentage",
+    "segments-and-angles",
+    "sequence_and_series",
+    "similar-triangle",
+    "solving-linear-equations-and-inequalities",
+    "statistics",
+    "systems-of-eq-and-ineq",
+    "telling-time",
+    "transformations",
+    "triangle-properties",
+    "trigonometry",
+    "unit-conversion",
+    "vectors-matrix"
+  ],
+  "topic_count": 40
+}
