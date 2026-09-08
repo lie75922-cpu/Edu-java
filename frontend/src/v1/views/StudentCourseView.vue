@@ -3,67 +3,58 @@ import { computed, onMounted, ref } from 'vue'
 import { api, newRequestId, run, selectedCourse } from '../store.js'
 
 const courses = ref([])
+const areas = ref([])
 const points = ref([])
 const exercises = ref([])
-const selectedChapter = ref('全部')
+const selectedAreaId = ref('ALL')
 const activeQuestion = ref(null)
 const selectedOptions = ref([])
 const answerResult = ref(null)
 const requestId = ref('')
 
-const chapters = [
-  { key: 'LOGIC', name: '第一章 数理逻辑', desc: '命题、等值演算、范式与推理理论' },
-  { key: 'SETREL', name: '第二章 集合论与关系', desc: '集合运算、二元关系、等价关系与偏序' },
-  { key: 'GRAPH', name: '第三章 图论', desc: '图、路径、连通性、欧拉图与树' },
-  { key: 'ALG', name: '第四章 代数结构', desc: '代数系统、群、环、域、格与布尔代数' }
-]
-
-const preferredOrder = [
-  'DM-LOGIC-PROP', 'DM-LOGIC-EQUIV', 'DM-LOGIC-NF', 'DM-LOGIC-INFERENCE',
-  'DM-SET-BASIC', 'DM-REL-BASIC', 'DM-REL-EQUIV', 'DM-REL-ORDER',
-  'DM-GRAPH-BASIC', 'DM-GRAPH-CONNECT', 'DM-GRAPH-EULER', 'DM-GRAPH-TREE',
-  'DM-ALG-SYSTEM', 'DM-ALG-GROUP', 'DM-ALG-RING', 'DM-ALG-LATTICE'
-]
-const orderIndex = new Map(preferredOrder.map((code, index) => [code, index]))
-
-function chapterOf(point) {
-  const code = point.knowledgeCode || ''
-  if (code.includes('LOGIC')) return 'LOGIC'
-  if (code.includes('SET') || code.includes('REL')) return 'SETREL'
-  if (code.includes('GRAPH')) return 'GRAPH'
-  if (code.includes('ALG')) return 'ALG'
-  return 'OTHER'
-}
-
-function chapterName(point) {
-  return chapters.find(item => item.key === chapterOf(point))?.name || '课程知识'
-}
+const areaMap = computed(() => new Map(areas.value.map(area => [String(area.id), area])))
 
 const orderedPoints = computed(() => [...points.value].sort((left, right) => {
-  const leftIndex = orderIndex.has(left.knowledgeCode) ? orderIndex.get(left.knowledgeCode) : Number.MAX_SAFE_INTEGER
-  const rightIndex = orderIndex.has(right.knowledgeCode) ? orderIndex.get(right.knowledgeCode) : Number.MAX_SAFE_INTEGER
-  if (leftIndex !== rightIndex) return leftIndex - rightIndex
+  const leftArea = areaMap.value.get(String(left.areaId))
+  const rightArea = areaMap.value.get(String(right.areaId))
+  const leftAreaCode = leftArea?.areaCode || 'ZZZ'
+  const rightAreaCode = rightArea?.areaCode || 'ZZZ'
+  const areaCompare = leftAreaCode.localeCompare(rightAreaCode)
+  if (areaCompare !== 0) return areaCompare
   return String(left.knowledgeName).localeCompare(String(right.knowledgeName), 'zh-CN')
 }))
 
-const visiblePoints = computed(() => selectedChapter.value === '全部'
+const visiblePoints = computed(() => selectedAreaId.value === 'ALL'
   ? orderedPoints.value
-  : orderedPoints.value.filter(item => chapterOf(item) === selectedChapter.value))
+  : orderedPoints.value.filter(item => String(item.areaId) === selectedAreaId.value))
+
+function areaName(point) {
+  return areaMap.value.get(String(point.areaId))?.areaName || '其他知识'
+}
+
+function pointCount(areaId) {
+  return points.value.filter(item => String(item.areaId) === String(areaId)).length
+}
 
 function pointExercise(point) {
-  return exercises.value.find(exercise => (exercise.knowledgePoints || []).some(item => item.id === point.id || item.knowledgePointId === point.id))
+  return exercises.value.find(exercise => (exercise.knowledgePoints || []).some(item =>
+    Number(item.id ?? item.knowledgePointId) === Number(point.id)
+  ))
 }
 
 async function loadCourse(course = null) {
   if (course) selectedCourse.value = course
   if (!selectedCourse.value) return
+  selectedAreaId.value = 'ALL'
   await api(`/courses/${selectedCourse.value.id}/enroll`, { method: 'POST' }).catch(() => null)
-  const [courseDetail, pointList, exerciseList] = await Promise.all([
+  const [courseDetail, areaList, pointList, exerciseList] = await Promise.all([
     api(`/courses/${selectedCourse.value.id}`),
+    api(`/courses/${selectedCourse.value.id}/knowledge-areas`).catch(() => []),
     api(`/courses/${selectedCourse.value.id}/knowledge-points`),
     api(`/exercise-units?courseId=${selectedCourse.value.id}`)
   ])
   selectedCourse.value = courseDetail
+  areas.value = areaList
   points.value = pointList
   exercises.value = exerciseList
 }
@@ -72,7 +63,9 @@ async function boot() {
   const result = await run(() => api('/courses'))
   if (!result) return
   courses.value = result
-  if (!selectedCourse.value) selectedCourse.value = result.find(item => item.courseCode === 'DM-101') || result[0] || null
+  if (!selectedCourse.value || !result.some(item => item.id === selectedCourse.value.id)) {
+    selectedCourse.value = result[0] || null
+  }
   if (selectedCourse.value) await run(() => loadCourse())
 }
 
@@ -112,31 +105,46 @@ onMounted(boot)
 <template>
   <section class="dashboard-page">
     <div class="page-intro">
-      <div><p class="eyebrow">课程学习</p><h2>{{ selectedCourse?.courseName || '离散数学' }}</h2><p>{{ selectedCourse?.description || '按章节与知识关系组织学习内容。' }}</p></div>
+      <div>
+        <p class="eyebrow">课程学习</p>
+        <h2>{{ selectedCourse?.courseName || '我的课程' }}</h2>
+        <p>{{ selectedCourse?.description || '按课程知识领域和知识关系组织学习内容。' }}</p>
+      </div>
       <select v-if="courses.length > 1" :value="selectedCourse?.id" @change="loadCourse(courses.find(item => item.id === Number($event.target.value)))">
         <option v-for="course in courses" :key="course.id" :value="course.id">{{ course.courseName }}</option>
       </select>
     </div>
 
-    <div class="chapter-strip" v-if="selectedCourse?.courseCode === 'DM-101'">
-      <button :class="{ active: selectedChapter === '全部' }" @click="selectedChapter = '全部'"><strong>全部内容</strong><span>{{ points.length }} 个知识点</span></button>
-      <button v-for="chapter in chapters" :key="chapter.key" :class="{ active: selectedChapter === chapter.key }" @click="selectedChapter = chapter.key">
-        <strong>{{ chapter.name }}</strong><span>{{ chapter.desc }}</span>
+    <div class="chapter-strip" v-if="areas.length">
+      <button :class="{ active: selectedAreaId === 'ALL' }" @click="selectedAreaId = 'ALL'">
+        <strong>全部内容</strong><span>{{ points.length }} 个知识点</span>
+      </button>
+      <button v-for="area in areas" :key="area.id" :class="{ active: selectedAreaId === String(area.id) }" @click="selectedAreaId = String(area.id)">
+        <strong>{{ area.areaName }}</strong><span>{{ pointCount(area.id) }} 个知识点</span>
       </button>
     </div>
 
     <section class="panel">
-      <div class="panel-head"><div><p class="eyebrow">知识目录</p><h3>{{ selectedChapter === '全部' ? '课程知识点' : chapters.find(item => item.key === selectedChapter)?.name }}</h3></div><span class="soft-badge">{{ visiblePoints.length }} 个知识点</span></div>
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">知识目录</p>
+          <h3>{{ selectedAreaId === 'ALL' ? '课程知识点' : (areaMap.get(selectedAreaId)?.areaName || '课程知识') }}</h3>
+        </div>
+        <span class="soft-badge">{{ visiblePoints.length }} 个知识点</span>
+      </div>
       <div class="knowledge-list">
         <article v-for="(point, index) in visiblePoints" :key="point.id" class="knowledge-row">
           <div class="knowledge-index">{{ String(index + 1).padStart(2, '0') }}</div>
-          <div class="knowledge-main"><strong>{{ point.knowledgeName }}</strong><span>{{ chapterName(point) }}</span></div>
+          <div class="knowledge-main"><strong>{{ point.knowledgeName }}</strong><span>{{ areaName(point) }}</span></div>
           <div class="knowledge-actions">
-            <span v-if="pointExercise(point)" class="resource-count">1 组练习</span>
+            <span v-if="pointExercise(point)" class="resource-count">已关联练习</span>
             <button v-if="pointExercise(point)" class="primary-button small" @click="startPractice(point)">开始练习</button>
             <span v-else class="muted">暂无练习</span>
           </div>
         </article>
+      </div>
+      <div v-if="!visiblePoints.length" class="empty-state compact">
+        <strong>当前领域暂无知识点</strong><p>课程知识结构由后台业务数据驱动，不在前端写死章节和知识编码。</p>
       </div>
     </section>
 
