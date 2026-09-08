@@ -1,0 +1,69 @@
+{
+  "protocol_version": "MODEL3_DEVELOPMENT_FREEZE_V1",
+  "dataset_role": "MODEL-1 historical external cohort is development-only; JUNYI_FINAL_HOLDOUT_V1 labels are prohibited in this phase.",
+  "allowed_candidates": [
+    "EXERCISE_RATE_DEV",
+    "RASCH_1PL_V1",
+    "HIER_RASCH_TOPIC_V1"
+  ],
+  "forbidden_model_families": [
+    "NCDM",
+    "RCD",
+    "ORCDF",
+    "GEAR-CD",
+    "GNN",
+    "Transformer"
+  ],
+  "cardinality_contract": {
+    "students": 5000,
+    "exercises": 624,
+    "topic_catalog": 40,
+    "final_eligible_active_topics": 39,
+    "one_topic_per_exercise": true
+  },
+  "exercise_rate": {
+    "alpha": 1.0,
+    "beta": 1.0,
+    "minimum_development_exercise_exposure": 5,
+    "fallback": "GLOBAL_EXERCISE_RATE_BETA_1_1"
+  },
+  "rasch_1pl": {
+    "equation": "logit P(correct) = mu + theta_student - beta_exercise",
+    "architecture": "intercept plus scalar student ability plus scalar exercise difficulty; no hidden layer",
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "batch_size": 4096,
+    "max_epochs": 30,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_auc_then_lower_validation_log_loss_then_lower_validation_brier_then_earlier_epoch",
+    "seed": 2026090806
+  },
+  "hierarchical_rasch_topic": {
+    "equation": "logit P(correct) = mu + theta_student - beta_exercise + delta_student_topic",
+    "architecture": "Rasch scalar terms plus one scalar student-topic deviation; no hidden layer or graph propagation",
+    "delta_regularization": "MAP-L2 penalty on observed calibration deviations only",
+    "lambda_delta_grid": [
+      0.03,
+      0.1,
+      0.3,
+      1.0
+    ],
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "batch_size": 4096,
+    "max_epochs": 30,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_auc_then_lower_validation_log_loss_then_lower_validation_brier_then_lower_lambda_then_earlier_epoch",
+    "seed": 2026090807
+  },
+  "development_refit": {
+    "scope": "MODEL-1 train, validation, and historical diagnostic partitions only",
+    "epoch_policy": "Use each candidate's validation-selected epoch exactly; do not reopen model selection.",
+    "global_parameters_frozen_before_final": [
+      "mu",
+      "exercise_difficulty",
+      "exercise_rate"
+    ]
+  },
+  "final_holdout_labels_read": false
+}

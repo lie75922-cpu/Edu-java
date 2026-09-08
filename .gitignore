@@ -28,6 +28,9 @@ model-service/experiments/model1/runtime/
 model-service/experiments/model2/data/
 model-service/experiments/model2/checkpoints/
 model-service/experiments/model2/runtime/
+model-service/experiments/model3/data/
+model-service/experiments/model3/checkpoints/
+model-service/experiments/model3/runtime/
 *.pt
 *.pth
 *.ckpt

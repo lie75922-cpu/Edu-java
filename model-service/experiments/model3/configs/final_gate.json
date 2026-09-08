@@ -1,0 +1,31 @@
+{
+  "protocol_version": "MODEL3_FINAL_GATE_V1",
+  "allowed_statuses": [
+    "GO_HIERARCHICAL_MODEL_INTEGRATION",
+    "GO_RASCH_ONLY_INTEGRATION",
+    "STOP_ML_INTEGRATION_RULE_ONLY"
+  ],
+  "primary_comparisons": {
+    "rasch_minus_exercise_rate": {
+      "candidate": "RASCH_1PL_V1",
+      "baseline": "EXERCISE_RATE_DEV"
+    },
+    "hierarchical_minus_rasch": {
+      "candidate": "HIER_RASCH_TOPIC_V1",
+      "baseline": "RASCH_1PL_V1"
+    }
+  },
+  "quality_limits": {
+    "maximum_ece": 0.1,
+    "maximum_fallback_item_fraction": 0.05,
+    "maximum_hierarchical_log_loss_increase_over_rasch": 0.005,
+    "maximum_hierarchical_brier_increase_over_rasch": 0.002
+  },
+  "hierarchical_interpretability": {
+    "minimum_observed_exposure": 3,
+    "minimum_delta_future_association_auc": 0.5,
+    "require_nonempty_observed_delta_distribution": true,
+    "require_twenty_anonymized_cases": true
+  },
+  "product_boundary": "A GO authorizes only a later, separately reviewed integration design. Java MasteryProvider, recommendation, Published Graph, and RuleBeta remain unchanged in this Issue."
+}

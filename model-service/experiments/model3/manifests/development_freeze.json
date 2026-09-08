@@ -1,0 +1,68 @@
+{
+  "fallback_policy": {
+    "prediction": "GLOBAL_EXERCISE_RATE_BETA_1_1",
+    "report_separately": true,
+    "retain_rows": true,
+    "when": "Exercise has fewer than 5 development-refit interactions or is absent from the frozen development Exercise map."
+  },
+  "final_holdout_labels_read": false,
+  "final_protocol": {
+    "bootstrap": {
+      "confidence_level": 0.95,
+      "method": "student-cluster paired bootstrap",
+      "resamples": 1000,
+      "seed": 2026090808
+    },
+    "calibration_fraction": 0.6,
+    "evaluation_fraction": 0.4,
+    "global_parameter_policy": "Frozen development-refit global parameters; no final response updates mu, beta_exercise, or ExerciseRate.",
+    "no_history_topic_policy": {
+      "delta": 0.0,
+      "never_map_to": 0.5,
+      "not_mastery": true,
+      "semantic_status": "UNKNOWN"
+    }
+  },
+  "gate_config": {
+    "allowed_statuses": [
+      "GO_HIERARCHICAL_MODEL_INTEGRATION",
+      "GO_RASCH_ONLY_INTEGRATION",
+      "STOP_ML_INTEGRATION_RULE_ONLY"
+    ],
+    "hierarchical_interpretability": {
+      "minimum_delta_future_association_auc": 0.5,
+      "minimum_observed_exposure": 3,
+      "require_nonempty_observed_delta_distribution": true,
+      "require_twenty_anonymized_cases": true
+    },
+    "primary_comparisons": {
+      "hierarchical_minus_rasch": {
+        "baseline": "RASCH_1PL_V1",
+        "candidate": "HIER_RASCH_TOPIC_V1"
+      },
+      "rasch_minus_exercise_rate": {
+        "baseline": "EXERCISE_RATE_DEV",
+        "candidate": "RASCH_1PL_V1"
+      }
+    },
+    "product_boundary": "A GO authorizes only a later, separately reviewed integration design. Java MasteryProvider, recommendation, Published Graph, and RuleBeta remain unchanged in this Issue.",
+    "protocol_version": "MODEL3_FINAL_GATE_V1",
+    "quality_limits": {
+      "maximum_ece": 0.1,
+      "maximum_fallback_item_fraction": 0.05,
+      "maximum_hierarchical_brier_increase_over_rasch": 0.002,
+      "maximum_hierarchical_log_loss_increase_over_rasch": 0.005
+    }
+  },
+  "global_parameter_artifact": "model-service/experiments/model3/checkpoints/development_refit_global_parameters.npz",
+  "hierarchical_selected_epoch": 2,
+  "model_form": {
+    "exercise_rate": "EXERCISE_RATE_DEV",
+    "hierarchical": "logit P(correct) = mu + theta_student - beta_exercise + delta_student_topic",
+    "rasch": "logit P(correct) = mu + theta_student - beta_exercise"
+  },
+  "product_boundary": "No Java MasteryProvider, RuleBeta, recommendation, or Published Graph change is authorized.",
+  "rasch_selected_epoch": 5,
+  "selected_hierarchical_lambda_delta": 0.03,
+  "status": "DEVELOPMENT_MODEL_AND_FINAL_PROTOCOL_FROZEN"
+}

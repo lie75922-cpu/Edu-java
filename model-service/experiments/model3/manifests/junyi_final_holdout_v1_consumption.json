@@ -1,0 +1,16 @@
+{
+  "claim_policy": "Fail closed: this claim precedes opening final correctness labels, and any later retry is prohibited.",
+  "dataset_name": "JUNYI_FINAL_HOLDOUT_V1",
+  "development_freeze_required": "manifests/development_freeze.json",
+  "final_calibration_rows": 767635,
+  "final_evaluation_rows": 515008,
+  "final_student_count": 5000,
+  "label_read_state": "COMPLETED",
+  "labels_read": true,
+  "metrics_generated": true,
+  "one_time_policy": "The runner writes FINAL_EVALUATION_CLAIMED before it opens correctness labels. Any claimed or completed state rejects another final evaluation.",
+  "primary_bootstrap_resamples": 1000,
+  "protocol_version": "MODEL3_FINAL_VALIDATION_V1",
+  "selected_student_count": 5000,
+  "status": "FINAL_EVALUATION_COMPLETED"
+}
