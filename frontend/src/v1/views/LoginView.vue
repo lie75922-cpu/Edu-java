@@ -19,23 +19,23 @@ function fillDemo(username) {
 <template>
   <div class="login-page">
     <section class="login-hero">
-      <div class="hero-badge">离散数学数字教材 · 知识图谱教学应用</div>
-      <h1>让知识结构真正参与学习</h1>
+      <div class="hero-badge">数学学习 · 知识图谱 · 学习分析</div>
+      <h1>让数据、知识结构和学习路径真正连接起来</h1>
       <p>
-        围绕数理逻辑、集合论与关系、图论、代数结构构建课程知识图谱，
-        将学习记录、薄弱知识、个性化推荐与教师评价连接起来。
+        平台以课程知识结构和学习行为为基础，将知识图谱、薄弱知识诊断、
+        个性化推荐、学习路径和教师学情分析连接为一套可解释的学习闭环。
       </p>
       <div class="hero-features">
-        <article><strong>知识图谱</strong><span>查看先修关系与知识脉络</span></article>
-        <article><strong>个性化学习</strong><span>根据学习记录生成学习建议</span></article>
-        <article><strong>教学评价</strong><span>教师从班级到学生逐层分析</span></article>
+        <article><strong>知识图谱</strong><span>查看知识领域、先修关系与学习脉络</span></article>
+        <article><strong>个性化学习</strong><span>根据真实学习记录生成学习建议</span></article>
+        <article><strong>教学分析</strong><span>教师从班级到学生逐层查看学情</span></article>
       </div>
     </section>
 
     <section class="login-panel">
       <div class="login-brand">
-        <div class="brand-mark large">离</div>
-        <div><strong>离散数学智慧教学平台</strong><small>教学、学习与知识图谱一体化</small></div>
+        <div class="brand-mark large">数</div>
+        <div><strong>数学智慧学习平台</strong><small>数据、知识图谱与个性化学习一体化</small></div>
       </div>
 
       <div class="login-tabs">
@@ -57,7 +57,7 @@ function fillDemo(username) {
         <button @click="fillDemo('demo-teacher-a')">教师</button>
         <button @click="fillDemo('demo-admin')">管理员</button>
       </div>
-      <p class="login-footnote">演示账号均为合成平台数据，不使用 Junyi 匿名科研学生身份。</p>
+      <p class="login-footnote">演示账号均为合成平台数据，不使用科研数据中的匿名学生身份。</p>
     </section>
   </div>
 </template>
