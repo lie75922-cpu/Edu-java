@@ -38,23 +38,25 @@ test('中文离散数学学生、教师、管理员真实全栈流程', async ({
   expect(courseA).toBeTruthy()
   expect(courseB).toBeTruthy()
 
-  // 登录页视觉快照。
   await page.goto('/')
   await expect(page.getByText('离散数学智慧教学平台')).toBeVisible()
   await shot(page, '01-登录页')
 
-  // 学生：课程 -> 练习 -> 个性化推荐 -> 学习路径 -> 知识图谱。
+  // 学生：首页 -> 课程 -> 练习 -> 个性化推荐 -> 学习路径 -> 知识图谱。
   await login(page, 'demo-student-alice', '首页')
   await expect(page.getByText('离散数学智慧教学平台')).toBeVisible()
+  await expect(page.locator('.course-card').filter({ hasText: '离散数学' })).toBeVisible()
+  await expect(page.locator('.graph-summary')).toBeVisible()
   await shot(page, '02-学生首页')
 
   await page.getByRole('button', { name: '课程学习', exact: true }).click()
   await expect(page.getByRole('heading', { name: '离散数学', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: /第一章 数理逻辑/ })).toBeVisible()
-  await shot(page, '03-离散数学课程学习')
-
   const propositionRow = page.locator('.knowledge-row').filter({ hasText: '命题与逻辑联结词' })
   await expect(propositionRow).toBeVisible()
+  await expect(page.locator('.knowledge-row')).toHaveCount(16)
+  await shot(page, '03-离散数学课程学习')
+
   await propositionRow.getByRole('button', { name: '开始练习', exact: true }).click()
   await expect(page.getByText('设 p 为真、q 为假')).toBeVisible()
   await shot(page, '04-知识点练习')
@@ -77,6 +79,9 @@ test('中文离散数学学生、教师、管理员真实全栈流程', async ({
   await page.getByRole('button', { name: '知识图谱', exact: true }).click()
   await expect(page.getByRole('heading', { name: '离散数学知识地图', exact: true })).toBeVisible()
   await expect(page.getByText('命题与逻辑联结词', { exact: true }).first()).toBeVisible()
+  await expect(page.locator('.svg-node')).toHaveCount(16)
+  await page.locator('.svg-node.chapter-logic').first().click()
+  await expect(page.getByText('前置知识', { exact: true })).toBeVisible()
   await shot(page, '07-离散数学知识图谱')
 
   // 教师：课程学情 -> 知识点 -> 热力图 -> 学生详情；跨课程仍然403。
@@ -85,6 +90,7 @@ test('中文离散数学学生、教师、管理员真实全栈流程', async ({
   await expect(page.getByRole('heading', { name: '离散数学', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: '班级知识掌握概览', exact: true })).toBeVisible()
   await expect(page.getByRole('heading', { name: '学生 × 知识点掌握情况', exact: true })).toBeVisible()
+  await expect(page.locator('.teacher-point-list article')).toHaveCount(16)
   await shot(page, '08-教师工作台')
   const firstStudent = page.locator('.heatmap-wrap tbody .text-button.strong').first()
   await expect(firstStudent).toBeVisible()
@@ -107,11 +113,14 @@ test('中文离散数学学生、教师、管理员真实全栈流程', async ({
   await login(page, 'demo-admin', '管理工作台')
   await expect(page.getByRole('heading', { name: '教学平台管理', exact: true })).toBeVisible()
   await expect(page.getByText('当前课程知识点')).toBeVisible()
+  await expect(page.locator('.catalog-grid article')).toHaveCount(16)
   await shot(page, '10-管理工作台')
   await page.getByRole('button', { name: '教师授权', exact: true }).click()
   await expect(page.getByRole('heading', { name: '分配教师到课程', exact: true })).toBeVisible()
+  await expect(page.getByText('张老师')).toBeVisible()
   await shot(page, '11-教师授权管理')
   await page.getByRole('button', { name: '知识图谱治理', exact: true }).click()
   await expect(page.getByRole('heading', { name: '图谱版本', exact: true })).toBeVisible()
+  await expect(page.getByText('《离散数学》核心知识先修关系演示图')).toBeVisible()
   await shot(page, '12-知识图谱治理')
 })
