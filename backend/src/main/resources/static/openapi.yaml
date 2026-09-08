@@ -1,12 +1,13 @@
 openapi: 3.0.3
 info:
   title: Edu-java Platform API
-  version: 0.7.0
+  version: 1.0.0-rc1
   description: |
-    Stable API surface for the V0.7 release candidate. MySQL is the business
-    authority; Neo4j is a versioned Published Graph projection. RuleBeta is the
-    production personalization fallback. Research-model endpoints are not part
-    of this specification.
+    API surface for the Chinese math smart-learning platform product rebase.
+    MySQL remains the business authority; Neo4j is a versioned Published Graph
+    projection. Course structure is data-driven through KnowledgeArea and
+    KnowledgePoint APIs. RuleBeta remains the production personalization
+    provider; research-model results are not presented as production behavior.
 servers:
   - url: /api/v1
 security:
@@ -47,6 +48,14 @@ paths:
   /courses/{courseId}:
     get:
       summary: Read an authorized course
+      parameters: [ { $ref: '#/components/parameters/CourseId' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /courses/{courseId}/knowledge-areas:
+    get:
+      summary: List active knowledge areas in an authorized course
+      description: Frontend course hierarchy and graph grouping must consume this data instead of inferring chapters from knowledge codes.
       parameters: [ { $ref: '#/components/parameters/CourseId' } ]
       responses:
         '200': { $ref: '#/components/responses/Success' }
