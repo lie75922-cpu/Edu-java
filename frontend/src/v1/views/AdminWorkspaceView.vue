@@ -1,9 +1,10 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { api, run, statusText } from '../store.js'
+import { researchSnapshot } from '../researchSnapshot.js'
 
 const section = ref('课程与教学')
-const sections = ['课程与教学', '教师授权', '知识图谱治理', '系统状态']
+const sections = ['课程与教学', '数据与算法', '教师授权', '知识图谱治理', '系统状态']
 const courses = ref([])
 const selectedCourseId = ref('')
 const points = ref([])
@@ -18,13 +19,23 @@ const courseForm = reactive({ courseCode: '', courseName: '', description: '', s
 const newVersionDescription = ref('')
 
 const selectedCourse = computed(() => courses.value.find(item => String(item.id) === String(selectedCourseId.value)))
+const data0 = researchSnapshot.dataset
+const model3 = researchSnapshot.model
+
+function count(value) {
+  return Number(value).toLocaleString('zh-CN')
+}
+
+function pct(value, digits = 2) {
+  return `${(Number(value) * 100).toFixed(digits)}%`
+}
 
 async function loadCourses() {
   const result = await run(() => api('/courses'))
   if (!result) return
   courses.value = result
   if (!result.some(item => String(item.id) === String(selectedCourseId.value))) {
-    selectedCourseId.value = result.find(item => item.courseCode === 'DM-101') ? String(result.find(item => item.courseCode === 'DM-101').id) : (result[0] ? String(result[0].id) : '')
+    selectedCourseId.value = result[0] ? String(result[0].id) : ''
   }
   if (selectedCourseId.value) await loadCourseData()
 }
@@ -115,7 +126,7 @@ onMounted(loadCourses)
 
 <template>
   <section class="dashboard-page">
-    <div class="page-intro"><div><p class="eyebrow">管理工作台</p><h2>教学平台管理</h2><p>按业务领域拆分管理功能，不再把课程、题库和图谱治理堆在一个长页面。</p></div><select v-model="selectedCourseId" @change="loadCourseData"><option v-for="course in courses" :key="course.id" :value="String(course.id)">{{ course.courseName }}</option></select></div>
+    <div class="page-intro"><div><p class="eyebrow">管理工作台</p><h2>教学平台管理</h2><p>课程、科研数据、算法结果、教师授权和知识图谱治理按业务模块分开展示。</p></div><select v-model="selectedCourseId" @change="loadCourseData"><option v-for="course in courses" :key="course.id" :value="String(course.id)">{{ course.courseName }}</option></select></div>
 
     <div class="admin-section-tabs">
       <button v-for="item in sections" :key="item" :class="{ active: section === item }" @click="section = item">{{ item }}</button>
@@ -134,10 +145,49 @@ onMounted(loadCourses)
         </section>
         <section class="panel">
           <div class="panel-head"><div><p class="eyebrow">新建课程</p><h3>课程基础信息</h3></div></div>
-          <form class="modern-form" @submit.prevent="createCourse"><label>课程编码<input v-model="courseForm.courseCode" required placeholder="例如 DM-202"></label><label>课程名称<input v-model="courseForm.courseName" required placeholder="请输入中文课程名称"></label><label>课程说明<textarea v-model="courseForm.description" placeholder="课程定位、适用对象和主要内容"></textarea></label><button class="primary-button">创建课程</button></form>
+          <form class="modern-form" @submit.prevent="createCourse"><label>课程编码<input v-model="courseForm.courseCode" required placeholder="例如 MATH-202"></label><label>课程名称<input v-model="courseForm.courseName" required placeholder="请输入中文课程名称"></label><label>课程说明<textarea v-model="courseForm.description" placeholder="课程定位、适用对象和主要内容"></textarea></label><button class="primary-button">创建课程</button></form>
         </section>
       </div>
       <section class="panel"><div class="panel-head"><div><p class="eyebrow">知识目录</p><h3>{{ selectedCourse?.courseName }} · 知识点</h3></div><span class="soft-badge">{{ points.length }} 项</span></div><div class="catalog-grid"><article v-for="point in points" :key="point.id"><strong>{{ point.knowledgeName }}</strong><span>{{ point.knowledgeCode }}</span></article></div></section>
+    </template>
+
+    <template v-else-if="section === '数据与算法'">
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">DATA-0 已审计快照</p><h3>{{ data0.displayName }}</h3><p class="muted">{{ data0.provenance }}</p></div><span class="soft-badge">{{ data0.id }}</span></div>
+        <div class="metric-grid four">
+          <article class="metric-card accent-blue"><span>匿名学生</span><strong>{{ count(data0.students) }}</strong><small>人</small></article>
+          <article class="metric-card accent-green"><span>学习行为</span><strong>{{ count(data0.interactions) }}</strong><small>条</small></article>
+          <article class="metric-card accent-purple"><span>练习元数据</span><strong>{{ count(data0.metadataRows) }}</strong><small>{{ count(data0.distinctExerciseIds) }} 个不同ID</small></article>
+          <article class="metric-card accent-orange"><span>整体正确率</span><strong>{{ pct(data0.correctRate) }}</strong><small>研究数据统计</small></article>
+        </div>
+        <p class="muted">{{ data0.boundary }}</p>
+      </section>
+
+      <div class="two-column admin-layout">
+        <section class="panel">
+          <div class="panel-head"><div><p class="eyebrow">数据处理链</p><h3>从原始资料到模型输入</h3></div></div>
+          <article v-for="(item, index) in researchSnapshot.pipeline" :key="item" class="simple-row"><span>{{ index + 1 }}. {{ item }}</span><b>已记录</b></article>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><p class="eyebrow">数据质量</p><h3>审计发现</h3></div></div>
+          <article class="simple-row"><span>知识领域 / 主题</span><b>{{ data0.areas }} / {{ data0.topics }}</b></article>
+          <article class="simple-row"><span>原始先修关系</span><b>{{ count(data0.rawPrerequisiteEdges) }} 条</b></article>
+          <article class="simple-row"><span>重复练习ID记录</span><b>{{ data0.duplicateExerciseIdRecords }}</b></article>
+          <article class="simple-row"><span>缺失主题 / 领域记录</span><b>{{ data0.missingTopicRows }} / {{ data0.missingAreaRows }}</b></article>
+          <article class="simple-row"><span>原始关系自环 / 有环SCC</span><b>{{ data0.selfLoops }} / {{ data0.cyclicSccs }}</b></article>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">{{ model3.experiment }} 最终验证</p><h3>算法比较与当前集成边界</h3></div><span class="soft-badge">{{ model3.gate }}</span></div>
+        <div class="metric-grid four">
+          <article class="metric-card"><span>{{ model3.baselineName }}</span><strong>{{ model3.baselineAuc.toFixed(6) }}</strong><small>AUC</small></article>
+          <article class="metric-card accent-blue"><span>{{ model3.raschName }}</span><strong>{{ model3.raschAuc.toFixed(6) }}</strong><small>AUC · ACC {{ model3.raschAcc.toFixed(6) }}</small></article>
+          <article class="metric-card accent-green"><span>Rasch 相对基线</span><strong>+{{ model3.aucDelta.toFixed(6) }}</strong><small>95%CI [{{ model3.aucCiLow.toFixed(6) }}, {{ model3.aucCiHigh.toFixed(6) }}]</small></article>
+          <article class="metric-card accent-orange"><span>{{ model3.hierarchicalName }}</span><strong>{{ model3.hierarchicalAuc.toFixed(6) }}</strong><small>AUC，未优于 Rasch</small></article>
+        </div>
+        <div class="warning-box"><strong>不能混淆研究结果与线上算法</strong><p>{{ model3.productionBoundary }}</p></div>
+      </section>
     </template>
 
     <template v-else-if="section === '教师授权'">
@@ -155,7 +205,7 @@ onMounted(loadCourses)
     </template>
 
     <template v-else>
-      <section class="panel"><div class="panel-head"><div><p class="eyebrow">系统状态</p><h3>V0.7 工程底座</h3></div><span class="soft-badge">Release Candidate</span></div><div class="system-cap-grid"><article><strong>MySQL 8.4</strong><span>业务权威数据与图谱版本事实</span></article><article><strong>Neo4j</strong><span>已发布知识图查询投影，可从 MySQL 重建</span></article><article><strong>Redis</strong><span>可选缓存，故障时系统进入降级状态</span></article><article><strong>Spring Boot</strong><span>认证、课程、答题、推荐、图谱与学情服务</span></article><article><strong>Playwright</strong><span>学生、教师、管理员真实浏览器回归</span></article><article><strong>Docker Compose</strong><span>完整本地评审环境一键启动</span></article></div></section>
+      <section class="panel"><div class="panel-head"><div><p class="eyebrow">系统状态</p><h3>Java 工程底座</h3></div><span class="soft-badge">发布候选</span></div><div class="system-cap-grid"><article><strong>MySQL 8.4</strong><span>业务权威数据与图谱版本事实</span></article><article><strong>Neo4j</strong><span>已发布知识图查询投影，可从 MySQL 重建</span></article><article><strong>Redis</strong><span>可选缓存，故障时系统进入降级状态</span></article><article><strong>Spring Boot</strong><span>认证、课程、答题、推荐、图谱与学情服务</span></article><article><strong>Playwright</strong><span>学生、教师、管理员真实浏览器回归</span></article><article><strong>Docker Compose</strong><span>完整本地评审环境一键启动</span></article></div></section>
     </template>
   </section>
 </template>
