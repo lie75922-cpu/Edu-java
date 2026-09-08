@@ -52,13 +52,14 @@ const missingRoute = await request('/api/v1/release-check/missing-route', {
 })
 assert(missingRoute.code === 'NOT_FOUND', 'missing API route does not return the standard 404 envelope')
 const studentCourses = requireData(await request('/api/v1/courses', { token: student.accessToken }), 'student courses')
-const courseA = studentCourses.find(course => course.courseCode === 'DEMO-ALG-101')
-assert(courseA, 'synthetic algebra course is not accessible to demo student')
+const courseA = studentCourses.find(course => course.courseCode === 'DM-101')
+assert(courseA, '离散数学主课程未对演示学生开放')
 const points = requireData(await request(`/api/v1/courses/${courseA.id}/knowledge-points`, { token: student.accessToken }), 'knowledge points')
-const target = points.find(point => point.knowledgeCode === 'DEMO-ALG-APPLICATION')
-assert(target, 'learning-path target is missing')
+assert(points.length >= 16, '离散数学主课程知识点数量不足')
+const target = points.find(point => point.knowledgeCode === 'DM-LOGIC-INFERENCE')
+assert(target, '学习路径目标知识点缺失')
 const exercises = requireData(await request(`/api/v1/exercise-units?courseId=${courseA.id}`, { token: student.accessToken }), 'exercise units')
-assert(exercises.length > 0, 'synthetic course has no exercise units')
+assert(exercises.length >= 16, '离散数学主课程练习单元不足')
 const question = requireData(await request(`/api/v1/exercise-units/${exercises[0].id}/questions/next`, { token: student.accessToken }), 'next question')
 const answer = requireData(await request(`/api/v1/questions/${question.id}/answers`, {
   method: 'POST',
@@ -87,23 +88,23 @@ const learningPath = requireData(await request(`/api/v1/knowledge-points/${targe
 }), 'learning path')
 assert(learningPath.graphVersionId, 'learning path is not bound to a Published GraphVersion')
 const graph = requireData(await request(`/api/v1/courses/${courseA.id}/graph`, { token: student.accessToken }), 'published graph')
-assert(graph.nodes.length >= 2 && graph.edges.length >= 1, 'real Published Graph query is incomplete')
+assert(graph.nodes.length >= 16 && graph.edges.length >= 12, '离散数学 Published Graph 规模不符合演示基线')
 
 const teacher = await login('demo-teacher-a')
 const teacherCourses = requireData(await request('/api/v1/teacher/courses', { token: teacher.accessToken }), 'teacher courses')
-assert(teacherCourses.length === 1 && teacherCourses[0].courseId === courseA.id, 'Teacher A can see an unassigned course')
+assert(teacherCourses.some(course => course.courseId === courseA.id), '张老师无法访问离散数学主课程')
 for (const path of [
   `/api/v1/teacher/courses/${courseA.id}/analytics/overview`,
   `/api/v1/teacher/courses/${courseA.id}/analytics/knowledge-points`,
   `/api/v1/teacher/courses/${courseA.id}/analytics/mastery-heatmap?page=0&size=10`
 ]) {
-  const endpoint = path.replace('/api/v1', '')
-  requireData(await request(`/api/v1${endpoint}`, { token: teacher.accessToken }), `teacher analytics ${endpoint}`)
+  requireData(await request(path, { token: teacher.accessToken }), `teacher analytics ${path}`)
 }
 const otherStudent = await login('demo-student-dave')
 const otherCourses = requireData(await request('/api/v1/courses', { token: otherStudent.accessToken }), 'second student courses')
-const courseB = otherCourses.find(course => course.courseCode === 'DEMO-GEO-201')
-assert(courseB, 'synthetic second course is missing')
+const courseB = otherCourses.find(course => course.courseCode === 'DM-GRAPH-201')
+assert(courseB, '图论专题训练课程缺失')
+assert(!teacherCourses.some(course => course.courseId === courseB.id), 'Teacher A can see Teacher B course')
 const forbidden = await request(`/api/v1/teacher/courses/${courseB.id}/analytics/overview`, {
   token: teacher.accessToken,
   expected: 403
@@ -116,7 +117,7 @@ assert(assignments.some(assignment => assignment.username === 'demo-teacher-a'),
 const rebuild = requireData(await request('/api/v1/admin/graph-projections/rebuild-published', {
   method: 'POST', token: admin.accessToken
 }), 'Published Graph reprojection')
-assert(rebuild.some(item => item.courseId === courseA.id && item.edgeCount >= 1), 'MySQL-to-Neo4j reprojection did not rebuild course A')
+assert(rebuild.some(item => item.courseId === courseA.id && item.edgeCount >= 12), 'MySQL-to-Neo4j reprojection did not rebuild discrete-math graph')
 
 const unauthenticated = await request(`/api/v1/teacher/courses/${courseA.id}/analytics/overview`, { expected: 401 })
 assert(unauthenticated.code === 'UNAUTHENTICATED', 'missing JWT does not have a consistent failure envelope')
