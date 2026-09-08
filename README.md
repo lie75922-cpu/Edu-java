@@ -1,128 +1,225 @@
 # Edu-java
 
-**基于知识图谱与个性化学习分析的 Java 智能教学平台**
+**基于知识图谱与学习分析的中文数学智能学习平台**
 
-> 当前状态：V0.7 工程底座已达到 Release Candidate；V1 产品层已经开始按原《基于〈离散数学〉数字教材的知识图谱建设与应用》申报书重构。工程底座（Spring Boot / MySQL / Neo4j / 权限 / Outbox / 图谱版本治理 / 推荐与学习路径 / 教师学情 / Docker / E2E）保留，前台主产品改为中文《离散数学》智慧教学平台。
+> 当前状态：V0.7 Java 工程底座已形成可复用 Release Candidate；V1 正在把“数据处理 → 知识结构 → 图谱治理 → 学习状态 → 个性化推荐/路径 → 学生/教师/管理产品”真正连成一条业务链。当前中文业务 fixture 仍以离散数学为小型全栈演示，但平台不再锁死离散数学，真实数据是什么数学领域就按真实语义建模和中文展示。
 
-## 当前两条线
+最新产品基线：`docs/V1_MATH_PLATFORM_BASELINE.md`  
+真实数据接入 Codex 执行单：`docs/CODEX_REAL_DATA_INTEGRATION_TASK.md`
 
-- **工程底座**：V0.7 已完成并保留。
-- **产品重构**：V1 已直接实现第一轮中文产品预览，包括离散数学课程数据、学生端、教师端、模块化管理端、知识图谱与个性化学习页面；教学资源中心、正式章/节/知识集实体和多元评价配置仍待下一阶段后端扩展。
+## 1. 项目目标
 
-## V1 当前产品内容
+平台不是单纯课程 CRUD，也不是只展示一张 Neo4j 图。
 
-主课程：《离散数学》 `DM-101`
+目标链路：
 
 ```text
-离散数学
-├─ 第一章 数理逻辑
-│  ├─ 命题与逻辑联结词
-│  ├─ 命题等值演算
-│  ├─ 析取范式与合取范式
-│  └─ 命题逻辑推理理论
-├─ 第二章 集合论与关系
-│  ├─ 集合与集合运算
-│  ├─ 二元关系及其性质
-│  ├─ 等价关系与划分
-│  └─ 偏序关系与哈斯图
-├─ 第三章 图论
-│  ├─ 图的基本概念
-│  ├─ 路径、回路与连通性
-│  ├─ 欧拉图与欧拉回路
-│  └─ 树与生成树
-└─ 第四章 代数结构
-   ├─ 代数系统与运算
-   ├─ 群与子群
-   ├─ 环与域
-   └─ 格与布尔代数
+真实学习数据
+  -> 数据来源登记 / 清洗 / EDA / 质量审计
+  -> 原始英文语义 + 中文展示映射
+  -> KnowledgeArea / KnowledgePoint / ExerciseUnit
+  -> Evidence / GraphVersion / Validator / Published Graph
+  -> 学生 AnswerRecord
+  -> RuleBeta 学习状态
+  -> 图谱先修约束 + 错题历史 + 推荐排序
+  -> 个性化推荐 / 学习路径
+  -> 学生学习页面
+  -> 教师学情分析
+  -> 管理端数据 / 课程 / 图谱 / 权限治理
 ```
 
-当前中文演示基线：
+用户侧使用自然中文；底层 Java、数据库字段和原始科研数据可以保持英文。中文化不等于篡改原始数据。
 
-- 4 个一级章节；
-- 16 个核心知识点；
-- 16 个练习单元；
-- 16 道中文选择题；
-- 12 条已审核先修关系；
-- 1 张通过现有 GraphVersion / Validator / Neo4j 流程发布的课程知识图；
-- 专题课程：图论专题训练、数理逻辑专题训练、集合与关系专题训练。
+## 2. 当前真实数据基础
 
-## V1 已直接重做的前台
+DATA-0 已完成来源登记、Schema/质量审计、EDA、图关系审计、学生级划分和模型输入构造。
+
+| 指标 | 已审计值 |
+| --- | ---: |
+| 匿名学生 | 247,606 |
+| 学习行为 | 25,925,992 |
+| Exercise metadata | 837 |
+| distinct Exercise external ID | 835 |
+| non-empty Topic | 40 |
+| non-empty Area | 8 |
+| 整体正确率 | 0.827874 |
+| raw prerequisite rows | 980 |
+| duplicate Exercise external-ID records | 2 |
+| missing Topic rows | 20 |
+| missing Area rows | 20 |
+
+原始 prerequisite 分析图存在 self-loop 和 cycle，因此**不能直接导入 Neo4j 当成生产知识图谱**。
+
+数据来源边界：当前执行环境未直接取得官方 PSLC/DataShop 原包，实际研究输入为已登记的第三方镜像；该 provenance 限制继续保留。
+
+### 语义边界
+
+```text
+Area != Topic != Exercise != Question
+Research Student != Platform User
+Raw prerequisite Evidence != Published Graph
+```
+
+第一版真实业务映射候选：
+
+```text
+KnowledgeArea <- Area
+KnowledgePoint <- Topic
+ExerciseUnit <- Exercise
+Question <- 仅平台自有/有权使用的具体题目
+```
+
+原始英文名称必须保留；中文名称通过版本化 display mapping 提供。
+
+## 3. 当前 Java 工程底座
+
+- Java 21 / Spring Boot / Spring Security / JWT / RBAC
+- MySQL 8.4：业务权威数据
+- Neo4j：已发布知识图查询投影，可从 MySQL/GraphVersion 重建
+- Redis：可选缓存
+- Flyway V001–V006
+- Course / KnowledgeArea / KnowledgePoint / ExerciseUnit / Question
+- AnswerRecord 幂等
+- Outbox
+- Mastery exactly-once
+- Evidence -> Draft -> GraphValidator -> Published Graph -> Neo4j
+- RuleBeta mastery，零历史保持 UNKNOWN/“暂无学习数据”
+- Recommendation / Learning Path
+- Teacher course authorization / analytics
+- Docker Compose / OpenAPI / health-readiness / Playwright / backup-restore
+
+## 4. V1 当前产品形态
 
 ### 学生端
 
-- 中文首页；
-- 课程学习与章节目录；
-- 中文题目与服务端判题；
-- 可交互知识图谱；
-- 前置/后继知识；
-- 薄弱知识诊断；
-- 学习推荐；
-- 图形化学习路径。
+- 首页：课程、学习记录、薄弱知识、平均掌握情况、图谱摘要、推荐摘要
+- 课程学习：从后端 `KnowledgeArea -> KnowledgePoint` 动态生成领域和知识目录
+- 知识图谱：按后端 Area 分组，查看前置/后继关系
+- 个性化学习：薄弱知识、推荐理由、学习路径
+- 真实服务端答题与判题闭环
+
+**重要纠偏：**课程页和知识图谱页已经删除通过 `DM-LOGIC / DM-GRAPH / DM-ALG` 等编码判断章节的前端硬编码。
 
 ### 教师端
 
-- 中文教师工作台；
-- 班级整体指标；
-- 知识点掌握概览；
-- 高频错误题；
-- 学生 × 知识点掌握热力表；
-- 学生学情详情；
-- 当前学习建议上下文。
+- 授权课程列表
+- 在读/活跃学生、累计作答、整体正确率
+- KnowledgePoint 班级掌握概览
+- 高频错误题
+- 学生 × KnowledgePoint 热力表
+- 单学生作答、掌握状态、推荐上下文
+- 跨课程权限隔离
 
 ### 管理端
 
-已从原超长单页首先拆为：
+当前拆分为：
 
-- 课程与教学；
-- 教师授权；
-- 知识图谱治理；
-- 系统状态。
+- 课程与教学
+- 数据与算法
+- 教师授权
+- 知识图谱治理
+- 系统状态
 
-Evidence / GraphVersion 等工程术语不再暴露给普通学生和教师；高级治理仅保留在管理侧。
+“数据与算法”当前展示的是仓库已经冻结、可审计的 DATA-0 / MODEL-3 快照，用于让产品评审看到数据处理和算法研究工作；它**不是实时数据治理后端**，后续会由 DatasetSource / DatasetVersion / ImportRun API 替代。
 
-## 仍保留的工程能力
+## 5. 当前合成业务 fixture 的边界
 
-- Java 21 + Spring Boot + Spring Security + JWT + RBAC
-- MySQL 8.4 权威业务存储；Neo4j 为已发布知识图查询投影；Redis 为可选缓存
-- 课程、知识点、练习、题目、答题记录
-- AnswerRecord 幂等与 Outbox
-- Evidence → Draft → GraphValidator → Published Graph → Neo4j 版本化发布
-- RuleBeta 知识点掌握度（无历史为“暂无学习数据”，不伪造 0.5）
-- 可解释推荐与基于先修 DAG 的学习路径
-- 教师课程授权与学情分析
-- Docker Compose、Flyway V001–V006、OpenAPI、健康检查、Playwright E2E、备份恢复
+为了让 CI 可以在没有 Junyi 原始 CSV 的 GitHub Runner 上完整跑通学生/教师/管理员流程，目前仍保留一个小型中文离散数学业务 fixture：
 
-## 科研数据边界
+- 主课程 `DM-101 离散数学`
+- 16 个知识点
+- 16 个练习单元
+- 16 道中文题
+- 12 条已审核先修关系
+- 少量合成学生/教师/管理员
 
-Junyi 继续作为 Research Data Domain，不再定义最终前台课程内容：
+它的用途是**全栈演示与自动化测试**，不是：
 
-- 247,606 名匿名学习者
-- 25,925,992 条交互
-- 835 个不同 Exercise external ID
-- 8 Area / 40 Topic
-- DATA-0 固定先修证据图 scope：815 Exercise 节点 / 979 条 raw prerequisite Evidence
+- 平台最终学科限制；
+- 真实 Junyi 业务导入结果；
+- 真实知识库规模；
+- 教学效果证据。
 
-这些数据服务于 MODEL-0A～MODEL-3，不会自动成为平台用户或离散数学知识点。
+## 6. 个性化推荐目前怎样工作
 
-## 模型研究最终结论
+当前生产链：
 
-MODEL-3 在唯一一次独立 5,000 人 final holdout 上得到：
+```text
+学生作答
+  -> RuleBeta KnowledgePoint mastery
+  -> 找到低于阈值的薄弱知识
+  -> 查询 Published Graph 前置关系
+  -> 补充未掌握 prerequisite
+  -> 结合近期错误 / 复习间隔
+  -> 过滤和确定性排序
+  -> Recommendation Snapshot
+  -> Learning Path
+```
 
-- ExerciseRate AUC 0.707210
-- Rasch/IRT-1PL AUC 0.724675
-- Rasch 相对 ExerciseRate：AUC +0.017465，95% CI [0.012394, 0.022665]
-- Rasch + student-Topic deviation AUC 0.710015，显著弱于 Rasch
+当前弱掌握阈值：`0.70`。
 
-因此接受 `GO_RASCH_ONLY_INTEGRATION`，但 Rasch 只表示全局学生能力 / 答题预测信号，不等于知识点掌握度。当前生产 Mastery 仍由 RuleBeta 负责。
+系统保留 UNKNOWN 语义：没有真实历史记录的知识点不伪造为 0.5 掌握度。
 
-## 下一阶段仅处理 V1 后端缺口
+## 7. 算法研究结论与生产边界
 
-1. 教学资源中心：教材、课件、视频、动画、文档、案例、练习、测试题、代码/虚拟实验；
-2. 正式的章 → 节 → 知识集 → 知识点后端层次；
-3. 过程性、诊断性、结果性评价模型；
-4. 智能备课资源聚合；
-5. 对上述能力补 Flyway / API / Testcontainers / 中文 Playwright；
-6. 最终人工 UI 截图验收。
+MODEL-3 最终验证：
 
-V1 不新增 LLM/Agent、复杂图模型、Kafka、微服务或 Kubernetes。
+| 方法 | AUC | ACC | RMSE |
+| --- | ---: | ---: | ---: |
+| ExerciseRate | 0.707210 | 0.820778 | 0.368169 |
+| Rasch / IRT-1PL | 0.724675 | 0.826387 | 0.362658 |
+| Hierarchical Rasch + Topic | 0.710015 | 0.811279 | 0.374733 |
+
+Rasch - ExerciseRate AUC = `+0.017465`，student-cluster bootstrap 95% CI `[0.012394, 0.022665]`。
+
+Final Gate：`GO_RASCH_ONLY_INTEGRATION`。
+
+这表示 Rasch 可以进入下一阶段**独立审查的辅助信号集成设计**，不表示它已经上线。当前 Java 生产 Mastery/Recommendation 仍由 RuleBeta + Published Graph 驱动。
+
+Rasch θ 只能解释为全局能力/答题风险辅助信号，不能写成知识点掌握度。
+
+## 8. 当前最重要的未完成工作
+
+P0：**真实 Junyi 数学数据 → Java Business Domain**。
+
+需要在有本地原始数据的环境完成：
+
+1. Area / Topic / Exercise 的确定性业务导出；
+2. 原始英文 label + 中文 display mapping；
+3. Java 幂等、可审计 ImportRun；
+4. raw prerequisite -> Evidence -> resolve/review -> GraphVersion -> Published Graph；
+5. 实际导入数量与冲突报告；
+6. >100 节点知识图谱的筛选/局部图，而不是默认一次画全部节点；
+7. 推荐证据链可视化；
+8. 正式数据治理 API。
+
+本地真实输入路径与完整执行要求已经写入：
+
+`docs/CODEX_REAL_DATA_INTEGRATION_TASK.md`
+
+## 9. 当前不做/不能伪造
+
+- 不把 Junyi Exercise 元数据变成假的 Question 题干/答案；
+- 不把科研匿名学生导成平台 User；
+- 不直接发布有 self-loop/cycle 的原始 prerequisite；
+- 不虚构教材、视频、课件等资源中心内容；
+- 不虚构学习效果提升；
+- 不新增与需求无关的 LLM/Agent、Kafka、微服务、Kubernetes；
+- 不为了页面看起来丰富而硬造课程数量。
+
+## 10. Release Gate
+
+每个 Release Candidate 都必须通过：
+
+- backend tests
+- model-service tests
+- data-pipeline tests
+- frontend build
+- compose-config
+- clean-volume full-stack startup
+- API smoke
+- Playwright 学生/教师/管理员真实浏览器 E2E
+- 跨角色/跨课程权限隔离
+- 不提交原始数据/凭据/日志/依赖目录
+
+任何一项失败都不能写 `GO_RELEASE`。
