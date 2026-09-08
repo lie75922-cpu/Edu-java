@@ -13,7 +13,10 @@ const weakItems = computed(() => mastery.value.filter(item => item.status === 'O
 const unknownItems = computed(() => mastery.value.filter(item => item.status === 'UNKNOWN'))
 
 async function load(course = null) {
-  if (course) selectedCourse.value = course
+  if (course) {
+    selectedCourse.value = course
+    targetId.value = ''
+  }
   if (!selectedCourse.value) return
   const id = selectedCourse.value.id
   const [m, g] = await Promise.all([
@@ -52,7 +55,9 @@ async function boot() {
   const result = await run(() => api('/courses'))
   if (!result) return
   courses.value = result
-  if (!selectedCourse.value) selectedCourse.value = result.find(item => item.courseCode === 'DM-101') || result[0] || null
+  if (!selectedCourse.value || !result.some(item => item.id === selectedCourse.value.id)) {
+    selectedCourse.value = result[0] || null
+  }
   await load()
 }
 
