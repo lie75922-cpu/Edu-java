@@ -8,134 +8,20 @@
 
 ## 已直接实现
 
-### 1. V0.7 工程底座保留
+- 保留 Java 21 / Spring Boot / Spring Security / JWT / RBAC、MySQL / Neo4j / Redis / Flyway、AnswerRecord 幂等、Outbox、RuleBeta mastery / UNKNOWN、Evidence -> Draft -> GraphValidator -> Published Graph、Recommendation / Learning Path、Teacher course authorization / analytics、Docker / OpenAPI / Playwright / release CI。
+- V1 中文学生端、教师端、管理端已经可运行。
+- 后端角色继续区分 STUDENT / TEACHER / TEACH_ADMIN / SYSTEM_ADMIN。
+- 新增 `GET /api/v1/courses/{courseId}/knowledge-areas`，学生课程页和知识图谱页按后端 KnowledgeArea/KnowledgePoint 数据组织，不再通过 `DM-*` knowledgeCode 在前端猜课程结构。
+- 管理端“数据与算法”显示 DATA-0 / MODEL-3 冻结科研快照，同时明确生产推荐仍为 RuleBeta + Published Graph，Rasch 尚未接入生产。
+- 个性化链保持真实后端调用：AnswerRecord -> RuleBeta mastery / UNKNOWN -> weak KnowledgePoint -> active Published Graph prerequisite -> Recommendation -> Learning Path -> Teacher Analytics。
 
-保留并继续回归：
+## 当前 synthetic fixture
 
-- Java 21 / Spring Boot / Spring Security / JWT / RBAC；
-- MySQL 8.4 / Neo4j / Redis；
-- Flyway V001–V006；
-- Course / KnowledgeArea / KnowledgePoint / ExerciseUnit / Question；
-- AnswerRecord 幂等；
-- Outbox；
-- RuleBeta mastery 与 UNKNOWN 语义；
-- Evidence -> Draft -> GraphValidator -> Published Graph -> Neo4j；
-- Recommendation / Learning Path；
-- Teacher course authorization / analytics；
-- Docker Compose / OpenAPI / API smoke / Playwright / release CI。
+仍保留受控的小型中文离散数学 fixture 作为 E2E 数据：16 个知识点、16 个 ExerciseUnit、16 道中文平台 Question、12 条已审核先修关系。它只证明全栈链路，不代表真实 Junyi 数据已经产品化，也不代表平台最终被锁死为离散数学。
 
-### 2. 中文产品入口与角色分区
+## Final Release Gate
 
-默认前端已切到 V1 中文界面。
-
-学生端：
-
-- 首页；
-- 课程学习；
-- 知识图谱；
-- 个性化学习；
-- 中文题目练习与服务端判题；
-- 推荐理由与学习路径。
-
-教师端：
-
-- 教师工作台；
-- 课程概览；
-- KnowledgePoint 学情；
-- 高频错误题；
-- 学生 × KnowledgePoint 掌握情况；
-- 学生学情详情；
-- 当前推荐上下文。
-
-管理端：
-
-- 课程与教学；
-- 数据与算法；
-- 教师授权；
-- 知识图谱治理；
-- 系统状态。
-
-后端角色继续区分 STUDENT / TEACHER / TEACH_ADMIN / SYSTEM_ADMIN，普通教师保持课程级授权边界。
-
-### 3. 课程结构去前端领域硬编码
-
-已新增学生可访问接口：
-
-- `GET /api/v1/courses/{courseId}/knowledge-areas`
-
-学生课程页改为根据后端 `KnowledgeArea -> KnowledgePoint` 数据生成领域导航和目录。
-
-学生知识图谱页改为使用 `KnowledgePoint.areaId + KnowledgeArea` 数据分组与布局。
-
-已删除把 `DM-LOGIC / DM-GRAPH / DM-ALG` 等 knowledgeCode 当课程结构的前端推断逻辑。后续真实数据接入时不得恢复这种写法。
-
-### 4. 当前中文业务 fixture
-
-当前仍保留一套受控的小型中文 fixture，用于全栈 E2E：
-
-- 主演示课程：《离散数学》 `DM-101`；
-- 16 个知识点；
-- 16 个 ExerciseUnit；
-- 16 道中文平台 Question；
-- 12 条已审核先修关系；
-- GraphVersion -> validation -> Published Graph -> Neo4j；
-- 受控学习行为用于 mastery / recommendation / learning path 演示。
-
-这套 fixture 的作用只是验证系统链路。它不能被写成“真实 Junyi 数据已产品化”，也不能作为最终数据规模。
-
-### 5. 数据处理与算法工作已在产品中显性化
-
-管理端“数据与算法”目前展示仓库已经冻结、可审计的 DATA-0 / MODEL-3 研究快照，包括：
-
-- 247,606 名匿名学生；
-- 25,925,992 条学习行为；
-- 837 条 Exercise metadata；
-- 835 个 distinct Exercise external ID；
-- 40 Topics / 8 Areas；
-- 980 条 raw prerequisite；
-- 数据重复、缺失、self-loop、cycle 审计事实；
-- ExerciseRate / Rasch / Hierarchical Rasch 对照；
-- Rasch 相对 ExerciseRate AUC +0.017465；
-- 95% CI [0.012394, 0.022665]；
-- Gate = `GO_RASCH_ONLY_INTEGRATION`。
-
-`frontend/src/v1/researchSnapshot.js` 只是版本化冻结科研快照，不冒充实时数据治理 API。
-
-当前 Java 生产推荐仍为 RuleBeta + Published Graph；Rasch 尚未接入生产，不允许把研究结果错误归因到线上推荐。
-
-### 6. 个性化学习链保持真实后端调用
-
-当前 V1 保留真实业务链：
-
-```text
-AnswerRecord
-  -> RuleBeta mastery / UNKNOWN
-  -> weak KnowledgePoint
-  -> active Published Graph prerequisite
-  -> Recommendation
-  -> Learning Path
-  -> Teacher Analytics
-```
-
-学生端可以完成：
-
-- 在线答题；
-- 服务端反馈；
-- 更新学习建议；
-- 查看推荐原因；
-- 选择目标知识；
-- 生成学习路径；
-- 查看知识图谱节点及前置/后继关系。
-
-### 7. Release Gate：最终最新 HEAD 已全绿
-
-最终验证 HEAD：
-
-- SHA：`fcb728cb96c3e69b20bf4552425930d165029317`
-- GitHub Actions CI run：`#162`
-- run id：`34278717249`
-
-最终结果：
+截至本文件写入前，代码与 Codex 执行单的最终 head `4efcd351e634659263fd16de2e285bea6041cb1e` 已通过 GitHub Actions CI run #163（run id `34279102133`）：
 
 ```text
 backend            PASS
@@ -145,43 +31,37 @@ compose-config     PASS
 full-stack-release PASS
 ```
 
-`full-stack-release` 实际完成：
+其中 `full-stack-release` 实际完成并通过：full release stack build/start、readiness、API smoke、真实 Playwright 浏览器 E2E、browser artifacts upload、clean shutdown。
 
-- 隔离 release 配置生成；
-- full release stack build/start；
-- readiness；
-- API smoke；
-- real browser Playwright E2E；
-- browser artifacts upload；
-- clean shutdown。
+注意：本文件本身的状态同步提交会形成新的 HEAD，因此 merge 时仍必须以 GitHub PR 页面显示的**最新 HEAD CI**为准；不得引用旧 SHA 绿灯替代最新 HEAD。
 
-在前一代码等价 head `d89650cdc64ec5938be3271aa5cb8e1d2f20d8fd` 的 run #161 中，最新浏览器 artifact 已人工复核：13 张真实页面截图完整，JUnit 为 1 test / 0 failures / 0 errors。最终 run #162 同样通过 real browser E2E；最后一次变更仅加强 Codex 本地路径与执行约束，不改变产品代码。
+前一代码等价 head `d89650cdc64ec5938be3271aa5cb8e1d2f20d8fd` 的浏览器 artifact 已人工核验：13 张真实页面截图完整，JUnit = 1 test / 0 failures / 0 errors。
 
 ## 当前不能在本会话环境真实完成的工作
 
-以下内容统一由 `docs/CODEX_REAL_DATA_INTEGRATION_TASK.md` 作为本机下一阶段执行单：
+统一由 `docs/CODEX_REAL_DATA_INTEGRATION_TASK.md` 作为本机下一阶段执行单：
 
 1. 本机 Junyi 原始 CSV -> deterministic business export；
-2. 真实 Area / Topic / Exercise 的中文 display mapping 与审核状态；
-3. Java 幂等 / dry-run / 可审计真实数据导入与 ImportRun；
+2. 真实 Area / Topic / Exercise 中文 display mapping 与审核；
+3. Java dry-run / 幂等 / 可审计 ImportRun；
 4. raw prerequisite -> Evidence -> review -> Published Graph 全量治理；
 5. >100 节点真实图的筛选、局部图、搜索、路径高亮和学生状态叠加；
-6. 正式 DatasetSource / DatasetVersion / ImportRun 数据治理 API；
-7. 教学资源中心的正式资源实体、来源/授权、分类与知识点关联；
-8. 章/节/知识集等课程层级是否需要扩展，必须由真实数据和业务需求驱动，不能前端硬造；
-9. 过程性 / 诊断性 / 结果性评价与教师配置；
-10. Rasch 生产辅助信号集成（如做必须 feature flag + 明确能力边界）；
+6. DatasetSource / DatasetVersion / ImportRun 正式数据治理 API；
+7. 教学资源中心；
+8. 由真实数据驱动的课程层级扩展；
+9. 学生/教师/管理员产品模块补齐；
+10. 可选 Rasch feature flag；
 11. 推荐/路径独立消融评测；
-12. 真实数据接入后的最终 UI 截图和人工产品验收。
+12. 真实数据接入后的最终 UI 与人工验收。
 
-## 当前硬约束
+## 硬约束
 
 - 不为了页面好看人工编课程；
+- `Area != Topic != Exercise != Question`；
 - 不把 Junyi Exercise 伪造成具体 Question；
 - 不把科研匿名学生导成平台 User；
-- `Area != Topic != Exercise != Question`；
-- raw prerequisite 只是 Evidence，不是真值；
-- 不覆盖原始英文 label，中文使用 display mapping；
+- raw prerequisite 只是 Evidence；
+- 中文 display mapping 不覆盖原始英文 label；
 - 不把 Rasch theta 称为知识点 mastery；
-- 不为了通过测试写学生 ID / 题目 ID / 课程 ID 专用逻辑；
-- 任一 release job 失败都不能返回 `GO_RELEASE`。
+- 不写学生 ID / 题目 ID / 课程 ID 专用逻辑过测试；
+- 任一最新 HEAD release job 失败都不能宣称可发布。
