@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { api, currentView, percent, run, selectedCourse, session, statusText } from '../store.js'
+import { api, currentView, percent, run, selectedCourse, session } from '../store.js'
 
 const courses = ref([])
 const mastery = ref([])
@@ -21,7 +21,7 @@ async function loadHome() {
   if (!loadedCourses) return
   courses.value = loadedCourses
   if (!selectedCourse.value || !loadedCourses.some(item => item.id === selectedCourse.value.id)) {
-    selectedCourse.value = loadedCourses.find(item => item.courseCode === 'DM-101') || loadedCourses[0] || null
+    selectedCourse.value = loadedCourses[0] || null
   }
   if (!selectedCourse.value) return
   const courseId = selectedCourse.value.id
@@ -43,8 +43,8 @@ onMounted(loadHome)
     <div class="welcome-banner">
       <div>
         <p class="eyebrow light">欢迎回来，{{ session?.user?.nickname || '同学' }}</p>
-        <h2>今天继续把离散数学学得更清楚一点</h2>
-        <p>从知识结构出发，结合你的答题记录和薄弱知识安排下一步学习。</p>
+        <h2>今天继续完成你的数学学习计划</h2>
+        <p>系统根据课程知识结构、已有作答和薄弱知识安排下一步学习。</p>
       </div>
       <button class="light-button" @click="currentView = '个性化学习'">查看我的学习建议</button>
     </div>
@@ -60,10 +60,10 @@ onMounted(loadHome)
       <section class="panel">
         <div class="panel-head"><div><p class="eyebrow">我的课程</p><h3>继续学习</h3></div><button class="text-button" @click="currentView = '课程学习'">查看全部</button></div>
         <div class="course-cards">
-          <article v-for="course in courses" :key="course.id" class="course-card" :class="{ featured: course.courseCode === 'DM-101' }">
+          <article v-for="course in courses" :key="course.id" class="course-card" :class="{ featured: course.id === selectedCourse?.id }">
             <div class="course-cover">{{ course.courseName.slice(0, 2) }}</div>
             <div class="course-info">
-              <span class="pill">{{ course.courseCode === 'DM-101' ? '主修课程' : '专题训练' }}</span>
+              <span class="pill">{{ course.id === selectedCourse?.id ? '当前课程' : '学习课程' }}</span>
               <h4>{{ course.courseName }}</h4>
               <p>{{ course.description || '课程内容建设中' }}</p>
               <button class="primary-button" @click="openCourse(course)">进入学习</button>
@@ -94,9 +94,9 @@ onMounted(loadHome)
         <div class="graph-summary" v-if="graph">
           <div><strong>{{ graph.nodes?.length || 0 }}</strong><span>知识点</span></div>
           <div><strong>{{ graph.edges?.length || 0 }}</strong><span>先修关系</span></div>
-          <p>从“数理逻辑、集合论与关系、图论、代数结构”四个模块理解课程知识脉络。</p>
+          <p>图谱展示当前课程的知识节点和先修关系，并参与学习路径与推荐候选生成。</p>
         </div>
-        <div v-else class="empty-state compact"><strong>知识图谱尚未加载</strong><p>进入《离散数学》课程后可查看已发布的知识结构。</p></div>
+        <div v-else class="empty-state compact"><strong>知识图谱尚未加载</strong><p>课程发布知识关系后，可在这里查看知识结构。</p></div>
       </section>
 
       <section class="panel">
