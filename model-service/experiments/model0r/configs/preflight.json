@@ -1,0 +1,7 @@
+{
+  "dataset_family": "JUNYI_MID",
+  "cold_k_values": [0, 3, 5, 10],
+  "duplicate_policy": "Remove only later full-record-equal interactions; preserve the first source-order row.",
+  "exercise_policy": "Exclude unknown Exercises and known Exercises without exactly one non-missing frozen Topic.",
+  "topic_semantics": "ADR-0002 40 Topic initial concept layer; do not infer a replacement mapping."
+}

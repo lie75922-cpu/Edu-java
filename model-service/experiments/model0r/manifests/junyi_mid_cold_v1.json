@@ -1,0 +1,164 @@
+{
+  "dataset_name": "JUNYI_MID_COLD_V1",
+  "derived_local_artifacts": {
+    "files": [
+      "interactions_train.csv",
+      "interactions_valid_sequence.csv",
+      "interactions_test_sequence.csv",
+      "q_matrix.csv",
+      "student_index_map.json",
+      "exercise_index_map.json",
+      "topic_index_map.json",
+      "split_membership.json"
+    ],
+    "root": "model-service/experiments/model0r/data/junyi_mid_cold_v1",
+    "tracked_by_git": false
+  },
+  "parent_dataset": "JUNYI_MID",
+  "protocol": {
+    "calibration_evaluation_boundary": "For each k, first k chronological retained rows are calibration only; later rows are evaluation only. Members with fewer than k+1 retained rows remain in the frozen split and are marked INELIGIBLE_FOR_K.",
+    "eligibility": {
+      "test": {
+        "0": {
+          "coverage_percent": 100.0,
+          "eligibility_rule": "At least 1 retained chronological rows: first 0 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 2000,
+          "evaluation_interactions": 57115,
+          "frozen_members": 2000,
+          "ineligible_students": 0
+        },
+        "10": {
+          "coverage_percent": 69.4,
+          "eligibility_rule": "At least 11 retained chronological rows: first 10 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 1388,
+          "evaluation_interactions": 38563,
+          "frozen_members": 2000,
+          "ineligible_students": 612
+        },
+        "3": {
+          "coverage_percent": 100.0,
+          "eligibility_rule": "At least 4 retained chronological rows: first 3 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 2000,
+          "evaluation_interactions": 51115,
+          "frozen_members": 2000,
+          "ineligible_students": 0
+        },
+        "5": {
+          "coverage_percent": 96.4,
+          "eligibility_rule": "At least 6 retained chronological rows: first 5 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 1928,
+          "evaluation_interactions": 47115,
+          "frozen_members": 2000,
+          "ineligible_students": 72
+        }
+      },
+      "valid": {
+        "0": {
+          "coverage_percent": 100.0,
+          "eligibility_rule": "At least 1 retained chronological rows: first 0 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 1000,
+          "evaluation_interactions": 27721,
+          "frozen_members": 1000,
+          "ineligible_students": 0
+        },
+        "10": {
+          "coverage_percent": 68.2,
+          "eligibility_rule": "At least 11 retained chronological rows: first 10 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 682,
+          "evaluation_interactions": 18453,
+          "frozen_members": 1000,
+          "ineligible_students": 318
+        },
+        "3": {
+          "coverage_percent": 100.0,
+          "eligibility_rule": "At least 4 retained chronological rows: first 3 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 1000,
+          "evaluation_interactions": 24721,
+          "frozen_members": 1000,
+          "ineligible_students": 0
+        },
+        "5": {
+          "coverage_percent": 96.3,
+          "eligibility_rule": "At least 6 retained chronological rows: first 5 calibration rows and at least one disjoint evaluation row.",
+          "eligible_students": 963,
+          "evaluation_interactions": 22721,
+          "frozen_members": 1000,
+          "ineligible_students": 37
+        }
+      }
+    },
+    "interaction_counts": {
+      "test": 57115,
+      "train": 199392,
+      "valid": 27721
+    },
+    "k_values": [
+      0,
+      3,
+      5,
+      10
+    ],
+    "name": "NEW_STUDENT_COLD_START",
+    "ordering": "Per student: occurred_at ascending, with source-order as a stable tie-breaker.",
+    "student_membership": "Exactly DATA-0 frozen 7000 train / 1000 validation / 2000 test students; no substitutions."
+  },
+  "shared_measurements": {
+    "exercise_topic_mapping": {
+      "conflicting_topic_external_ids": 0,
+      "distinct_external_ids": 815,
+      "duplicate_external_id_count": 0,
+      "mapped_external_ids": 815,
+      "mapping_rule": "Only an Exercise with exactly one non-missing Topic across metadata records is Q-matrix eligible.",
+      "metadata_rows": 815,
+      "topic_count": 40,
+      "unmapped_external_ids": 0
+    },
+    "frozen_data0_membership": {
+      "counts": {
+        "test": 2000,
+        "train": 7000,
+        "valid": 1000
+      },
+      "exact_member_list_comparison": "PASS",
+      "overlap": {
+        "train_test": 0,
+        "train_valid": 0,
+        "valid_test": 0
+      },
+      "student_count": 10000
+    },
+    "q_matrix": {
+      "columns": 40,
+      "nonzero_entries": 624,
+      "rows": 624,
+      "semantics": "DATA-0 / ADR-0002 frozen one-Topic-per-Exercise initial concept layer."
+    },
+    "source_artifacts_tracked": false,
+    "source_interactions": {
+      "exact_duplicate_definition": [
+        "student_external_id",
+        "exercise_external_id",
+        "correct",
+        "attempts",
+        "count_hints",
+        "duration_seconds",
+        "earned_proficiency",
+        "hint_used",
+        "occurred_at"
+      ],
+      "exact_duplicate_rows": 17,
+      "retained_q_eligible_rows": 284228,
+      "rows_after_exact_duplicate_removal": 284228,
+      "source_rows": 284245,
+      "topic_unmapped_rows_after_dedup": 0,
+      "unknown_exercise_rows_after_dedup": 0
+    },
+    "student_with_retained_interactions": 10000
+  },
+  "source_artifacts": {
+    "logical_medium_root": "data-pipeline/.data/generated/medium",
+    "parent_manifest": "data-pipeline/manifests/junyi_mid_v1.json"
+  },
+  "status": "PASS",
+  "version": "1.0.0-model0r"
+}

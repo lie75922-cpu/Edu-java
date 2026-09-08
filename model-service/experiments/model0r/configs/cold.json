@@ -1,0 +1,40 @@
+{
+  "dataset_name": "JUNYI_MID_COLD_V1",
+  "seed": 20260908,
+  "device_preference": "cuda:0",
+  "k_values": [0, 3, 5, 10],
+  "global_training": {
+    "model": "NCDM",
+    "reference_component": "InsCD NCDM / Default extractor / NCD_IF equations through the archived split-safe adapter.",
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "learning_rate": 0.002,
+    "weight_decay": 0.0,
+    "batch_size": 4096,
+    "max_epochs": 20,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_k5_auc_then_lower_validation_k5_rmse_then_earlier_epoch",
+    "selection_boundary": "Only frozen validation students at k=5 are adapted with their first five calibration rows for validation selection. Test rows are not read before final selection."
+  },
+  "calibration": {
+    "k0_policy": "ZERO_HISTORY_BASELINE: standalone new-student representation is all zero and no optimization step is taken; it is explicitly not presented as calibrated adaptation.",
+    "learning_rate": 0.05,
+    "max_steps": 40,
+    "early_stopping": "Stop after three consecutive non-improving calibration BCE values, or at max_steps. Improvement requires a strict decrease greater than 0.000001.",
+    "representation_only": "All global NCDM parameters are frozen. A separate 40-dimensional new-student tensor is the only optimizer parameter. Evaluation is torch.no_grad and cannot update it."
+  },
+  "baselines": {
+    "global": "NCDM global-train correct rate only; no held-out labels.",
+    "exercise": "NCDM global-train Exercise historical rate with global fallback only; no held-out labels.",
+    "topic": "NCDM global-train Topic historical rate with global fallback only."
+  },
+  "orcdf_route": {
+    "status_when_no_safe_adapter": "NOT_SUPPORTED_BY_CURRENT_ADAPTER",
+    "reason": "The archived ORCDF adapter convolves a fixed all-student response graph and does not expose a standalone new-student representation path that can be optimized without changing graph/global state."
+  },
+  "icdm_route": {
+    "official_repository": "https://github.com/ECNU-ILOG/ICDM",
+    "required_checks": ["official code", "declared license", "auditable input semantics", "auditable current 40 Topic Q-matrix alignment"],
+    "status_when_unmet": "NOT_AUDITABLY_ALIGNED_FOR_CURRENT_40_TOPIC_INPUT"
+  }
+}

@@ -1,0 +1,1281 @@
+{
+  "calibration_protocol": {
+    "early_stopping": "Stop after three consecutive non-improving calibration BCE values, or at max_steps. Improvement requires a strict decrease greater than 0.000001.",
+    "k0_policy": "ZERO_HISTORY_BASELINE: standalone new-student representation is all zero and no optimization step is taken; it is explicitly not presented as calibrated adaptation.",
+    "learning_rate": 0.05,
+    "max_steps": 40,
+    "representation_only": "All global NCDM parameters are frozen. A separate 40-dimensional new-student tensor is the only optimizer parameter. Evaluation is torch.no_grad and cannot update it."
+  },
+  "dataset_name": "JUNYI_MID_COLD_V1",
+  "device": "cpu",
+  "frozen_student_membership": "7000 train / 1000 validation / 2000 test retained exactly",
+  "global_ncdm": {
+    "checkpoint": {
+      "path": "model-service/experiments/model0r/checkpoints/cold_ncdm_global_best.pt",
+      "size_bytes": 1767420
+    },
+    "epoch_records": [
+      {
+        "epoch": 1,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.49315622327279074,
+        "validation_calibration_latency": {
+          "mean_ms": 47.86724081004971,
+          "p50_ms": 48.326599993743,
+          "p95_ms": 85.15630000474629
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.834558338101316,
+          "auc": 0.6432975723081957,
+          "log_loss": 0.4357527305301261,
+          "rmse": 0.36632209472800004
+        }
+      },
+      {
+        "epoch": 2,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.4584665991822068,
+        "validation_calibration_latency": {
+          "mean_ms": 54.882495846102614,
+          "p50_ms": 53.2723999931477,
+          "p95_ms": 107.64523999678204
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8338101315963206,
+          "auc": 0.6908633216924601,
+          "log_loss": 0.43149135066055,
+          "rmse": 0.3652790266708495
+        }
+      },
+      {
+        "epoch": 3,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.3984373363913322,
+        "validation_calibration_latency": {
+          "mean_ms": 45.494547144436474,
+          "p50_ms": 45.740900008240715,
+          "p95_ms": 87.82765999931144
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.808987280489415,
+          "auc": 0.7119483502926662,
+          "log_loss": 0.502206434194773,
+          "rmse": 0.37656901979903795
+        }
+      },
+      {
+        "epoch": 4,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.35127418625111484,
+        "validation_calibration_latency": {
+          "mean_ms": 46.643137902447904,
+          "p50_ms": 51.651500005391426,
+          "p95_ms": 82.30069999553962
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8126402887196866,
+          "auc": 0.7229771566206861,
+          "log_loss": 0.5160428469215446,
+          "rmse": 0.37512229386105855
+        }
+      },
+      {
+        "epoch": 5,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.3297996964989876,
+        "validation_calibration_latency": {
+          "mean_ms": 45.09361806818657,
+          "p50_ms": 49.745500000426546,
+          "p95_ms": 84.20776000566546
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8144007746137935,
+          "auc": 0.7242659665812352,
+          "log_loss": 0.5330012272992876,
+          "rmse": 0.3766290184405978
+        }
+      },
+      {
+        "epoch": 6,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.31867370678454027,
+        "validation_calibration_latency": {
+          "mean_ms": 39.28356365495224,
+          "p50_ms": 45.18250000546686,
+          "p95_ms": 69.0965400004643
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8121121429514546,
+          "auc": 0.7204557460645938,
+          "log_loss": 0.5403576320190745,
+          "rmse": 0.3761980092123603
+        }
+      },
+      {
+        "epoch": 7,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.31221297322487346,
+        "validation_calibration_latency": {
+          "mean_ms": 37.78924953281567,
+          "p50_ms": 44.224299999768846,
+          "p95_ms": 64.72991000191541
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8126402887196866,
+          "auc": 0.7197867963984143,
+          "log_loss": 0.5493091857591003,
+          "rmse": 0.3774776778751092
+        }
+      },
+      {
+        "epoch": 8,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.30820498113729516,
+        "validation_calibration_latency": {
+          "mean_ms": 37.56755295911403,
+          "p50_ms": 41.33009999350179,
+          "p95_ms": 66.52012000413379
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8095154262576472,
+          "auc": 0.7210464810271893,
+          "log_loss": 0.5553333105302172,
+          "rmse": 0.37899786136515673
+        }
+      },
+      {
+        "epoch": 9,
+        "evaluation_representation_unchanged": true,
+        "global_state_unchanged": true,
+        "mean_global_train_bce": 0.3052187306540353,
+        "validation_calibration_latency": {
+          "mean_ms": 32.38225929410176,
+          "p50_ms": 36.563800007570535,
+          "p95_ms": 57.22693998977775
+        },
+        "validation_k": 5,
+        "validation_metrics": {
+          "acc": 0.8078429646582457,
+          "auc": 0.7208449536532635,
+          "log_loss": 0.5591100222569473,
+          "rmse": 0.37997260991771276
+        }
+      }
+    ],
+    "hyperparameters": {
+      "batch_size": 4096,
+      "dropout": 0.2,
+      "early_stopping_patience": 4,
+      "hidden_dims": [
+        128,
+        64
+      ],
+      "learning_rate": 0.002,
+      "max_epochs": 20,
+      "model": "NCDM",
+      "reference_component": "InsCD NCDM / Default extractor / NCD_IF equations through the archived split-safe adapter.",
+      "selection_boundary": "Only frozen validation students at k=5 are adapted with their first five calibration rows for validation selection. Test rows are not read before final selection.",
+      "selection_metric": "validation_k5_auc_then_lower_validation_k5_rmse_then_earlier_epoch",
+      "weight_decay": 0.0
+    },
+    "model": "NCDM",
+    "reference_component": "InsCD NCDM / Default extractor / NCD_IF equations through the archived split-safe adapter.",
+    "selected_epoch": 5,
+    "selection_boundary": "Only frozen validation students at k=5 are adapted with their first five calibration rows for validation selection. Test rows are not read before final selection.",
+    "selection_metric": "validation_k5_auc_then_lower_validation_k5_rmse_then_earlier_epoch",
+    "status": "SELECTED_VALIDATION_ONLY",
+    "training_wall_seconds": 393.5607844000042,
+    "validation_k5_calibration_latency": {
+      "mean_ms": 45.09361806818657,
+      "p50_ms": 49.745500000426546,
+      "p95_ms": 84.20776000566546
+    },
+    "validation_k5_metrics": {
+      "acc": 0.8144007746137935,
+      "auc": 0.7242659665812352,
+      "log_loss": 0.5330012272992876,
+      "rmse": 0.3766290184405978
+    }
+  },
+  "preflight_status": "PASS",
+  "production_integration_changed": false,
+  "rate_estimate_evidence": {
+    "baseline_train_fit_seconds": 0.0025133000017376617,
+    "global_train_correct_rate": 0.8217781782150269,
+    "global_train_exercises_seen": 601,
+    "global_train_topics_seen": 39
+  },
+  "resources": {
+    "NCDM": {
+      "gpu": "none",
+      "peak_gpu_allocated_bytes": null,
+      "peak_gpu_reserved_bytes": null,
+      "peak_process_rss_bytes": 345567232
+    },
+    "baselines": {
+      "gpu": "none",
+      "peak_gpu_allocated_bytes": null,
+      "peak_gpu_reserved_bytes": null,
+      "peak_process_rss_bytes": 329883648
+    }
+  },
+  "runtime_versions": {
+    "numpy": "1.26.4",
+    "psutil": "6.1.1",
+    "python": "3.12.14",
+    "scikit-learn": "1.5.2",
+    "torch": "2.3.1+cpu"
+  },
+  "seed": 20260908,
+  "status": "COMPLETED",
+  "test": {
+    "0": {
+      "ICDM": {
+        "reason": "The official repository lacks a declared license and no audited input/Q-matrix semantic alignment to this 40 Topic representation is available; no ID mapping is invented.",
+        "status": "NOT_AUDITABLY_ALIGNED_FOR_CURRENT_40_TOPIC_INPUT"
+      },
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 0.028118349946453236,
+          "p50_ms": 0.02680000034160912,
+          "p95_ms": 0.035599994589574635
+        },
+        "calibration_steps": {
+          "maximum": 0,
+          "mean": 0.0,
+          "minimum": 0,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "coverage_percent": 100.0,
+        "doa": {
+          "doa": null,
+          "eligible_exercises": 0,
+          "pair_count": 0,
+          "status": "NOT_APPLICABLE_ZERO_HISTORY"
+        },
+        "eligible_students": 2000,
+        "evaluation_interactions": 57115,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 0,
+        "inference": {
+          "milliseconds_per_interaction": 0.017314507571228974,
+          "total_seconds": 0.9889180999307428
+        },
+        "metrics": {
+          "acc": 0.8155650879803904,
+          "auc": 0.7523264468601919,
+          "log_loss": 0.4301110268257877,
+          "rmse": 0.36830419351855964
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "ORCDF-NCD": {
+        "calibration_used": false,
+        "reason": "The archived ORCDF adapter convolves a fixed all-student response graph and does not expose a standalone new-student representation path that can be optimized without changing graph/global state.",
+        "status": "NOT_SUPPORTED_BY_CURRENT_ADAPTER"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005280889435087104,
+            "total_seconds": 0.030161800008499995
+          },
+          "metrics": {
+            "acc": 0.8255274446292568,
+            "auc": 0.7600246611986816,
+            "log_loss": 0.4407562816784932,
+            "rmse": 0.3607592170497217
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0004979042281780451,
+            "total_seconds": 0.028437799992389046
+          },
+          "metrics": {
+            "acc": 0.8132189442353147,
+            "auc": 0.5,
+            "log_loss": 0.48176870071070116,
+            "rmse": 0.38982964671563175
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005031217717133729,
+            "total_seconds": 0.028735799991409294
+          },
+          "metrics": {
+            "acc": 0.815074848988882,
+            "auc": 0.6886422253040058,
+            "log_loss": 0.44464005509523885,
+            "rmse": 0.374025290459343
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 100.0,
+        "eligible_students": 2000,
+        "evaluation_interactions": 57115,
+        "ineligible_students": 0
+      }
+    },
+    "10": {
+      "ICDM": {
+        "reason": "The official repository lacks a declared license and no audited input/Q-matrix semantic alignment to this 40 Topic representation is available; no ID mapping is invented.",
+        "status": "NOT_AUDITABLY_ALIGNED_FOR_CURRENT_40_TOPIC_INPUT"
+      },
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 50.75251520176256,
+          "p50_ms": 42.574099999910686,
+          "p95_ms": 117.4830750045657
+        },
+        "calibration_steps": {
+          "maximum": 40,
+          "mean": 23.751440922190202,
+          "minimum": 5,
+          "p50": 20.0,
+          "p95": 40.0
+        },
+        "coverage_percent": 69.4,
+        "doa": {
+          "doa": 0.5552897759543372,
+          "eligible_exercises": 385,
+          "pair_count": 2267752,
+          "status": "APPLICABLE_EXERCISE_CONDITIONED_PAIRWISE"
+        },
+        "eligible_students": 1388,
+        "evaluation_interactions": 38563,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 612,
+        "inference": {
+          "milliseconds_per_interaction": 0.040935409595717516,
+          "total_seconds": 1.5785922002396546
+        },
+        "metrics": {
+          "acc": 0.8059020304436896,
+          "auc": 0.7265326779496057,
+          "log_loss": 0.5417375159434552,
+          "rmse": 0.38500166329662466
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "ORCDF-NCD": {
+        "calibration_used": false,
+        "reason": "The archived ORCDF adapter convolves a fixed all-student response graph and does not expose a standalone new-student representation path that can be optimized without changing graph/global state.",
+        "status": "NOT_SUPPORTED_BY_CURRENT_ADAPTER"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006821435053274441,
+            "total_seconds": 0.026305499995942228
+          },
+          "metrics": {
+            "acc": 0.8320670072349143,
+            "auc": 0.766849666186215,
+            "log_loss": 0.41910578161183787,
+            "rmse": 0.3541316005149678
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006958146408208523,
+            "total_seconds": 0.02683269999397453
+          },
+          "metrics": {
+            "acc": 0.821097943624718,
+            "auc": 0.5,
+            "log_loss": 0.46972611076442916,
+            "rmse": 0.38327088764876893
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006840935612122354,
+            "total_seconds": 0.026380700001027435
+          },
+          "metrics": {
+            "acc": 0.8229131550968545,
+            "auc": 0.6982554757992696,
+            "log_loss": 0.4307440306265606,
+            "rmse": 0.36688602435627643
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 69.4,
+        "eligible_students": 1388,
+        "evaluation_interactions": 38563,
+        "ineligible_students": 612
+      }
+    },
+    "3": {
+      "ICDM": {
+        "reason": "The official repository lacks a declared license and no audited input/Q-matrix semantic alignment to this 40 Topic representation is available; no ID mapping is invented.",
+        "status": "NOT_AUDITABLY_ALIGNED_FOR_CURRENT_40_TOPIC_INPUT"
+      },
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 40.77459019987873,
+          "p50_ms": 45.35730000498006,
+          "p95_ms": 70.3112150033121
+        },
+        "calibration_steps": {
+          "maximum": 40,
+          "mean": 29.9315,
+          "minimum": 5,
+          "p50": 40.0,
+          "p95": 40.0
+        },
+        "coverage_percent": 100.0,
+        "doa": {
+          "doa": 0.5398340821086739,
+          "eligible_exercises": 427,
+          "pair_count": 4351550,
+          "status": "APPLICABLE_EXERCISE_CONDITIONED_PAIRWISE"
+        },
+        "eligible_students": 2000,
+        "evaluation_interactions": 51115,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 0,
+        "inference": {
+          "milliseconds_per_interaction": 0.030428570873596617,
+          "total_seconds": 1.555356400203891
+        },
+        "metrics": {
+          "acc": 0.7758387948743031,
+          "auc": 0.69457619838865,
+          "log_loss": 0.6661731238860609,
+          "rmse": 0.4185237049535704
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "ORCDF-NCD": {
+        "calibration_used": false,
+        "reason": "The archived ORCDF adapter convolves a fixed all-student response graph and does not expose a standalone new-student representation path that can be optimized without changing graph/global state.",
+        "status": "NOT_SUPPORTED_BY_CURRENT_ADAPTER"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.00041691871275630635,
+            "total_seconds": 0.0213108000025386
+          },
+          "metrics": {
+            "acc": 0.831380221070136,
+            "auc": 0.7652740444031079,
+            "log_loss": 0.42785704874635416,
+            "rmse": 0.3551849281081284
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005005556099505985,
+            "total_seconds": 0.02558590000262484
+          },
+          "metrics": {
+            "acc": 0.8198571847794189,
+            "auc": 0.5,
+            "log_loss": 0.47162253812248206,
+            "rmse": 0.38431116502225676
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0003974782354105929,
+            "total_seconds": 0.020317100003012456
+          },
+          "metrics": {
+            "acc": 0.8218331213929375,
+            "auc": 0.6938696620482112,
+            "log_loss": 0.4337400817362327,
+            "rmse": 0.3682994622904843
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 100.0,
+        "eligible_students": 2000,
+        "evaluation_interactions": 51115,
+        "ineligible_students": 0
+      }
+    },
+    "5": {
+      "ICDM": {
+        "reason": "The official repository lacks a declared license and no audited input/Q-matrix semantic alignment to this 40 Topic representation is available; no ID mapping is invented.",
+        "status": "NOT_AUDITABLY_ALIGNED_FOR_CURRENT_40_TOPIC_INPUT"
+      },
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 38.33289045640307,
+          "p50_ms": 42.360649997135624,
+          "p95_ms": 70.89836499289953
+        },
+        "calibration_steps": {
+          "maximum": 40,
+          "mean": 28.25155601659751,
+          "minimum": 5,
+          "p50": 40.0,
+          "p95": 40.0
+        },
+        "coverage_percent": 96.4,
+        "doa": {
+          "doa": 0.543552295110284,
+          "eligible_exercises": 420,
+          "pair_count": 3606733,
+          "status": "APPLICABLE_EXERCISE_CONDITIONED_PAIRWISE"
+        },
+        "eligible_students": 1928,
+        "evaluation_interactions": 47115,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 72,
+        "inference": {
+          "milliseconds_per_interaction": 0.04039261169374526,
+          "total_seconds": 1.903097899950808
+        },
+        "metrics": {
+          "acc": 0.7942056669850366,
+          "auc": 0.7129978570565041,
+          "log_loss": 0.5752890907851587,
+          "rmse": 0.3944504010352642
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "ORCDF-NCD": {
+        "calibration_used": false,
+        "reason": "The archived ORCDF adapter convolves a fixed all-student response graph and does not expose a standalone new-student representation path that can be optimized without changing graph/global state.",
+        "status": "NOT_SUPPORTED_BY_CURRENT_ADAPTER"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006166125439947713,
+            "total_seconds": 0.029051700010313652
+          },
+          "metrics": {
+            "acc": 0.8313700520004245,
+            "auc": 0.7655156196014163,
+            "log_loss": 0.42575038571033813,
+            "rmse": 0.35514060751055376
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006043871376406673,
+            "total_seconds": 0.02847569998994004
+          },
+          "metrics": {
+            "acc": 0.8197813859704978,
+            "auc": 0.5,
+            "log_loss": 0.47173839217058383,
+            "rmse": 0.3843746250288322
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006124970816853831,
+            "total_seconds": 0.028857800003606826
+          },
+          "metrics": {
+            "acc": 0.8217977289610527,
+            "auc": 0.6930819419572571,
+            "log_loss": 0.4340242873643579,
+            "rmse": 0.36843120686668496
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 96.4,
+        "eligible_students": 1928,
+        "evaluation_interactions": 47115,
+        "ineligible_students": 72
+      }
+    }
+  },
+  "test_evaluation_ledger": "model-service/experiments/model0r/runtime/cold_test_evaluation_ledger.json",
+  "test_read_before_global_selection": false,
+  "validation": {
+    "0": {
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 0.03364539994799998,
+          "p50_ms": 0.03170000127283856,
+          "p95_ms": 0.04640500337700359
+        },
+        "calibration_steps": {
+          "maximum": 0,
+          "mean": 0.0,
+          "minimum": 0,
+          "p50": 0.0,
+          "p95": 0.0
+        },
+        "coverage_percent": 100.0,
+        "doa": {
+          "doa": null,
+          "eligible_exercises": 0,
+          "pair_count": 0,
+          "status": "NOT_APPLICABLE_ZERO_HISTORY"
+        },
+        "eligible_students": 1000,
+        "evaluation_interactions": 27721,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 0,
+        "inference": {
+          "milliseconds_per_interaction": 0.021327765956656426,
+          "total_seconds": 0.5912270000844728
+        },
+        "metrics": {
+          "acc": 0.8282168752930991,
+          "auc": 0.7427839439459653,
+          "log_loss": 0.4209630037349871,
+          "rmse": 0.3627093065190476
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.000643205512042569,
+            "total_seconds": 0.017830299999332055
+          },
+          "metrics": {
+            "acc": 0.8344937051332925,
+            "auc": 0.7506551625283815,
+            "log_loss": 0.4148455836817066,
+            "rmse": 0.3524971251978426
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005537462575136507,
+            "total_seconds": 0.015350400004535913
+          },
+          "metrics": {
+            "acc": 0.827639695537679,
+            "auc": 0.5,
+            "log_loss": 0.4597274254080141,
+            "rmse": 0.37773878182323395
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0007427365533535992,
+            "total_seconds": 0.020589399995515123
+          },
+          "metrics": {
+            "acc": 0.829695898416363,
+            "auc": 0.6844843218658241,
+            "log_loss": 0.4261107770325004,
+            "rmse": 0.36346528614860146
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 100.0,
+        "eligible_students": 1000,
+        "evaluation_interactions": 27721,
+        "ineligible_students": 0
+      }
+    },
+    "10": {
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 32.360890029345455,
+          "p50_ms": 31.44560000509955,
+          "p95_ms": 65.84977499005615
+        },
+        "calibration_steps": {
+          "maximum": 40,
+          "mean": 25.3841642228739,
+          "minimum": 5,
+          "p50": 25.0,
+          "p95": 40.0
+        },
+        "coverage_percent": 68.2,
+        "doa": {
+          "doa": 0.5544474572738266,
+          "eligible_exercises": 282,
+          "pair_count": 556509,
+          "status": "APPLICABLE_EXERCISE_CONDITIONED_PAIRWISE"
+        },
+        "eligible_students": 682,
+        "evaluation_interactions": 18453,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 318,
+        "inference": {
+          "milliseconds_per_interaction": 0.022214057333498915,
+          "total_seconds": 0.40991599997505546
+        },
+        "metrics": {
+          "acc": 0.8226846583211402,
+          "auc": 0.718170114674969,
+          "log_loss": 0.5220480746859787,
+          "rmse": 0.3695954378692759
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0007948030126276288,
+            "total_seconds": 0.014666499992017634
+          },
+          "metrics": {
+            "acc": 0.8421936812442421,
+            "auc": 0.7617261271630204,
+            "log_loss": 0.3953495098638973,
+            "rmse": 0.3444801990648576
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006975180180310809,
+            "total_seconds": 0.012871299986727536
+          },
+          "metrics": {
+            "acc": 0.8372622337831247,
+            "auc": 0.5,
+            "log_loss": 0.4450199382506889,
+            "rmse": 0.36945086498809676
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006823714307787401,
+            "total_seconds": 0.012591800012160093
+          },
+          "metrics": {
+            "acc": 0.8384002601203057,
+            "auc": 0.6899884150369587,
+            "log_loss": 0.41154907422752285,
+            "rmse": 0.35563606107325424
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 68.2,
+        "eligible_students": 682,
+        "evaluation_interactions": 18453,
+        "ineligible_students": 318
+      }
+    },
+    "3": {
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 33.17918740004825,
+          "p50_ms": 38.14680000505177,
+          "p95_ms": 56.26166500223917
+        },
+        "calibration_steps": {
+          "maximum": 40,
+          "mean": 29.527,
+          "minimum": 5,
+          "p50": 40.0,
+          "p95": 40.0
+        },
+        "coverage_percent": 100.0,
+        "doa": {
+          "doa": 0.5388691040571255,
+          "eligible_exercises": 321,
+          "pair_count": 1102135,
+          "status": "APPLICABLE_EXERCISE_CONDITIONED_PAIRWISE"
+        },
+        "eligible_students": 1000,
+        "evaluation_interactions": 24721,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 0,
+        "inference": {
+          "milliseconds_per_interaction": 0.02383818615190434,
+          "total_seconds": 0.5893037998612272
+        },
+        "metrics": {
+          "acc": 0.7911492253549613,
+          "auc": 0.7076539096949672,
+          "log_loss": 0.594742302950853,
+          "rmse": 0.39962521090516523
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.000629711581071894,
+            "total_seconds": 0.01556709999567829
+          },
+          "metrics": {
+            "acc": 0.8411067513450103,
+            "auc": 0.7568620169313915,
+            "log_loss": 0.402686814471074,
+            "rmse": 0.3460260548699669
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005613081994261956,
+            "total_seconds": 0.013876099998014979
+          },
+          "metrics": {
+            "acc": 0.8351199385138142,
+            "auc": 0.5,
+            "log_loss": 0.4482943113274076,
+            "rmse": 0.3713120377504178
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005773714659392357,
+            "total_seconds": 0.014273200009483844
+          },
+          "metrics": {
+            "acc": 0.836737996035759,
+            "auc": 0.6884508815432433,
+            "log_loss": 0.41461664806413306,
+            "rmse": 0.35720881205573507
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 100.0,
+        "eligible_students": 1000,
+        "evaluation_interactions": 24721,
+        "ineligible_students": 0
+      }
+    },
+    "5": {
+      "NCDM": {
+        "calibration_latency": {
+          "mean_ms": 31.921191900308017,
+          "p50_ms": 35.59900000982452,
+          "p95_ms": 57.914940008777194
+        },
+        "calibration_steps": {
+          "maximum": 40,
+          "mean": 28.666666666666668,
+          "minimum": 5,
+          "p50": 40.0,
+          "p95": 40.0
+        },
+        "coverage_percent": 96.3,
+        "doa": {
+          "doa": 0.5514346090888685,
+          "eligible_exercises": 307,
+          "pair_count": 913315,
+          "status": "APPLICABLE_EXERCISE_CONDITIONED_PAIRWISE"
+        },
+        "eligible_students": 963,
+        "evaluation_interactions": 22721,
+        "evaluation_representation_unchanged": true,
+        "global_parameters_frozen_during_calibration": true,
+        "global_state_unchanged": true,
+        "ineligible_students": 37,
+        "inference": {
+          "milliseconds_per_interaction": 0.02377871573264009,
+          "total_seconds": 0.5402762001613155
+        },
+        "metrics": {
+          "acc": 0.8144007746137935,
+          "auc": 0.7242659665812352,
+          "log_loss": 0.5330012272992876,
+          "rmse": 0.3766290184405978
+        },
+        "optimizer_parameter_count": 40,
+        "optimizer_scope": "standalone_current_student_representation_only"
+      },
+      "baselines": {
+        "exercise": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0006294793368931086,
+            "total_seconds": 0.014302400013548322
+          },
+          "metrics": {
+            "acc": 0.8404999779939263,
+            "auc": 0.7592781858925142,
+            "log_loss": 0.40140988349338286,
+            "rmse": 0.3462622913170914
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "global": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005824259492479274,
+            "total_seconds": 0.013233299992862158
+          },
+          "metrics": {
+            "acc": 0.834558338101316,
+            "auc": 0.5,
+            "log_loss": 0.4491526847257441,
+            "rmse": 0.37179840087553456
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        },
+        "topic": {
+          "calibration_latency": {
+            "mean_ms": 0.0,
+            "p50_ms": 0.0,
+            "p95_ms": 0.0
+          },
+          "calibration_steps": {
+            "maximum": 0,
+            "mean": 0.0,
+            "minimum": 0,
+            "p50": 0.0,
+            "p95": 0.0
+          },
+          "inference": {
+            "milliseconds_per_interaction": 0.0005730381584659666,
+            "total_seconds": 0.013019999998505227
+          },
+          "metrics": {
+            "acc": 0.8359227146692487,
+            "auc": 0.6874188443534133,
+            "log_loss": 0.415849766001333,
+            "rmse": 0.35792923095421697
+          },
+          "status": "COMPLETED_STATIC_TRAIN_ONLY"
+        }
+      },
+      "eligibility": {
+        "coverage_percent": 96.3,
+        "eligible_students": 963,
+        "evaluation_interactions": 22721,
+        "ineligible_students": 37
+      }
+    }
+  }
+}

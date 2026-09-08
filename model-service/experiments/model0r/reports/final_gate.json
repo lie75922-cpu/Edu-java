@@ -1,0 +1,37 @@
+{
+  "cold_evidence": {
+    "calibration_p95_ms": 70.89836499289953,
+    "evaluation_representation_unchanged": true,
+    "global_state_unchanged": true,
+    "k": 5,
+    "test_auc_delta": -0.05251776254491225,
+    "test_baseline_auc": 0.7655156196014163,
+    "test_ncdm_auc": 0.7129978570565041,
+    "validation_selected_baseline": "exercise"
+  },
+  "cold_failures": [
+    "k=5 NCDM does not strictly exceed the validation-selected cold statistical baseline"
+  ],
+  "cold_ready": false,
+  "java_ai_gateway_changed": false,
+  "mastery_outbox_consumed": false,
+  "production_integration_changed": false,
+  "reasons": [
+    "No warm candidate cleared all pre-registered response-prediction and mastery-sanity criteria."
+  ],
+  "recommendation_started": false,
+  "status": "NO_GO",
+  "warm_failures": {
+    "NCDM": [
+      "mastery collapse/oversmoothing sanity check did not pass"
+    ],
+    "ORCDF-NCD": [
+      "test AUC is not strictly above the pre-registered minimum",
+      "test AUC does not strictly exceed the validation-selected non-personalized baseline",
+      "paired-bootstrap lower confidence bound is not above zero",
+      "mastery collapse/oversmoothing sanity check did not pass"
+    ]
+  },
+  "warm_passing_candidates": [],
+  "website_work_started": false
+}
