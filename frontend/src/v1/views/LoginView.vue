@@ -20,10 +20,10 @@ function fillDemo(username) {
   <div class="login-page">
     <section class="login-hero">
       <div class="hero-badge">离散数学数字教材 · 知识图谱教学应用</div>
-      <h1>让知识结构真正参与学习与教学</h1>
+      <h1>让知识结构真正参与学习</h1>
       <p>
         围绕数理逻辑、集合论与关系、图论、代数结构构建课程知识图谱，
-        将学习记录、薄弱知识、个性化推荐和教学评价连接起来。
+        将学习记录、薄弱知识、个性化推荐与教师评价连接起来。
       </p>
       <div class="hero-features">
         <article><strong>知识图谱</strong><span>查看先修关系与知识脉络</span></article>
