@@ -2,7 +2,7 @@
 
 **基于知识图谱与个性化学习分析的 Java 智能教学平台**
 
-> 当前阶段：**V0.7 Release Readiness 实现中；仅在 clean full stack、真实 API/浏览器 E2E、恢复/备份演练与 GitHub CI 均完成后才会给出 Release Candidate Gate。MODEL-0A / MODEL-0R / MODEL-1 实验保持既有归档结论。**
+> 当前阶段：**V0.7 Release Readiness 已完成 `GO_RELEASE_CANDIDATE`：clean full stack、真实 API/浏览器 E2E、恢复/备份演练与 GitHub CI 已闭环。该结论仅覆盖本地/reviewer Compose Release Candidate，不构成生产 SLA 或下一阶段业务/模型开发授权。MODEL-0A / MODEL-0R / MODEL-1 实验保持既有归档结论。**
 
 本项目按真实软件工程与研究流程推进：
 
@@ -344,9 +344,9 @@ Edu-java/
 └── docker-compose.yml
 ```
 
-### V0.7 — Release Readiness（实现中）
+### V0.7 — Release Readiness ✅ `GO_RELEASE_CANDIDATE`
 
-V0.7 不增加教育业务功能。它为 V0.6 已有能力增加可复现全栈 Compose、release 配置校验、健康/readiness/version/OpenAPI、合成 Platform Demo Seed、真实 API/Playwright 验收、恢复/备份 Runbook 与 GitHub Full-stack Release Gate。
+V0.7 不增加教育业务功能。它为 V0.6 已有能力增加可复现全栈 Compose、release 配置校验、健康/readiness/version/OpenAPI、合成 Platform Demo Seed、真实 API/Playwright 验收、恢复/备份 Runbook 与 GitHub Full-stack Release Gate。具体证据、边界和非 SLA 声明见 [V0.7 implementation record](docs/V0.7_IMPLEMENTATION.md)。
 
 快速本地启动（PowerShell）：
 
