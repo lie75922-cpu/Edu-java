@@ -1,0 +1,54 @@
+{
+  "dataset_name": "JUNYI_EXTERNAL_HOLDOUT_V1",
+  "c40": {
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "checkpoint_name": "c40_topic_best.pt",
+    "inference_only": true
+  },
+  "student_identity_ablation": {
+    "variants": [
+      "ORIGINAL",
+      "POP_MEAN",
+      "ZERO",
+      "PERMUTED"
+    ],
+    "permutation_seed": 2026090803,
+    "fixed_parameters": [
+      "exercise difficulty",
+      "exercise discrimination",
+      "interaction MLP",
+      "Q matrix"
+    ]
+  },
+  "observability": {
+    "exposure_thresholds": [1, 3, 5],
+    "minimum_topic_sample_size": 50,
+    "pairwise_common_observed_minimum": 3,
+    "pairwise_summary_sample_size": 10000,
+    "pairwise_seed": 2026090804
+  },
+  "bootstrap": {
+    "resamples": 500,
+    "confidence_level": 0.95,
+    "seed": 2026090805,
+    "method": "student-cluster paired bootstrap"
+  },
+  "rasch_1pl": {
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "batch_size": 4096,
+    "max_epochs": 30,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_auc_then_lower_validation_log_loss_then_earlier_epoch"
+  },
+  "calibration": {
+    "bin_count": 10
+  },
+  "diagnostic_data_roles": {
+    "model1_train_history": "fit fixed scores and Rasch/IRT-1PL only",
+    "model1_validation": "diagnostic future signal and Rasch epoch selection only",
+    "model1_test": "historical diagnostic source only; never a new final holdout",
+    "junyi_final_holdout_v1": "frozen membership only; labels and metrics prohibited in MODEL-2"
+  }
+}

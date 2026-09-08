@@ -1,0 +1,19 @@
+{
+  "allowed_statuses": [
+    "GO_C40_FINAL_VALIDATION",
+    "GO_SIMPLE_HIERARCHICAL_ROUTE",
+    "STOP_ML_DIAGNOSIS_RULE_ONLY"
+  ],
+  "c40_requirements": {
+    "identity_comparison": "ORIGINAL must have a student-cluster paired-bootstrap AUC lower bound above zero against POP_MEAN or PERMUTED.",
+    "observed_future_signal": "For diagnostic-test exposure >=3, C40 Topic mastery must have a student-cluster paired-bootstrap AUC lower bound above zero over RuleBeta.",
+    "observed_nonconstant": "The exposure >=3 observed-only Topic summary must contain no constant retained Topic and have positive aggregate median Topic standard deviation.",
+    "final_holdout": "JUNYI_FINAL_HOLDOUT_V1 must be frozen and unused for labels or metrics."
+  },
+  "simple_route_requirement": "Rasch/IRT-1PL or StudentGlobalBeta must have a student-cluster paired-bootstrap AUC lower bound above zero over ExerciseRate on the diagnostic test.",
+  "interpretation": {
+    "go_c40": "C40 retains a robust student-specific inference signal and observed Topic mastery contributes beyond RuleBeta. This authorizes only a separately reviewed one-time final validation.",
+    "go_simple": "A simple student-ability signal remains after C40 fails its diagnostic requirements. Stop graph cognitive diagnosis and permit only a separately designed simple hierarchical ability plus Topic-deviation research route.",
+    "stop": "No robust C40 or simple student-specific signal clears the registered diagnostic comparison. Formally stop the ML cognitive-diagnosis route and retain the V0.4 rule path."
+  }
+}
