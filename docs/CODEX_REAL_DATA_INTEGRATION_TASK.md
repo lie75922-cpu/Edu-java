@@ -2,15 +2,25 @@
 
 ## 0. 执行角色与硬约束
 
-你是本仓库下一阶段的执行工程师。不要重新设计一个新项目，也不要推翻已经通过验证的 V0.7 工程底座。
+你是本仓库下一阶段的执行工程师。不要重新设计一个新项目，也不要推翻已经通过验证的 V0.7/V1 工程底座。
 
 仓库：`lie75922-cpu/Edu-java`
 
 起始分支：优先从 PR #34 的最新 head `chatgpt/final-status-sync-20260908` 开始；执行前先 `git fetch` 并核对最新 SHA 和 CI，不允许从旧 main 直接重新做一套。
 
+本地仓库根目录不要假定唯一固定路径。优先检查：
+
+```text
+D:\Code\Edu-java
+D:\Code\java
+```
+
+以实际包含 `.git`、`backend/`、`frontend/`、`data-pipeline/` 的目录作为 `REPO_ROOT`。如果两者都不是，自动在 `D:\Code` 下查找仓库，不要复制出第三套项目。
+
 最新产品基线必须先阅读：
 
 - `docs/V1_MATH_PLATFORM_BASELINE.md`
+- `docs/V1_SELF_IMPLEMENTATION.md`
 - `docs/DATA0_ARCHITECT_REVIEW.md`
 - `data-pipeline/reports/data_sources.md`
 - `data-pipeline/reports/exercise_eda.md`
@@ -32,17 +42,22 @@
 9. 不得把 Rasch 当前研究结果写成线上已使用，也不得把 Rasch θ 叫“知识点掌握度”。
 10. 不得提交原始 Junyi CSV/zip、凭据、`.env`、日志、依赖目录、模型大文件。
 11. 任何数量、性能、模型效果必须来自本次真实运行日志/报告，不得估算后写成事实。
+12. 不允许只改文档或只做假页面后宣称完成；每个业务能力必须有可执行代码、测试和验收证据。
 
 ---
 
 ## 1. 本地真实输入
 
-当前 provenance 已登记的本地输入包括：
+不要假定原始数据一定只有一套路径。按以下顺序检查并记录最终实际使用路径：
 
 ```text
-D:\Code\java\data-pipeline\data\interim\junyi_metadata\junyi_Exercise_table.csv
-D:\Code\java\data-pipeline\data\interim\junyi_original\junyi_ProblemLog_original.csv
+%REPO_ROOT%\data-pipeline\data\interim\junyi_metadata\junyi_Exercise_table.csv
+%REPO_ROOT%\data-pipeline\data\interim\junyi_original\junyi_ProblemLog_original.csv
+D:\Code\junyi_Exercise_table.csv
+D:\Code\junyi_ProblemLog_original.csv
 ```
+
+如果历史机器上存在其它已登记路径，也只能在确认文件来源、大小、schema 与 DATA-0 provenance 一致后使用。
 
 执行前必须：
 
@@ -50,7 +65,7 @@ D:\Code\java\data-pipeline\data\interim\junyi_original\junyi_ProblemLog_original
 - 输出大小、列名、编码、10 条脱敏样例；
 - 与 DATA-0 报告记录比对；
 - 如果路径已变化，自动定位仓库父目录/已登记数据目录，不要重新从网络下载一份不明来源数据；
-- 如果真实输入不存在，停止“业务导入”步骤并明确 `BLOCKED_MISSING_LOCAL_DATA`，但可以继续完成不依赖原始数据的代码、测试、文档工作。
+- 如果真实输入不存在，停止“业务导入”步骤并明确 `BLOCKED_MISSING_LOCAL_DATA`，但必须继续完成所有不依赖原始数据的代码、测试、文档工作。
 
 已知审计基线仅用于一致性核查：
 
@@ -178,309 +193,330 @@ Evidence -> Draft Relation -> GraphValidator -> READY -> Publish -> Neo4j projec
 2. Resolve Exercise endpoint；
 3. Resolve 到业务 KnowledgePoint 候选；
 4. 无法唯一解析的进入 conflict；
-5. self-loop 标记冲突；
-6. cycle 由 Validator 阻断；
-7. 关系必须 review/approve 后才有资格进入 Published Graph；
-8. 发布后执行 Neo4j projection verification。
+5. 同点自环进入 reject；
+6. 构建 draft graph version；
+7. 跑 cycle / endpoint / duplicate / cross-course validator；
+8. 只有通过并经明确 review 的版本才能 publish；
+9. publish 后再投影到 Neo4j；
+10. 输出 before/after 关系数量和拒绝原因统计。
 
-### 输出真实计数
-
-最终报告必须给：
-
-```text
-raw evidence rows = ?
-resolved = ?
-unresolved = ?
-self-loop conflicts = ?
-duplicate/ambiguous conflicts = ?
-candidate relations = ?
-approved = ?
-rejected = ?
-validator cycle errors = ?
-published nodes = ?
-published edges = ?
-Neo4j verification = PASS/FAIL
-```
-
-Published Graph 的硬 Gate：
-
-- self-loop = 0
-- directed cycle = 0
-- endpoint outside course = 0
-- relation with missing provenance = 0
-
-如果真实关系无法安全形成足够质量的 Topic-level prerequisite graph，不得硬发；可以保留为 Evidence + 部分 reviewed graph，并说明覆盖率。
+严禁为了得到大图把全部 raw edge 自动设为 READY。
 
 ---
 
-## 5. 第四任务：大规模知识图谱前端
+## 5. 第四任务：让大规模知识图谱真正可用
 
-当前 V1 已经取消 `DM-LOGIC/DM-GRAPH` 前端推断，课程页和图谱页使用后端 Area/Point 数据。继续在此基础上做，不要退回硬编码。
-
-当节点超过 100 后，禁止默认把 800 个节点全部一次性画在一张静态 SVG 上。
+当前 16 节点 fixture 只能证明链路，不足以证明产品能力。真实数据导入后，学生图谱页面必须支持大图使用，而不是一次性把 100+ 节点全画满。
 
 至少实现：
 
-- 按 KnowledgeArea 筛选；
-- 搜索 Topic/KnowledgePoint；
-- focus selected node；
-- predecessor/successor 局部子图；
-- prerequisite subgraph；
-- 学习路径高亮；
-- 图例中文；
-- 节点详情显示 raw provenance / 中文名 / 关联 ExerciseUnit 数；
-- 学生视角叠加 mastery state：已掌握、薄弱、已有记录、暂无数据；
-- 不把 UNKNOWN 渲染为 0.5 掌握。
+- Area / Topic 筛选；
+- 文本搜索；
+- 当前节点 1-hop / 2-hop 局部图；
+- 前置链/后继链高亮；
+- 目标学习路径高亮；
+- 学生 mastery 状态叠加：已掌握 / 薄弱 / 未观察；
+- 图例；
+- 节点详情：raw label、中文 display label、来源、关联 ExerciseUnit 数；
+- 关系详情：evidence source、graph version、review status；
+- 节点数过大时默认局部视图，不冻结浏览器。
 
-如需引入图可视化库，优先选择成熟、轻量、维护正常的依赖，说明为什么选；不要为了“高级”引入重型框架。
+禁止重新通过 knowledgeCode 猜节点位置或章节。
+
+### 性能/可用性验收
+
+至少在真实 Published Graph 上记录：
+
+- node/edge count；
+- 首屏渲染时间；
+- 搜索响应；
+- 1-hop/2-hop 切换；
+- 路径高亮；
+- 浏览器无明显卡死；
+- Playwright 覆盖搜索/选择节点/路径高亮。
 
 ---
 
-## 6. 第五任务：把个性化推荐证据链展示清楚
+## 6. 第五任务：把推荐证据链做成可解释产品
 
-当前 Java 推荐必须保持：
-
-- RuleBeta Mastery（生产默认）；
-- weak threshold 0.70；
-- Published Graph prerequisite；
-- recent errors；
-- review interval；
-- deterministic rank；
-- recommendation snapshot + graph/rule version。
-
-前端每条推荐至少展示可解释证据：
+当前生产链必须保留：
 
 ```text
-推荐知识：xxx
-当前状态：OBSERVED / 暂无数据
-掌握度：xx%（若有）
-近期错误：x 次（若 API 当前未返回，扩展 DTO）
-图谱原因：是目标 xxx 的前置知识 / 当前知识本身薄弱
-图谱版本：v?
-规则版本：REC_RULE_V1
-推荐动作：练习 / 复习 / 补前置
+AnswerRecord
+ -> RuleBeta mastery / UNKNOWN
+ -> weak KnowledgePoint
+ -> Published Graph prerequisite
+ -> Recommendation
+ -> Learning Path
 ```
 
-学习路径必须能够在图谱页高亮同一条路径，让用户肉眼看到：
+推荐页增加可解释证据：
+
+- 当前 mastery / status；
+- attempt / correct count；
+- 最近 30 天错误次数；
+- 距离上次练习时间；
+- 是否是目标知识直接/间接 prerequisite；
+- 来源 Published Graph version；
+- 为什么排在当前 rank；
+- 若无足够观测，明确 UNKNOWN，不补数字。
+
+目标学习路径展示：
 
 ```text
-答题 -> 薄弱点 -> 未满足先修 -> 推荐 -> 路径
+学生当前状态
+ -> 未掌握前置节点
+ -> 目标知识
 ```
 
-不要只显示一句“根据学习记录推荐”。
+并在图谱中同步高亮同一条路径。
+
+### 推荐消融
+
+如果数据条件允许，至少实现离线对照接口/脚本，不需要虚构线上 A/B：
+
+- Popular/Random（无学生状态、无图谱）
+- Mastery only
+- Graph only
+- Mastery + Graph（当前主方法）
+
+评价指标必须先定义，再运行。没有真实可评价 ground truth 时，不得编造“准确率”。可以报告结构有效性、prerequisite validity、coverage、冗余、路径长度以及人工/专家审核结果。
 
 ---
 
-## 7. 第六任务：数据治理管理端
+## 7. 第六任务：正式数据治理后台
 
-当前 `frontend/src/v1/researchSnapshot.js` 是冻结审计快照，只用于把已有研究工作显性化。它不是最终数据治理后端。
+当前“数据与算法”页只是冻结科研快照，不能继续冒充实时治理。
 
-新增正式后端数据治理能力，至少提供：
+实现最小正式数据治理模型/API：
 
-- DatasetSource / DatasetVersion / ImportRun（可以先做只读运行记录，不要过度设计）；
-- source provenance；
-- latest import status；
-- entity counts；
-- missing/duplicate/conflict counts；
-- graph evidence counts；
-- mapping review counts；
-- processing timestamp；
-- research data vs platform business data 明确标签。
+- DatasetSource
+- DatasetVersion
+- ImportRun
+- ImportConflict（或等价结构）
 
-管理端“数据与算法”改为从 API 读取最新 run，同时保留冻结研究报告作为历史/实验记录入口。
+后台至少展示：
 
----
+- 数据源名称/来源/许可或 provenance 说明；
+- 数据版本；
+- 输入文件 checksum；
+- 导入时间；
+- create/update/skip/conflict；
+- 数据质量结果；
+- 当前业务数据量；
+- 当前 Published Graph version；
+- 最近一次导入状态。
 
-## 8. 第七任务：算法接入边界与消融
-
-### 当前冻结结论
-
-MODEL-3：
-
-- ExerciseRate AUC 0.707210
-- Rasch AUC 0.724675
-- Rasch - ExerciseRate = +0.017465
-- 95% CI [0.012394, 0.022665]
-- Hierarchical Rasch+Topic AUC 0.710015
-- Gate = GO_RASCH_ONLY_INTEGRATION
-
-### Java 集成规则
-
-如果本轮做 Rasch 集成：
-
-- 新建独立 provider / auxiliary signal；
-- feature flag 默认关闭，除非有完整集成验收；
-- θ 只能称“全局能力/答题风险辅助信号”，不得称 Topic mastery；
-- RuleBeta 仍是 KnowledgePoint mastery；
-- recommendation snapshot 必须记录使用了哪种 signal/version；
-- 未通过对照实验不得声称推荐质量提升。
-
-### 推荐/路径消融（在真实数据允许的范围内）
-
-至少比较：
-
-1. Popular/Random（无学生状态、无图）；
-2. Mastery-only；
-3. Graph-only；
-4. Mastery + Graph（当前核心）；
-5. 可选 Rasch + Graph。
-
-不能用“生成推荐本身使用的同一条规则”作为唯一正确答案进行自我评分。
-
-可用指标包括：
-
-- prerequisite violation rate；
-- valid path rate；
-- coverage；
-- redundancy / path length；
-- held-out response relevance（明确只是 proxy）；
-- 如有独立专家标注，再报告 expert agreement。
-
-如果没有真实教学试验，不得写“学习效果提升 xx%”。
+敏感本地路径只在开发日志中出现，Web 页面不要显示用户机器绝对路径。
 
 ---
 
-## 9. 角色与产品结构
+## 8. 第七任务：教学资源中心
 
-保持四类后端权限：
+不允许为了页面丰富随便伪造教材/视频。
 
-- STUDENT
-- TEACHER
-- TEACH_ADMIN
-- SYSTEM_ADMIN
+建立最小资源领域模型，例如：
 
-产品至少保持学生/教师/管理三套信息架构分离。
+- LearningResource
+- ResourceType
+- ResourceSource / license
+- KnowledgePointResourceLink
 
-不要把所有教师功能或管理 CRUD 再堆回一页。
+支持：
 
-下一步可以拆：
+- 文档/视频/外链/例题等类型；
+- 标题、来源、授权/许可状态；
+- 与 KnowledgePoint 关联；
+- 教师新增/编辑/下架；
+- 学生节点详情查看关联资源；
+- 没有合法资源时明确显示“暂无资源”。
 
-学生：课程学习 / 知识图谱 / 个性化学习 / 练习 / 学习报告。
-
-教师：教学概览 / 学情分析 / 课程内容 / 图谱与资源。
-
-管理：用户权限 / 课程体系 / 数据治理 / 图谱治理 / 系统运行。
-
-教学资源中心只有在正式资源实体、来源、授权、关联模型完成后再上线；禁止前端虚构视频、课件、教材。
+若当前本地没有合法资源素材，只实现模型/API/UI 空状态/测试，不得批量生成假的真实课程资源。
 
 ---
 
-## 10. 必跑测试与发布验收
+## 9. 第八任务：课程层级与角色产品补齐
 
-每次重要阶段必须执行并记录：
+课程层级不能靠前端硬编码。真实数据导入后，根据数据与业务需求决定是否增加 Chapter/Section/KnowledgeCollection 等实体，并写 ADR。
 
-```bash
-cd backend && mvn --batch-mode test
-cd ../model-service && python -m pytest -q
-cd ../data-pipeline && python -m pytest -q
-cd ../frontend && npm install --no-package-lock --no-audit --no-fund && npm run build
-cd .. && docker compose config
+至少检查并补齐：
+
+### 学生
+
+- 首页
+- 课程学习
+- 知识图谱
+- 个性化学习
+- 练习/错题入口
+- 学习报告
+
+### 教师
+
+不要所有功能继续堆在一个大页面。拆分或通过清晰二级导航组织：
+
+- 教学概览
+- 课程/内容管理
+- 学情分析
+- 图谱/资源
+- 教学评价
+
+### 管理员
+
+- 用户与权限
+- 课程体系
+- 数据治理
+- 知识图谱治理
+- 系统运行/审计
+
+现有 RBAC 与 teacher course authorization 必须保留且增加负向权限测试。
+
+---
+
+## 10. 第九任务：Rasch 生产集成只能作为可选增强
+
+不要因为 MODEL-3 Gate 是 `GO_RASCH_ONLY_INTEGRATION` 就把现有 RuleBeta mastery 替掉。
+
+如果做 Rasch integration：
+
+- 必须 feature flag；
+- 标注为 student global ability / response-risk signal；
+- 不写成 KnowledgePoint mastery；
+- 保留 RuleBeta 作为解释性知识点状态；
+- 增加 OFF/ON 回归测试；
+- 没有明确推荐增益证据时默认 OFF；
+- 页面清楚区分“知识点掌握度”和“总体能力/答题风险”。
+
+---
+
+## 11. 第十任务：测试与 Final Gate
+
+所有新增工作完成后必须执行仓库现有测试，再增加真实数据专项测试。
+
+最低命令（按仓库实际脚本调整）：
+
+```powershell
+cd $REPO_ROOT
+
+# Python / data pipeline
+python -m pytest data-pipeline/tests model-service/tests
+
+# Backend
+cd backend
+./mvnw test
+cd ..
+
+# Frontend
+cd frontend
+npm ci
+npm run build
+cd ..
+
+# Compose definition
+docker compose config
+
+# Full release stack / browser E2E
+# 使用仓库现有 release workflow / scripts；不得用 mock 页面替代。
 ```
 
-完整 release：
+### 必须新增的 E2E 行为
 
-```bash
-scripts/generate-local-release-env.sh .env.release
+真实数据接入后，Playwright 不得断言固定课程名、固定 `DM-*` 编码、固定 16 节点等 fixture 细节；必须验证通用业务行为：
 
-docker compose --env-file .env.release -f docker-compose.full.yml up --build -d
-scripts/wait-for-ready.sh http://localhost:8080
+- 学生可看到导入后的中文数学课程/领域；
+- 课程页结构来自后端；
+- 无合法 Question 的 ExerciseUnit 显示“暂无可用练习”；
+- 选择一个确有平台 Question 的练习可真实答题；
+- 推荐页展示可解释证据；
+- 学习路径与 Published Graph 一致；
+- 知识图谱可搜索/局部展开/路径高亮；
+- 教师只看有权限课程；
+- 管理员能看到真实 ImportRun / GraphVersion；
+- 403 负向权限仍通过。
 
-docker compose --env-file .env.release -f docker-compose.full.yml --profile test run --rm e2e npm run smoke
-docker compose --env-file .env.release -f docker-compose.full.yml --profile test run --rm e2e npm run e2e
-```
+### Final Gate
 
-另外必须新增：
-
-- real-data export tests；
-- import idempotency test；
-- no-research-student-to-user test；
-- published graph self-loop=0 test；
-- published graph cycle=0 test；
-- cross-role/cross-course authorization test；
-- >100-node graph UI smoke（至少使用生成的非生产测试 fixture 验证性能/交互）；
-- recommendation evidence DTO/API test。
-
-### CI Gate
-
-`backend / python / frontend / compose-config / full-stack-release` 必须全部成功。
-
-任何一个失败都不得写 `GO_RELEASE`。
-
----
-
-## 11. 最终交付格式
-
-完成后必须一次性向 Owner 返回以下内容，禁止只说“已完成”：
-
-### A. 代码
-
-- 分支名；
-- 最终 commit SHA；
-- PR 地址/编号；
-- changed files 分类表。
-
-### B. 真实数据结果
-
-- 实际读取源文件路径；
-- 实际读取记录数；
-- export 实体数；
-- import create/update/skip/conflict 数；
-- KnowledgeArea/KnowledgePoint/ExerciseUnit 最终业务数量；
-- Evidence/Published Graph 实际数量；
-- 所有异常与未解决冲突。
-
-### C. 测试
-
-逐项列：
+只有同时满足以下条件才允许返回：
 
 ```text
-backend: PASS/FAIL, tests=?
-model-service: PASS/FAIL, tests=?
-data-pipeline: PASS/FAIL, tests=?
-frontend build: PASS/FAIL
-compose-config: PASS/FAIL
-clean-volume startup: PASS/FAIL
-API smoke: PASS/FAIL
-Playwright: PASS/FAIL
-CI 5 jobs: ?/5
+GO_REAL_DATA_INTEGRATION
 ```
 
-附失败根因，不得隐藏失败。
+- raw data provenance 核对完成；
+- deterministic business export PASS；
+- Java dry-run PASS；
+- first import PASS；
+- second identical import idempotent PASS；
+- GraphValidator PASS；
+- Published Graph projection PASS；
+- backend tests PASS；
+- python/data tests PASS；
+- frontend build PASS；
+- compose config PASS；
+- full-stack API smoke PASS；
+- real browser Playwright PASS；
+- 未提交 raw dataset/secrets；
+- 没有离散数学前端硬编码回流；
+- 没有虚假 Question/Resource/算法归因。
 
-### D. 产品截图
+如果有任意阻塞，返回：
 
-至少：
+```text
+BLOCKED_REAL_DATA_INTEGRATION
+```
 
-- 学生首页；
-- 真实数学课程页；
-- >100 节点情况下的知识图谱筛选/局部图；
-- 推荐解释；
-- 学习路径高亮；
-- 教师学情；
-- 管理端数据治理；
-- 管理端图谱治理。
+并逐项列出：
 
-### E. 尚未完成
+1. 已完成；
+2. 未完成；
+3. 阻塞文件/命令/错误；
+4. 当前 branch/HEAD；
+5. 测试结果表；
+6. 数据实际数量；
+7. 导入 create/update/skip/conflict；
+8. Published Graph node/edge/rejected counts；
+9. 下一条最小修复动作。
 
-单独列 `BLOCKED / DEFERRED / NOT_IMPLEMENTED`，说明为什么没有做、需要什么条件。
+**不要只写“已完成”或“测试通过”。必须给可复核证据。**
 
 ---
 
-## 12. Final Gate
+## 12. Codex 最终汇报模板
 
-只有同时满足下列条件才返回 `GO_REAL_DATA_V1_RC`：
+执行结束必须按下表回答，不得省略：
 
-1. 真实本地数据已完成确定性 export；
-2. Java 业务导入可重复、幂等、可审计；
-3. 用户侧展示中文，但 raw English label/provenance 保留；
-4. 课程结构不在 Vue 中按知识编码硬推断；
-5. 原始 prerequisite 走完整图谱治理；
-6. Published Graph 无 self-loop / cycle；
-7. 科研匿名学生没有转成业务用户；
-8. 没有伪造 Question/教学资源；
-9. 个性化推荐能展示学生状态 + 图谱证据 + 推荐理由；
-10. backend/python/frontend/compose/full-stack-release 全绿；
-11. 真实截图人工检查没有明显英文业务术语、混乱 CRUD 或大规模图不可用问题；
-12. 所有数据规模和算法结果均有可复核证据。
+| 项目 | 结果 | 证据 |
+|---|---|---|
+| REPO_ROOT | | |
+| branch / HEAD | | |
+| 原始数据实际路径 | | |
+| Exercise metadata 行数 | | |
+| Interaction 行数 | | |
+| Area / Topic / Exercise | | |
+| business export | PASS/FAIL | |
+| 中文 mapping | reviewed/unreviewed/quarantine | |
+| Java dry-run | PASS/FAIL | create/update/skip/conflict |
+| Java real import | PASS/FAIL | |
+| Graph evidence import | PASS/FAIL | |
+| Graph validation | PASS/FAIL | |
+| Published Graph | node/edge/rejected | |
+| RuleBeta recommendation | PASS/FAIL | |
+| graph-based path | PASS/FAIL | |
+| data governance UI | PASS/FAIL | |
+| resource center | PASS/FAIL/BLOCKED_NO_LEGAL_RESOURCE | |
+| backend tests | PASS/FAIL | |
+| python tests | PASS/FAIL | |
+| frontend build | PASS/FAIL | |
+| compose config | PASS/FAIL | |
+| API smoke | PASS/FAIL | |
+| Playwright E2E | PASS/FAIL | |
+| raw data/secrets committed | MUST BE 0 | |
+| Final Gate | GO_REAL_DATA_INTEGRATION / BLOCKED_REAL_DATA_INTEGRATION | |
 
-任一 P0 条件不满足，返回 `NO_GO` 或 `CONDITIONAL_GO`，不要降低标准。
+最后附：
+
+- Git diff summary；
+- migration 清单；
+- 新 API 清单；
+- 新/改测试清单；
+- 真实截图路径；
+- 任何未解决风险。
