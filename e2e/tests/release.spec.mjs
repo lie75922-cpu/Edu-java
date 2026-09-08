@@ -87,5 +87,5 @@ test('student, teacher, authorization, and admin release journeys use the real f
   const graphCard = page.locator('section.card').filter({ has: page.getByRole('heading', { name: 'V0.3 Knowledge Relation Governance' }) })
   await graphCard.getByLabel('课程 ID').fill(String(courseA.id))
   await graphCard.getByRole('button', { name: '加载 GraphVersion 与 Evidence', exact: true }).click()
-  await expect(graphCard.getByText('GraphVersion')).toBeVisible()
+  await expect(graphCard.getByRole('heading', { name: 'GraphVersion', exact: true })).toBeVisible()
 })
