@@ -1,0 +1,14 @@
+{
+  "RCD": {
+    "status": "NOT_COMPARABLE_ON_COMMON_GRAPH",
+    "reason": "No audited common Concept Graph and no audited Exercise identity mapping exist between the frozen 40 Topic Q-matrix and an RCD graph input."
+  },
+  "GEAR-CD": {
+    "status": "SMOKE_ONLY",
+    "reason": "MODEL-0A compatibility/smoke conclusion is retained. Full GEAR-CD training is not authorized for MODEL-0R."
+  },
+  "ICDM": {
+    "status": "NOT_AUDITABLY_ALIGNED_FOR_CURRENT_40_TOPIC_INPUT",
+    "reason": "The official repository lacks a declared license and no audited input/Q-matrix semantic alignment to this 40 Topic representation is available; no ID mapping is invented."
+  }
+}

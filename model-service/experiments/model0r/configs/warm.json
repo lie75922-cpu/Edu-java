@@ -1,0 +1,56 @@
+{
+  "dataset_name": "JUNYI_MID_TRANS_V1",
+  "seed": 20260908,
+  "device_preference": "cuda:0",
+  "data_protocol": {
+    "split": "Per-student chronological 60/20/20 with occurred_at ascending and source-order tie-breaker.",
+    "future_leakage": "Only warm train labels can fit rate baselines, NCDM, ORCDF, response graphs, and mastery vectors. Validation selects once; test is evaluated only after selection.",
+    "q_matrix": "Frozen 624 by 40 one-Topic-per-Exercise matrix."
+  },
+  "baselines": {
+    "majority": "Always predicts the observed warm-train majority class.",
+    "global": "Predicts the warm-train global correct rate.",
+    "exercise": "Predicts Exercise historical correct rate from warm-train rows; unseen Exercises fall back to global rate.",
+    "topic": "Predicts Topic historical correct rate from warm-train rows; unseen Topics fall back to global rate."
+  },
+  "ncdm": {
+    "reference_component": "InsCD NCDM / Default extractor / NCD_IF equations through the archived split-safe adapter.",
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "learning_rate": 0.002,
+    "weight_decay": 0.0,
+    "batch_size": 4096,
+    "max_epochs": 20,
+    "early_stopping_patience": 4,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch"
+  },
+  "orcdf": {
+    "reference_component": "InsCD ORCDF response graph / NCD_IF equations through the archived split-safe adapter.",
+    "latent_dim": 32,
+    "gcn_layers": 2,
+    "flip_ratio": 0.05,
+    "ssl_temperature": 3.0,
+    "ssl_weight": 0.001,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "hidden_dims": [128, 64],
+    "dropout": 0.2,
+    "max_epochs": 8,
+    "early_stopping_patience": 3,
+    "selection_metric": "validation_auc_then_lower_validation_rmse_then_earlier_epoch"
+  },
+  "mastery_sanity": {
+    "anonymous_case_count": 20,
+    "minimum_median_topic_standard_deviation": 0.01,
+    "maximum_mean_pairwise_cosine": 0.995
+  },
+  "doa": {
+    "definition": "Exercise-conditioned pairwise agreement: later correct versus later incorrect students on the same Exercise are ordered by the Q-topic mastery fitted from warm-train history; ties score one half.",
+    "test_labels_used_only_for_scoring": true
+  },
+  "bootstrap": {
+    "resamples": 500,
+    "confidence_level": 0.95,
+    "seed_offset": 701
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "allowed_statuses": ["GO_MODEL_INTEGRATION", "CONDITIONAL_GO", "NO_GO"],
+  "warm": {
+    "minimum_auc": 0.5,
+    "minimum_auc_margin_over_best_nonpersonalized_baseline": 0.0,
+    "require_bootstrap_lower_bound_above_zero": true,
+    "require_mastery_sanity_pass": true,
+    "maximum_peak_process_rss_bytes": 2147483648
+  },
+  "cold": {
+    "integration_ready_k": 5,
+    "require_global_state_unchanged": true,
+    "require_evaluation_representation_unchanged": true,
+    "require_test_auc_margin_over_best_baseline": 0.0,
+    "maximum_calibration_p95_ms": 1000.0
+  },
+  "interpretation": {
+    "go": "A warm model has a non-collapsed mastery signal and strictly beats all non-personalized baselines with paired-bootstrap support; a safe k=5 new-student calibration path also beats cold baselines under the frozen global-state audit.",
+    "conditional": "Warm evidence is sufficient but safe cold-start readiness is missing or weaker than its statistical fallback.",
+    "no_go": "No warm candidate clears the pre-registered response-prediction and mastery sanity criteria."
+  }
+}
