@@ -1,0 +1,48 @@
+{
+  "conditions": {
+    "evaluation_no_parameter_update": true,
+    "final_protocol_global_freeze": true,
+    "hierarchical_bootstrap_lower_bound_above_zero": false,
+    "hierarchical_brier_not_materially_worse": false,
+    "hierarchical_log_loss_not_materially_worse": false,
+    "hierarchical_point_auc_above_rasch": false,
+    "hierarchical_quality": true,
+    "observed_topic_delta_future_association": true,
+    "observed_topic_delta_nonempty": true,
+    "rasch_auc_above_exercise_rate": true,
+    "rasch_quality": true,
+    "twenty_anonymized_cases": true,
+    "unknown_topic_delta_neutral": true
+  },
+  "hierarchical_conditions_passed": false,
+  "primary_comparisons": {
+    "hierarchical_minus_rasch": {
+      "baseline": "RASCH_1PL_V1",
+      "candidate": "HIER_RASCH_TOPIC_V1",
+      "confidence_level": 0.95,
+      "lower_bound": -0.017390705664993795,
+      "method": "Student-cluster paired bootstrap: students are resampled with replacement, and every selected student's evaluation rows retain the same cluster multiplicity.",
+      "observed_auc_delta": -0.014659893983236083,
+      "resamples_requested": 1000,
+      "resamples_valid": 1000,
+      "student_cluster_count": 5000,
+      "upper_bound": -0.011977041435890342
+    },
+    "rasch_minus_exercise_rate": {
+      "baseline": "EXERCISE_RATE_DEV",
+      "candidate": "RASCH_1PL_V1",
+      "confidence_level": 0.95,
+      "lower_bound": 0.012394195950618305,
+      "method": "Student-cluster paired bootstrap: students are resampled with replacement, and every selected student's evaluation rows retain the same cluster multiplicity.",
+      "observed_auc_delta": 0.017464740217834618,
+      "resamples_requested": 1000,
+      "resamples_valid": 1000,
+      "student_cluster_count": 5000,
+      "upper_bound": 0.022664963044776946
+    }
+  },
+  "product_boundary": "A GO authorizes only a later, separately reviewed integration design. Java MasteryProvider, recommendation, Published Graph, and RuleBeta remain unchanged in this Issue.",
+  "rasch_conditions_passed": true,
+  "reason": "Rasch robustly clears ExerciseRate, while the hierarchical candidate lacks a frozen GO condition.",
+  "status": "GO_RASCH_ONLY_INTEGRATION"
+}

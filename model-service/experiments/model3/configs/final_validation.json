@@ -1,0 +1,66 @@
+{
+  "protocol_version": "MODEL3_FINAL_VALIDATION_V1",
+  "dataset_name": "JUNYI_FINAL_HOLDOUT_V1",
+  "target_students": 5000,
+  "topic_identity_scope": {
+    "catalog_topics": 40,
+    "active_final_eligible_topics": 39,
+    "semantics": "The frozen 40-Topic catalog has 39 Topics represented by the 624 observed eligible Exercises. The inactive catalog Topic has no final eligible response row and cannot receive an observed delta."
+  },
+  "chronological_split": {
+    "ordering": "time_done ascending with original ProblemLog source row as stable tie-breaker",
+    "calibration_fraction": 0.6,
+    "evaluation_fraction": 0.4,
+    "minimum_eligible_interactions": 20
+  },
+  "global_parameter_policy": "Frozen development-refit global parameters; no final response updates mu, beta_exercise, or ExerciseRate.",
+  "personal_calibration": {
+    "device": "cpu",
+    "learning_rate": 0.05,
+    "batch_size": 4096,
+    "epochs": 20,
+    "theta_l2": 0.01,
+    "hierarchical_delta_l2": "Use the lambda_delta selected and frozen by development_model_selection.",
+    "allowed_trainable_parameters": [
+      "theta_student",
+      "delta_student_topic for HIER_RASCH_TOPIC_V1 only"
+    ]
+  },
+  "no_history_topic_policy": {
+    "delta": 0.0,
+    "semantic_status": "UNKNOWN",
+    "not_mastery": true,
+    "never_map_to": 0.5
+  },
+  "fallback_policy": {
+    "when": "Exercise has fewer than 5 development-refit interactions or is absent from the frozen development Exercise map.",
+    "prediction": "GLOBAL_EXERCISE_RATE_BETA_1_1",
+    "retain_rows": true,
+    "report_separately": true
+  },
+  "metrics": {
+    "threshold": 0.5,
+    "calibration_bin_count": 10,
+    "required": [
+      "auc",
+      "acc",
+      "rmse",
+      "log_loss",
+      "brier",
+      "calibration",
+      "known_item_coverage",
+      "fallback_item_coverage",
+      "calibration_latency",
+      "fit_inference_wall_time",
+      "peak_ram_gpu"
+    ]
+  },
+  "bootstrap": {
+    "method": "student-cluster paired bootstrap",
+    "resamples": 1000,
+    "confidence_level": 0.95,
+    "seed": 2026090808
+  },
+  "evaluation_update_policy": "Evaluation computes predictions and metrics only; it never invokes optimizer or updates theta_student or delta_student_topic.",
+  "final_holdout_labels_read": false
+}

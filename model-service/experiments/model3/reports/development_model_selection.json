@@ -1,0 +1,133 @@
+{
+  "candidates": [
+    {
+      "candidate": "EXERCISE_RATE_DEV",
+      "fallback": "GLOBAL_EXERCISE_RATE_BETA_1_1",
+      "validation_metrics": {
+        "acc": 0.8266914754973542,
+        "auc": 0.7134730129849589,
+        "brier": 0.1322153355669501,
+        "log_loss": 0.42160793834350596,
+        "rmse": 0.36361426755141235
+      }
+    },
+    {
+      "candidate": "RASCH_1PL_V1",
+      "resources": {
+        "gpu": "none",
+        "peak_gpu_allocated_bytes": null,
+        "peak_gpu_reserved_bytes": null,
+        "peak_process_rss_bytes": 363479040
+      },
+      "selected_epoch": 5,
+      "training_wall_seconds": 10.213518899996416,
+      "validation_metrics": {
+        "acc": 0.829364705512899,
+        "auc": 0.7374121657860205,
+        "brier": 0.1283610590794094,
+        "log_loss": 0.41108917791270955,
+        "rmse": 0.3582751164669539
+      }
+    }
+  ],
+  "development_data_role": "MODEL-1 train/history and validation only for selection; historical diagnostic partition is not scored here.",
+  "final_holdout_labels_read": false,
+  "hierarchical_lambda_grid": [
+    {
+      "candidate": "HIER_RASCH_TOPIC_V1",
+      "lambda_delta": 0.03,
+      "resources": {
+        "gpu": "none",
+        "peak_gpu_allocated_bytes": null,
+        "peak_gpu_reserved_bytes": null,
+        "peak_process_rss_bytes": 370941952
+      },
+      "selected_epoch": 2,
+      "training_wall_seconds": 8.55281969999487,
+      "validation_metrics": {
+        "acc": 0.8299103427701101,
+        "auc": 0.7392929792593554,
+        "brier": 0.12816026737783748,
+        "log_loss": 0.410306189875428,
+        "rmse": 0.35799478680259783
+      }
+    },
+    {
+      "candidate": "HIER_RASCH_TOPIC_V1",
+      "lambda_delta": 0.1,
+      "resources": {
+        "gpu": "none",
+        "peak_gpu_allocated_bytes": null,
+        "peak_gpu_reserved_bytes": null,
+        "peak_process_rss_bytes": 372662272
+      },
+      "selected_epoch": 2,
+      "training_wall_seconds": 8.875317999991239,
+      "validation_metrics": {
+        "acc": 0.8299731499364077,
+        "auc": 0.7389158564076903,
+        "brier": 0.12819840643568686,
+        "log_loss": 0.4104450844047635,
+        "rmse": 0.35804805045648114
+      }
+    },
+    {
+      "candidate": "HIER_RASCH_TOPIC_V1",
+      "lambda_delta": 0.3,
+      "resources": {
+        "gpu": "none",
+        "peak_gpu_allocated_bytes": null,
+        "peak_gpu_reserved_bytes": null,
+        "peak_process_rss_bytes": 372662272
+      },
+      "selected_epoch": 2,
+      "training_wall_seconds": 8.12834219999786,
+      "validation_metrics": {
+        "acc": 0.8299652990406206,
+        "auc": 0.738423165340913,
+        "brier": 0.12825022471132466,
+        "log_loss": 0.4106214349361002,
+        "rmse": 0.3581204053266508
+      }
+    },
+    {
+      "candidate": "HIER_RASCH_TOPIC_V1",
+      "lambda_delta": 1.0,
+      "resources": {
+        "gpu": "none",
+        "peak_gpu_allocated_bytes": null,
+        "peak_gpu_reserved_bytes": null,
+        "peak_process_rss_bytes": 372666368
+      },
+      "selected_epoch": 1,
+      "training_wall_seconds": 7.27741939999396,
+      "validation_metrics": {
+        "acc": 0.8297965047811955,
+        "auc": 0.7379965420189232,
+        "brier": 0.12830568018869315,
+        "log_loss": 0.4110398392867832,
+        "rmse": 0.35819782270233463
+      }
+    }
+  ],
+  "selected_hierarchical": {
+    "candidate": "HIER_RASCH_TOPIC_V1",
+    "lambda_delta": 0.03,
+    "resources": {
+      "gpu": "none",
+      "peak_gpu_allocated_bytes": null,
+      "peak_gpu_reserved_bytes": null,
+      "peak_process_rss_bytes": 370941952
+    },
+    "selected_epoch": 2,
+    "training_wall_seconds": 8.55281969999487,
+    "validation_metrics": {
+      "acc": 0.8299103427701101,
+      "auc": 0.7392929792593554,
+      "brier": 0.12816026737783748,
+      "log_loss": 0.410306189875428,
+      "rmse": 0.35799478680259783
+    }
+  },
+  "status": "DEVELOPMENT_SELECTION_COMPLETED_FINAL_LABELS_UNREAD"
+}

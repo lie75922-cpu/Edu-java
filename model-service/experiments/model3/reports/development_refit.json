@@ -1,0 +1,45 @@
+{
+  "exercise_rate": {
+    "fallback_exercise_count": 10,
+    "global_rate": 0.8300677015212783,
+    "known_exercise_count": 614
+  },
+  "final_holdout_labels_read": false,
+  "global_parameter_artifact": "model-service/experiments/model3/checkpoints/development_refit_global_parameters.npz (ignored local artifact)",
+  "global_parameters_frozen_before_final": [
+    "mu",
+    "exercise_difficulty",
+    "exercise_rate"
+  ],
+  "hierarchical": {
+    "refit_epochs": 2,
+    "resources": {
+      "gpu": "none",
+      "peak_gpu_allocated_bytes": null,
+      "peak_gpu_reserved_bytes": null,
+      "peak_process_rss_bytes": 416960512
+    },
+    "selected_lambda_delta": 0.03,
+    "training_wall_seconds": 4.478682000000845
+  },
+  "interaction_rows": 1283721,
+  "rasch": {
+    "refit_epochs": 5,
+    "resources": {
+      "gpu": "none",
+      "peak_gpu_allocated_bytes": null,
+      "peak_gpu_reserved_bytes": null,
+      "peak_process_rss_bytes": 416964608
+    },
+    "training_wall_seconds": 5.457381000000169
+  },
+  "runtime_versions": {
+    "numpy": "1.26.4",
+    "psutil": "6.1.1",
+    "python": "3.12.14",
+    "scikit-learn": "1.5.2",
+    "torch": "2.3.1+cpu"
+  },
+  "scope": "MODEL-1 train, validation, and historical diagnostic partitions only",
+  "status": "DEVELOPMENT_GLOBAL_REFIT_COMPLETED_FINAL_LABELS_UNREAD"
+}

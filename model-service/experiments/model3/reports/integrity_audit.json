@@ -1,0 +1,48 @@
+{
+  "final_holdout": {
+    "archived_status": "FROZEN_UNEVALUATED",
+    "dataset_name": "JUNYI_FINAL_HOLDOUT_V1",
+    "final_member_count": 5000,
+    "model1_overlap": 0,
+    "model2_labels_read": false,
+    "model2_metrics_generated": false,
+    "model3_consumption_status": "FROZEN_UNEVALUATED",
+    "model3_labels_read": false,
+    "model3_metrics_generated": false,
+    "original_medium_overlap": 0
+  },
+  "frozen_protocol": {
+    "bootstrap_resamples": 1000,
+    "candidates": [
+      "EXERCISE_RATE_DEV",
+      "RASCH_1PL_V1",
+      "HIER_RASCH_TOPIC_V1"
+    ],
+    "final_gate_statuses": [
+      "GO_HIERARCHICAL_MODEL_INTEGRATION",
+      "GO_RASCH_ONLY_INTEGRATION",
+      "STOP_ML_INTEGRATION_RULE_ONLY"
+    ],
+    "lambda_delta_grid": [
+      0.03,
+      0.1,
+      0.3,
+      1.0
+    ]
+  },
+  "identity_scope": {
+    "development_exercise_count": 624,
+    "development_topic_catalog_count": 40,
+    "final_active_topic_count": 39,
+    "final_eligible_exercise_count": 624,
+    "raw_metadata_audit": {
+      "distinct_nonempty_exercise_ids": 835,
+      "eligible_exercises_checked": 624,
+      "identity_topic_mismatch_count": 0,
+      "metadata_rows": 837
+    }
+  },
+  "label_access": "No ProblemLog correctness field was opened by this audit.",
+  "prior_model3_final_artifacts": [],
+  "status": "INTEGRITY_AUDIT_PASSED_NO_FINAL_LABEL_READ"
+}
