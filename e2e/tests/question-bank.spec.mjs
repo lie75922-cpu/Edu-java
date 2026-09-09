@@ -43,7 +43,7 @@ test('教师可维护平台自编题目且停用后状态可追踪', async ({ pa
   await login(page)
 
   await page.getByRole('button', { name: '题库管理', exact: true }).click()
-  await expect(page.getByRole('heading', { name: '题库管理', exact: true })).toBeVisible()
+  await expect(page.locator('.page-intro h2')).toHaveText('题库管理')
 
   const selects = page.locator('.page-intro .intro-actions select')
   await selects.nth(0).selectOption(String(course.courseId))
