@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 class RecommendationFilterTest {
 
     @Test
-    void excludesGraphVersionMismatchInactiveNodesInactiveExercisesAndExercisesWithoutActiveQuestions() {
+    void excludesInvalidCandidatesButKeepsTopicLevelRecommendationWhenQuestionContentIsUnavailable() {
         KnowledgePointRepository pointRepository = mock(KnowledgePointRepository.class);
         ExerciseKnowledgeRepository mappingRepository = mock(ExerciseKnowledgeRepository.class);
         ExerciseUnitRepository exerciseRepository = mock(ExerciseUnitRepository.class);
@@ -62,9 +62,11 @@ class RecommendationFilterTest {
                 candidate(42L, 5L)
         ), 10L, 42L);
 
-        assertThat(filtered).hasSize(1);
-        assertThat(filtered.getFirst().candidate().knowledgePointId()).isEqualTo(1L);
-        assertThat(filtered.getFirst().exerciseUnitId()).isEqualTo(101L);
+        assertThat(filtered).hasSize(2);
+        assertThat(filtered.get(0).candidate().knowledgePointId()).isEqualTo(1L);
+        assertThat(filtered.get(0).exerciseUnitId()).isEqualTo(101L);
+        assertThat(filtered.get(1).candidate().knowledgePointId()).isEqualTo(4L);
+        assertThat(filtered.get(1).exerciseUnitId()).isNull();
     }
 
     private KnowledgePoint point(long id, long courseId, String status) {
