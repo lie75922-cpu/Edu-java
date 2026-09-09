@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { api, percent, run, selectedCourse } from '../store.js'
+import { recommendationExplanation } from '../recommendationExplanation.js'
 
 const courses = ref([])
 const mastery = ref([])
@@ -42,13 +43,18 @@ async function loadPath() {
   path.value = await run(() => api(`/knowledge-points/${id}/learning-path`))
 }
 
-function reasonText(code) {
-  if (code === 'UNMET_PREREQUISITE') return '目标知识的前置内容尚未巩固'
-  if (code === 'LOW_MASTERY') return '已有学习记录显示当前掌握程度偏低'
-  if (code === 'RECENT_ERRORS') return '近期在相关练习中出现错误'
-  if (code === 'REVIEW_DUE') return '距离上次练习时间较长，建议复习'
-  if (code === 'TARGET_PRACTICE') return '目标知识需要进一步练习'
-  return '根据当前学习记录推荐'
+function explanationFor(item) {
+  return recommendationExplanation(item)
+}
+
+function pathBadge(node) {
+  return node.reasonCode === 'UNMET_PREREQUISITE' ? '前置知识' : '学习目标'
+}
+
+function pathDescription(node) {
+  return node.masteryStatus === 'UNKNOWN'
+    ? '暂无学习数据，建议先完成基础学习与练习。'
+    : `当前掌握情况 ${percent(node.masteryScore)}。`
 }
 
 async function boot() {
@@ -95,7 +101,16 @@ onMounted(boot)
         <template v-if="recommendation?.items?.length">
           <article v-for="item in recommendation.items" :key="item.id" class="recommend-card large">
             <span class="recommend-rank">{{ item.rank }}</span>
-            <div><strong>{{ item.knowledgeName }}</strong><p>{{ item.exerciseName || '复习该知识点' }}</p><small>{{ reasonText(item.reasonCode) }}</small></div>
+            <div>
+              <strong>{{ item.knowledgeName }}</strong>
+              <p>{{ item.exerciseName || '复习该知识点' }}</p>
+              <small>{{ explanationFor(item).message }}</small>
+              <small v-if="explanationFor(item).masteryScore !== null">当前掌握情况：{{ percent(explanationFor(item).masteryScore) }}</small>
+              <small v-if="explanationFor(item).attemptCount !== null && explanationFor(item).correctCount !== null">已有作答 {{ explanationFor(item).attemptCount }} 次，答对 {{ explanationFor(item).correctCount }} 次。</small>
+              <small v-if="explanationFor(item).recentErrorCount !== null && explanationFor(item).recentErrorCount > 0">近期错误 {{ explanationFor(item).recentErrorCount }} 次。</small>
+              <small v-if="explanationFor(item).unmetPrerequisite">建议先巩固相关前置知识。</small>
+              <small v-if="explanationFor(item).ruleVersion || explanationFor(item).graphVersionId !== null">推荐规则版本：{{ explanationFor(item).ruleVersion || '未提供' }}；知识关系版本：{{ explanationFor(item).graphVersionId ?? '未提供' }}</small>
+            </div>
           </article>
         </template>
         <div v-else class="empty-state compact"><strong>暂时没有推荐任务</strong><p>点击“更新学习建议”后，系统会结合掌握情况和知识先修关系生成推荐。</p></div>
@@ -107,7 +122,7 @@ onMounted(boot)
       <div v-if="path?.nodes?.length" class="learning-path">
         <article v-for="(node, index) in path.nodes" :key="node.knowledgePointId" class="path-step">
           <div class="path-marker"><span>{{ index + 1 }}</span><i v-if="index < path.nodes.length - 1"></i></div>
-          <div class="path-card"><span class="soft-badge">{{ node.reasonCode === 'UNMET_PREREQUISITE' ? '前置知识' : '学习目标' }}</span><h4>{{ node.knowledgeName }}</h4><p>{{ node.masteryStatus === 'UNKNOWN' ? '暂无学习数据，建议先完成基础学习与练习。' : `当前掌握情况 ${percent(node.masteryScore)}。` }}</p><small>{{ node.hasAvailableExercise ? `已关联练习：${node.exerciseName}` : '当前暂无可用练习' }}</small></div>
+          <div class="path-card"><span class="soft-badge">{{ pathBadge(node) }}</span><h4>{{ node.knowledgeName }}</h4><p>{{ pathDescription(node) }}</p><small>{{ node.hasAvailableExercise ? `已关联练习：${node.exerciseName}` : '当前暂无可用练习' }}</small></div>
         </article>
       </div>
       <div v-else class="empty-state"><strong>选择一个目标知识点</strong><p>系统会从当前已发布知识图谱中提取前置知识，并过滤已经掌握的节点，形成有顺序的学习路径。</p></div>

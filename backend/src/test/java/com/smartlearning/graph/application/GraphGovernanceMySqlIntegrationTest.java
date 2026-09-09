@@ -194,6 +194,20 @@ class GraphGovernanceMySqlIntegrationTest {
         assertThat(result.conflictCount()).isEqualTo(3);
         assertThat(result.conflicts()).extracting(GraphApi.EvidenceConflictResponse::conflictCode)
                 .contains("REJECTED_SELF_LOOP", "MISSING_SOURCE_EXERCISE", "AMBIGUOUS_SOURCE_EXERCISE");
+        assertThat(relationRepository.findByGraphVersionIdOrderByIdAsc(version.id())).isEmpty();
+
+        GraphApi.CandidateRelationImportResult candidateResult = evidenceImportService.applyCandidates(
+                version.id(), new GraphApi.CandidateRelationImportRequest(List.of(
+                        new GraphApi.CandidateTopicRelationRequest(
+                                "candidate-" + number, "A-" + number, "B-" + number,
+                                "GRAPH_IT_POLICY_V1", "REVIEW_REQUIRED_NOT_PUBLISHED", "NOT_PUBLISHED",
+                                List.of("raw-1-" + number, "raw-2-" + number)
+                        )
+                )), administratorId
+        );
+
+        assertThat(candidateResult.createdCandidateRelations()).isEqualTo(1);
+        assertThat(candidateResult.conflictCount()).isZero();
         assertThat(relationRepository.findByGraphVersionIdOrderByIdAsc(version.id())).hasSize(1);
         var relation = relationRepository.findByGraphVersionIdOrderByIdAsc(version.id()).getFirst();
         assertThat(relation.getEvidenceCount()).isEqualTo(2);
@@ -208,7 +222,7 @@ class GraphGovernanceMySqlIntegrationTest {
 
     private long createPoint(String code, String name) {
         return knowledgeService.createPoint(new KnowledgeApi.KnowledgePointRequest(
-                courseId, null, code, name, "PLATFORM", null, "MAPPED", "ACTIVE"
+                courseId, null, code, name, "JUNYI_TOPIC", code, "MAPPED", "ACTIVE"
         )).id();
     }
 

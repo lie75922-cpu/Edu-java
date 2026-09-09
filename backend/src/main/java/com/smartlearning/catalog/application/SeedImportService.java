@@ -5,8 +5,10 @@ import com.smartlearning.assessment.domain.ExerciseUnit;
 import com.smartlearning.assessment.infrastructure.persistence.ExerciseKnowledgeRepository;
 import com.smartlearning.assessment.infrastructure.persistence.ExerciseUnitRepository;
 import com.smartlearning.catalog.api.SeedImportApi;
+import com.smartlearning.catalog.domain.CatalogSourceRecord;
 import com.smartlearning.catalog.domain.SeedImportConflict;
 import com.smartlearning.catalog.domain.SeedImportRun;
+import com.smartlearning.catalog.infrastructure.persistence.CatalogSourceRecordRepository;
 import com.smartlearning.catalog.infrastructure.persistence.SeedImportConflictRepository;
 import com.smartlearning.catalog.infrastructure.persistence.SeedImportRunRepository;
 import com.smartlearning.common.exception.NotFoundException;
@@ -25,16 +27,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * The one catalog import path. It deliberately imports only the platform directory projection:
+ * Area, Topic-as-KnowledgePoint, Exercise metadata and Exercise-Topic mappings. Research students,
+ * interactions and Question content are outside this service and outside its request contract.
+ */
 @Service
 public class SeedImportService {
 
     private static final String SOURCE_NAME = "JUNYI_CATALOG";
     private static final String TOPIC_SOURCE = "JUNYI_TOPIC";
+    private static final String AREA_RECORD = "KNOWLEDGE_AREA";
+    private static final String TOPIC_RECORD = "KNOWLEDGE_POINT";
+    private static final String EXERCISE_RECORD = "EXERCISE_UNIT";
+    private static final String ELIGIBLE_FOR_IMPORT = "ELIGIBLE_FOR_IMPORT";
 
     private final CourseRepository courseRepository;
     private final KnowledgeAreaRepository areaRepository;
@@ -43,6 +57,7 @@ public class SeedImportService {
     private final ExerciseKnowledgeRepository mappingRepository;
     private final SeedImportRunRepository runRepository;
     private final SeedImportConflictRepository conflictRepository;
+    private final CatalogSourceRecordRepository sourceRecordRepository;
     private final ObjectMapper objectMapper;
 
     public SeedImportService(
@@ -53,6 +68,7 @@ public class SeedImportService {
             ExerciseKnowledgeRepository mappingRepository,
             SeedImportRunRepository runRepository,
             SeedImportConflictRepository conflictRepository,
+            CatalogSourceRecordRepository sourceRecordRepository,
             ObjectMapper objectMapper
     ) {
         this.courseRepository = courseRepository;
@@ -62,6 +78,7 @@ public class SeedImportService {
         this.mappingRepository = mappingRepository;
         this.runRepository = runRepository;
         this.conflictRepository = conflictRepository;
+        this.sourceRecordRepository = sourceRecordRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -84,16 +101,30 @@ public class SeedImportService {
 
     private SeedImportApi.SeedImportResult execute(SeedImportApi.SeedImportRequest request, long requestedBy, boolean apply) {
         String mode = apply ? "APPLY" : "DRY_RUN";
-        SeedImportRun run = runRepository.save(new SeedImportRun(requestedBy, mode, SOURCE_NAME));
+        SeedImportRun run = runRepository.save(new SeedImportRun(
+                requestedBy, mode, SOURCE_NAME, request.metadata(), toJson(request.metadata().inputColumns())
+        ));
         MutableSummary summary = new MutableSummary();
         List<ConflictDraft> conflicts = new ArrayList<>();
 
         Set<String> duplicateAreas = duplicates(request.areas(), SeedImportApi.SeedArea::externalId);
         Set<String> duplicateTopics = duplicates(request.topics(), SeedImportApi.SeedTopic::externalId);
         Set<String> duplicateExercises = duplicates(request.exercises(), SeedImportApi.SeedExercise::externalId);
-        duplicateAreas.forEach(id -> conflicts.add(conflict("KNOWLEDGE_AREA", id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate area external ID in import input")));
-        duplicateTopics.forEach(id -> conflicts.add(conflict("KNOWLEDGE_POINT", id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate topic external ID in import input")));
-        duplicateExercises.forEach(id -> conflicts.add(conflict("EXERCISE_UNIT", id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate exercise external ID in import input")));
+        Set<String> areaRawValueConflicts = batchRawValueConflicts(
+                request.areas(), duplicateAreas, SeedImportApi.SeedArea::externalId, SeedImportApi.SeedArea::rawArea
+        );
+        Set<String> topicRawValueConflicts = batchRawValueConflicts(
+                request.topics(), duplicateTopics, SeedImportApi.SeedTopic::externalId, SeedImportApi.SeedTopic::rawTopic
+        );
+        Set<String> exerciseRawValueConflicts = batchRawValueConflicts(
+                request.exercises(), duplicateExercises, SeedImportApi.SeedExercise::externalId, SeedImportApi.SeedExercise::rawExerciseName
+        );
+        duplicateAreas.forEach(id -> conflicts.add(conflict(AREA_RECORD, id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate area external ID in import input")));
+        duplicateTopics.forEach(id -> conflicts.add(conflict(TOPIC_RECORD, id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate topic external ID in import input")));
+        duplicateExercises.forEach(id -> conflicts.add(conflict(EXERCISE_RECORD, id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate exercise external ID in import input")));
+        areaRawValueConflicts.forEach(id -> conflicts.add(conflict(AREA_RECORD, id, "RAW_VALUE_CONFLICT", "database-equivalent source external ID has a different raw value in import input")));
+        topicRawValueConflicts.forEach(id -> conflicts.add(conflict(TOPIC_RECORD, id, "RAW_VALUE_CONFLICT", "database-equivalent source external ID has a different raw value in import input")));
+        exerciseRawValueConflicts.forEach(id -> conflicts.add(conflict(EXERCISE_RECORD, id, "RAW_VALUE_CONFLICT", "database-equivalent source external ID has a different raw value in import input")));
 
         Course course = courseRepository.findByCourseCode(request.courseCode()).orElse(null);
         if (course == null) {
@@ -104,31 +135,41 @@ public class SeedImportService {
         }
         Long courseId = course == null ? null : course.getId();
 
-        Map<String, AreaResolution> areas = importAreas(request.areas(), duplicateAreas, courseId, apply, summary, conflicts);
-        Map<String, PointResolution> points = importTopics(
-                request.topics(), duplicateTopics, duplicateAreas, areas, courseId, apply, summary, conflicts
+        Map<String, AreaResolution> areas = importAreas(
+                request.areas(), duplicateAreas, areaRawValueConflicts, courseId, apply, summary, conflicts
         );
-        importExercises(request.exercises(), duplicateExercises, duplicateTopics, points, courseId, apply, summary, conflicts);
+        Map<String, PointResolution> points = importTopics(
+                request.topics(), duplicateTopics, topicRawValueConflicts, duplicateAreas, areas, courseId, apply, summary, conflicts
+        );
+        importExercises(
+                request.exercises(), duplicateExercises, exerciseRawValueConflicts, duplicateTopics, points, courseId, apply, summary, conflicts
+        );
 
         List<SeedImportConflict> persistedConflicts = conflicts.stream()
                 .map(draft -> conflictRepository.save(new SeedImportConflict(
-                        run.getId(), draft.entityType(), draft.externalId(), draft.conflictType(), toJson(Map.of("message", draft.message()))
+                        run.getId(), draft.entityType(), draft.externalId(), draft.conflictType(),
+                        toJson(Map.of("message", draft.message()))
                 )))
                 .toList();
         summary.conflictCount = persistedConflicts.size();
-        String status = summary.conflictCount == 0 ? (apply ? "COMPLETED" : "DRY_RUN_COMPLETED") : "COMPLETED_WITH_CONFLICTS";
-        run.complete(status, toJson(summary.snapshot()));
+        String status = summary.conflictCount == 0
+                ? (apply ? "COMPLETED" : "DRY_RUN_COMPLETED")
+                : (apply ? "COMPLETED_WITH_CONFLICTS" : "DRY_RUN_COMPLETED_WITH_CONFLICTS");
+        run.complete(status, toJson(summary.snapshot()), summary.quarantinedRecords);
         return new SeedImportApi.SeedImportResult(
                 run.getId(), mode, status, summary.createdCourses, summary.createdAreas, summary.reusedAreas,
-                summary.createdKnowledgePoints, summary.reusedKnowledgePoints, summary.createdExerciseUnits,
-                summary.reusedExerciseUnits, summary.createdMappings, summary.unmappedExercises, summary.conflictCount,
-                persistedConflicts.stream().map(this::toConflictResponse).toList()
+                summary.updatedAreas, summary.createdKnowledgePoints, summary.reusedKnowledgePoints,
+                summary.updatedKnowledgePoints, summary.createdExerciseUnits, summary.reusedExerciseUnits,
+                summary.updatedExerciseUnits, summary.createdMappings, summary.unmappedExercises,
+                summary.quarantinedRecords, summary.createdProvenanceRecords, summary.updatedDisplayRecords,
+                summary.conflictCount, request.metadata(), persistedConflicts.stream().map(this::toConflictResponse).toList()
         );
     }
 
     private Map<String, AreaResolution> importAreas(
             List<SeedImportApi.SeedArea> seedAreas,
             Set<String> duplicateIds,
+            Set<String> rawValueConflictIds,
             Long courseId,
             boolean apply,
             MutableSummary summary,
@@ -137,29 +178,47 @@ public class SeedImportService {
         Map<String, AreaResolution> results = new HashMap<>();
         for (SeedImportApi.SeedArea seed : seedAreas) {
             String externalId = normalizedId(seed.externalId());
-            if (duplicateIds.contains(externalId)) {
+            if (duplicateIds.contains(externalId) || rawValueConflictIds.contains(externalId)) {
+                continue;
+            }
+            if (!ELIGIBLE_FOR_IMPORT.equals(seed.businessMappingStatus())) {
+                summary.quarantinedRecords++;
+                continue;
+            }
+            SourceRecordPlan source = sourceRecordPlan(
+                    courseId, AREA_RECORD, externalId, seed.rawArea(), seed.displayNameZh(),
+                    seed.displayMappingStatus(), seed.businessMappingStatus(), null, seed.provenance()
+            );
+            if (!source.accepted()) {
+                conflicts.add(conflict(AREA_RECORD, externalId, "RAW_VALUE_CONFLICT",
+                        "source external ID is already bound to a different raw area value"));
                 continue;
             }
             List<KnowledgeArea> existing = courseId == null ? List.of()
                     : areaRepository.findByCourseIdAndSourceTypeAndExternalId(courseId, SOURCE_NAME, externalId);
             if (existing.size() > 1) {
-                conflicts.add(conflict("KNOWLEDGE_AREA", externalId, "IDENTITY_CONFLICT", "multiple existing areas have this source external ID"));
+                conflicts.add(conflict(AREA_RECORD, externalId, "IDENTITY_CONFLICT", "multiple existing areas have this source external ID"));
                 continue;
             }
+            KnowledgeArea area;
             if (existing.size() == 1) {
-                summary.reusedAreas++;
-                results.put(externalId, new AreaResolution(existing.getFirst(), true));
-                continue;
-            }
-            summary.createdAreas++;
-            if (apply) {
-                KnowledgeArea area = areaRepository.save(new KnowledgeArea(
-                        courseId, nextAreaCode(courseId, externalId), seed.areaName(), SOURCE_NAME, externalId, "ACTIVE"
-                ));
-                results.put(externalId, new AreaResolution(area, true));
+                area = existing.getFirst();
+                if (!area.getAreaName().equals(seed.displayNameZh())) {
+                    area.update(area.getCourseId(), area.getAreaCode(), seed.displayNameZh(), area.getSourceType(),
+                            area.getExternalId(), area.getStatus());
+                    summary.updatedAreas++;
+                    summary.updatedDisplayRecords++;
+                } else {
+                    summary.reusedAreas++;
+                }
             } else {
-                results.put(externalId, new AreaResolution(null, true));
+                summary.createdAreas++;
+                area = apply ? areaRepository.save(new KnowledgeArea(
+                        courseId, nextAreaCode(courseId, externalId), seed.displayNameZh(), SOURCE_NAME, externalId, "ACTIVE"
+                )) : null;
             }
+            persistSourceRecord(source, apply, summary);
+            results.put(externalId, new AreaResolution(area, true));
         }
         return results;
     }
@@ -167,6 +226,7 @@ public class SeedImportService {
     private Map<String, PointResolution> importTopics(
             List<SeedImportApi.SeedTopic> seedTopics,
             Set<String> duplicateIds,
+            Set<String> rawValueConflictIds,
             Set<String> duplicateAreaIds,
             Map<String, AreaResolution> areas,
             Long courseId,
@@ -177,34 +237,58 @@ public class SeedImportService {
         Map<String, PointResolution> results = new HashMap<>();
         for (SeedImportApi.SeedTopic seed : seedTopics) {
             String externalId = normalizedId(seed.externalId());
-            if (duplicateIds.contains(externalId)) {
+            if (duplicateIds.contains(externalId) || rawValueConflictIds.contains(externalId)) {
+                continue;
+            }
+            if (!ELIGIBLE_FOR_IMPORT.equals(seed.businessMappingStatus())) {
+                summary.quarantinedRecords++;
+                continue;
+            }
+            AreaResolution area = resolveArea(seed.areaExternalId(), duplicateAreaIds, areas, courseId, conflicts);
+            if (area == null || !area.resolvable()) {
+                conflicts.add(conflict(TOPIC_RECORD, externalId, "UNMAPPED_AREA", "topic references an unavailable area external ID"));
+                continue;
+            }
+            SourceRecordPlan source = sourceRecordPlan(
+                    courseId, TOPIC_RECORD, externalId, seed.rawTopic(), seed.displayNameZh(),
+                    seed.displayMappingStatus(), seed.businessMappingStatus(), null, seed.provenance()
+            );
+            if (!source.accepted()) {
+                conflicts.add(conflict(TOPIC_RECORD, externalId, "RAW_VALUE_CONFLICT",
+                        "source external ID is already bound to a different raw topic value"));
                 continue;
             }
             List<KnowledgePoint> existing = courseId == null ? List.of()
                     : pointRepository.findByCourseIdAndSourceTypeAndExternalId(courseId, TOPIC_SOURCE, externalId);
             if (existing.size() > 1) {
-                conflicts.add(conflict("KNOWLEDGE_POINT", externalId, "IDENTITY_CONFLICT", "multiple existing knowledge points have this source external ID"));
+                conflicts.add(conflict(TOPIC_RECORD, externalId, "IDENTITY_CONFLICT", "multiple existing knowledge points have this source external ID"));
                 continue;
             }
-            AreaResolution area = resolveArea(seed.areaExternalId(), duplicateAreaIds, areas, courseId, conflicts);
-            if (seed.areaExternalId() != null && !seed.areaExternalId().isBlank() && (area == null || !area.resolvable())) {
-                conflicts.add(conflict("KNOWLEDGE_POINT", externalId, "UNMAPPED_AREA", "topic references an unavailable area external ID"));
-            }
+            KnowledgePoint point;
             if (existing.size() == 1) {
-                summary.reusedKnowledgePoints++;
-                results.put(externalId, new PointResolution(existing.getFirst(), true));
-                continue;
-            }
-            summary.createdKnowledgePoints++;
-            if (apply) {
-                KnowledgePoint point = pointRepository.save(new KnowledgePoint(
-                        courseId, area == null ? null : area.area().getId(), nextKnowledgeCode(courseId, externalId), seed.topicName(),
-                        TOPIC_SOURCE, externalId, area == null ? "UNMAPPED" : "MAPPED", "ACTIVE"
-                ));
-                results.put(externalId, new PointResolution(point, true));
+                point = existing.getFirst();
+                boolean displayChanged = !point.getKnowledgeName().equals(seed.displayNameZh());
+                boolean parentChanged = area.area() != null && !area.area().getId().equals(point.getAreaId());
+                if (displayChanged || parentChanged) {
+                    point.update(point.getCourseId(), area.area() == null ? point.getAreaId() : area.area().getId(),
+                            point.getKnowledgeCode(), seed.displayNameZh(), point.getSourceType(), point.getExternalId(),
+                            "MAPPED", point.getStatus());
+                    summary.updatedKnowledgePoints++;
+                    if (displayChanged) {
+                        summary.updatedDisplayRecords++;
+                    }
+                } else {
+                    summary.reusedKnowledgePoints++;
+                }
             } else {
-                results.put(externalId, new PointResolution(null, true));
+                summary.createdKnowledgePoints++;
+                point = apply ? pointRepository.save(new KnowledgePoint(
+                        courseId, area.area() == null ? null : area.area().getId(), nextKnowledgeCode(courseId, externalId),
+                        seed.displayNameZh(), TOPIC_SOURCE, externalId, "MAPPED", "ACTIVE"
+                )) : null;
             }
+            persistSourceRecord(source, apply, summary);
+            results.put(externalId, new PointResolution(point, true));
         }
         return results;
     }
@@ -212,6 +296,7 @@ public class SeedImportService {
     private void importExercises(
             List<SeedImportApi.SeedExercise> seedExercises,
             Set<String> duplicateIds,
+            Set<String> rawValueConflictIds,
             Set<String> duplicateTopicIds,
             Map<String, PointResolution> points,
             Long courseId,
@@ -221,52 +306,134 @@ public class SeedImportService {
     ) {
         for (SeedImportApi.SeedExercise seed : seedExercises) {
             String externalId = normalizedId(seed.externalId());
-            if (duplicateIds.contains(externalId)) {
+            if (duplicateIds.contains(externalId) || rawValueConflictIds.contains(externalId)) {
                 continue;
             }
-            List<ExerciseUnit> existing = courseId == null ? List.of()
-                    : exerciseRepository.findByCourseIdAndSourceTypeAndExternalId(courseId, SOURCE_NAME, externalId);
-            if (existing.size() > 1) {
-                conflicts.add(conflict("EXERCISE_UNIT", externalId, "IDENTITY_CONFLICT", "multiple existing exercise units have this source external ID"));
+            if (!ELIGIBLE_FOR_IMPORT.equals(seed.businessMappingStatus())) {
+                summary.quarantinedRecords++;
                 continue;
             }
             PointResolution point = resolvePoint(seed.topicExternalId(), duplicateTopicIds, points, courseId, conflicts);
             if (point == null || !point.resolvable()) {
                 summary.unmappedExercises++;
-                conflicts.add(conflict("EXERCISE_UNIT", externalId, "UNMAPPED_TOPIC", "exercise has no resolvable Topic mapping"));
+                conflicts.add(conflict(EXERCISE_RECORD, externalId, "UNMAPPED_TOPIC", "exercise has no resolvable Topic mapping"));
+                continue;
+            }
+            SourceRecordPlan source = sourceRecordPlan(
+                    courseId, EXERCISE_RECORD, externalId, seed.rawExerciseName(), seed.displayNameZh(),
+                    seed.displayMappingStatus(), seed.businessMappingStatus(), seed.sourceMetadataRowNumber(),
+                    exerciseProvenance(seed)
+            );
+            if (!source.accepted()) {
+                conflicts.add(conflict(EXERCISE_RECORD, externalId, "RAW_VALUE_CONFLICT",
+                        "source external ID is already bound to a different raw exercise value"));
+                continue;
+            }
+            List<ExerciseUnit> existing = courseId == null ? List.of()
+                    : exerciseRepository.findByCourseIdAndSourceTypeAndExternalId(courseId, SOURCE_NAME, externalId);
+            if (existing.size() > 1) {
+                conflicts.add(conflict(EXERCISE_RECORD, externalId, "IDENTITY_CONFLICT", "multiple existing exercise units have this source external ID"));
+                continue;
             }
             ExerciseUnit exercise;
             if (existing.size() == 1) {
                 exercise = existing.getFirst();
-                summary.reusedExerciseUnits++;
+                if (!exercise.getExerciseName().equals(seed.displayNameZh())) {
+                    exercise.update(exercise.getCourseId(), exercise.getExerciseCode(), seed.displayNameZh(),
+                            exercise.getSourceType(), exercise.getExternalId(), exercise.getIdentityStatus(),
+                            exercise.getMappingStatus(), seed.difficulty(), exercise.getStatus());
+                    summary.updatedExerciseUnits++;
+                    summary.updatedDisplayRecords++;
+                } else {
+                    summary.reusedExerciseUnits++;
+                }
             } else {
                 summary.createdExerciseUnits++;
                 exercise = apply ? exerciseRepository.save(new ExerciseUnit(
-                        courseId, nextExerciseCode(courseId, externalId), seed.exerciseName(), SOURCE_NAME, externalId,
-                        "RESOLVED", point == null ? "UNMAPPED" : "MAPPED", seed.difficulty(), "ACTIVE"
+                        courseId, nextExerciseCode(courseId, externalId), seed.displayNameZh(), SOURCE_NAME, externalId,
+                        "RESOLVED", "MAPPED", seed.difficulty(), "ACTIVE"
                 )) : null;
             }
-            if (point != null && point.resolvable()) {
-                if (apply && exercise != null && point.point() != null) {
-                    boolean mappingAlreadyExists = mappingRepository
-                            .findByExerciseUnitIdAndKnowledgePointId(exercise.getId(), point.point().getId())
-                            .isPresent();
-                    if (!mappingAlreadyExists) {
+            persistSourceRecord(source, apply, summary);
+            if (point.point() != null && exercise != null) {
+                boolean mappingAlreadyExists = mappingRepository
+                        .findByExerciseUnitIdAndKnowledgePointId(exercise.getId(), point.point().getId())
+                        .isPresent();
+                if (!mappingAlreadyExists) {
+                    if (apply) {
                         mappingRepository.save(new ExerciseKnowledge(
                                 exercise.getId(), point.point().getId(), TOPIC_SOURCE, BigDecimal.ONE, false
                         ));
-                        exercise.setMappingStatus("MAPPED");
-                        summary.createdMappings++;
                     }
-                } else if (!apply) {
-                    boolean mappingAlreadyExists = exercise != null && point.point() != null && mappingRepository
-                            .findByExerciseUnitIdAndKnowledgePointId(exercise.getId(), point.point().getId())
-                            .isPresent();
-                    if (!mappingAlreadyExists) {
-                        summary.createdMappings++;
-                    }
+                    summary.createdMappings++;
                 }
+            } else if (!apply) {
+                summary.createdMappings++;
             }
+        }
+    }
+
+    private Map<String, Object> exerciseProvenance(SeedImportApi.SeedExercise seed) {
+        Map<String, Object> provenance = new LinkedHashMap<>();
+        provenance.put("export_provenance", seed.provenance());
+        provenance.put("raw_source_fields", seed.rawSourceFields());
+        return Map.copyOf(provenance);
+    }
+
+    private SourceRecordPlan sourceRecordPlan(
+            Long courseId,
+            String entityType,
+            String externalId,
+            String rawValue,
+            String displayNameZh,
+            String displayMappingStatus,
+            String businessMappingStatus,
+            Integer sourceMetadataRowNumber,
+            Map<String, Object> provenance
+    ) {
+        String provenanceJson = toJson(provenance);
+        if (courseId == null) {
+            return SourceRecordPlan.forNew(null, entityType, externalId, rawValue, displayNameZh, displayMappingStatus,
+                    businessMappingStatus, sourceMetadataRowNumber, provenanceJson);
+        }
+        CatalogSourceRecord existing = sourceRecordRepository
+                .findByCourseIdAndEntityTypeAndExternalId(courseId, entityType, externalId)
+                .orElse(null);
+        if (existing == null) {
+            return SourceRecordPlan.forNew(courseId, entityType, externalId, rawValue, displayNameZh, displayMappingStatus,
+                    businessMappingStatus, sourceMetadataRowNumber, provenanceJson);
+        }
+        if (!existing.getRawValue().equals(rawValue)) {
+            return SourceRecordPlan.rejected();
+        }
+        boolean changed = !existing.getDisplayNameZh().equals(displayNameZh)
+                || !existing.getDisplayMappingStatus().equals(displayMappingStatus)
+                || !existing.getBusinessMappingStatus().equals(businessMappingStatus)
+                || !java.util.Objects.equals(existing.getSourceMetadataRowNumber(), sourceMetadataRowNumber)
+                || !existing.getProvenanceJson().equals(provenanceJson);
+        return SourceRecordPlan.forExisting(existing, displayNameZh, displayMappingStatus, businessMappingStatus,
+                sourceMetadataRowNumber, provenanceJson, changed);
+    }
+
+    private void persistSourceRecord(SourceRecordPlan plan, boolean apply, MutableSummary summary) {
+        if (plan.newRecord()) {
+            summary.createdProvenanceRecords++;
+        }
+        if (!plan.newRecord() && plan.changed()) {
+            summary.updatedDisplayRecords++;
+        }
+        if (!apply) {
+            return;
+        }
+        if (plan.newRecord()) {
+            sourceRecordRepository.save(new CatalogSourceRecord(
+                    plan.courseId(), plan.entityType(), plan.externalId(), plan.rawValue(), plan.displayNameZh(),
+                    plan.displayMappingStatus(), plan.businessMappingStatus(), plan.sourceMetadataRowNumber(), plan.provenanceJson()
+            ));
+        } else if (plan.changed()) {
+            plan.existing().refreshDerived(plan.displayNameZh(), plan.displayMappingStatus(), plan.businessMappingStatus(),
+                    plan.sourceMetadataRowNumber(), plan.provenanceJson());
+            sourceRecordRepository.save(plan.existing());
         }
     }
 
@@ -284,7 +451,7 @@ public class SeedImportService {
 
     private String nextCode(String prefix, String externalId, Function<String, Boolean> exists) {
         String normalized = externalId.replaceAll("[^A-Za-z0-9]+", "_").replaceAll("(^_+|_+$)", "").toUpperCase();
-        String base = (prefix + "_" + (normalized.isBlank() ? "ITEM" : normalized));
+        String base = prefix + "_" + (normalized.isBlank() ? "ITEM" : normalized);
         if (base.length() > 88) {
             base = base.substring(0, 88);
         }
@@ -306,6 +473,33 @@ public class SeedImportService {
             }
         }
         return duplicates;
+    }
+
+    /**
+     * MySQL compares the source-record external ID without case sensitivity. A dry run has no persisted
+     * source records to reveal that collision, so detect it before either mode starts mutating the plan.
+     * Exact duplicate identifiers retain their more specific DUPLICATE_SOURCE_EXTERNAL_ID classification.
+     */
+    private <T> Set<String> batchRawValueConflicts(
+            Collection<T> items,
+            Set<String> exactDuplicateIds,
+            Function<T, String> idExtractor,
+            Function<T, String> rawValueExtractor
+    ) {
+        Map<String, String> rawValueByDatabaseIdentity = new HashMap<>();
+        Set<String> conflicts = new HashSet<>();
+        for (T item : items) {
+            String externalId = normalizedId(idExtractor.apply(item));
+            if (exactDuplicateIds.contains(externalId)) {
+                continue;
+            }
+            String identity = externalId.toLowerCase(Locale.ROOT);
+            String previousRawValue = rawValueByDatabaseIdentity.putIfAbsent(identity, rawValueExtractor.apply(item));
+            if (previousRawValue != null && !Objects.equals(previousRawValue, rawValueExtractor.apply(item))) {
+                conflicts.add(externalId);
+            }
+        }
+        return conflicts;
     }
 
     private String normalizedId(String id) {
@@ -336,7 +530,7 @@ public class SeedImportService {
             return new AreaResolution(existing.getFirst(), true);
         }
         if (existing.size() > 1) {
-            conflicts.add(conflict("KNOWLEDGE_AREA", normalizedExternalId, "IDENTITY_CONFLICT", "multiple existing areas have this source external ID"));
+            conflicts.add(conflict(AREA_RECORD, normalizedExternalId, "IDENTITY_CONFLICT", "multiple existing areas have this source external ID"));
         }
         return null;
     }
@@ -365,7 +559,7 @@ public class SeedImportService {
             return new PointResolution(existing.getFirst(), true);
         }
         if (existing.size() > 1) {
-            conflicts.add(conflict("KNOWLEDGE_POINT", normalizedExternalId, "IDENTITY_CONFLICT", "multiple existing knowledge points have this source external ID"));
+            conflicts.add(conflict(TOPIC_RECORD, normalizedExternalId, "IDENTITY_CONFLICT", "multiple existing knowledge points have this source external ID"));
         }
         return null;
     }
@@ -398,22 +592,77 @@ public class SeedImportService {
     private record ConflictDraft(String entityType, String externalId, String conflictType, String message) {
     }
 
+    private record SourceRecordPlan(
+            boolean accepted,
+            boolean newRecord,
+            boolean changed,
+            CatalogSourceRecord existing,
+            Long courseId,
+            String entityType,
+            String externalId,
+            String rawValue,
+            String displayNameZh,
+            String displayMappingStatus,
+            String businessMappingStatus,
+            Integer sourceMetadataRowNumber,
+            String provenanceJson
+    ) {
+        static SourceRecordPlan rejected() {
+            return new SourceRecordPlan(false, false, false, null, null, null, null, null, null, null, null, null, null);
+        }
+
+        static SourceRecordPlan forNew(
+                Long courseId,
+                String entityType,
+                String externalId,
+                String rawValue,
+                String displayNameZh,
+                String displayMappingStatus,
+                String businessMappingStatus,
+                Integer sourceMetadataRowNumber,
+                String provenanceJson
+        ) {
+            return new SourceRecordPlan(true, true, false, null, courseId, entityType, externalId, rawValue, displayNameZh,
+                    displayMappingStatus, businessMappingStatus, sourceMetadataRowNumber, provenanceJson);
+        }
+
+        static SourceRecordPlan forExisting(
+                CatalogSourceRecord existing,
+                String displayNameZh,
+                String displayMappingStatus,
+                String businessMappingStatus,
+                Integer sourceMetadataRowNumber,
+                String provenanceJson,
+                boolean changed
+        ) {
+            return new SourceRecordPlan(true, false, changed, existing, null, null, null, null, displayNameZh,
+                    displayMappingStatus, businessMappingStatus, sourceMetadataRowNumber, provenanceJson);
+        }
+    }
+
     private static final class MutableSummary {
         private int createdCourses;
         private int createdAreas;
         private int reusedAreas;
+        private int updatedAreas;
         private int createdKnowledgePoints;
         private int reusedKnowledgePoints;
+        private int updatedKnowledgePoints;
         private int createdExerciseUnits;
         private int reusedExerciseUnits;
+        private int updatedExerciseUnits;
         private int createdMappings;
         private int unmappedExercises;
+        private int quarantinedRecords;
+        private int createdProvenanceRecords;
+        private int updatedDisplayRecords;
         private int conflictCount;
 
         private SummarySnapshot snapshot() {
             return new SummarySnapshot(
-                    createdCourses, createdAreas, reusedAreas, createdKnowledgePoints, reusedKnowledgePoints,
-                    createdExerciseUnits, reusedExerciseUnits, createdMappings, unmappedExercises, conflictCount
+                    createdCourses, createdAreas, reusedAreas, updatedAreas, createdKnowledgePoints, reusedKnowledgePoints,
+                    updatedKnowledgePoints, createdExerciseUnits, reusedExerciseUnits, updatedExerciseUnits, createdMappings,
+                    unmappedExercises, quarantinedRecords, createdProvenanceRecords, updatedDisplayRecords, conflictCount
             );
         }
     }
@@ -422,12 +671,18 @@ public class SeedImportService {
             int createdCourses,
             int createdAreas,
             int reusedAreas,
+            int updatedAreas,
             int createdKnowledgePoints,
             int reusedKnowledgePoints,
+            int updatedKnowledgePoints,
             int createdExerciseUnits,
             int reusedExerciseUnits,
+            int updatedExerciseUnits,
             int createdMappings,
             int unmappedExercises,
+            int quarantinedRecords,
+            int createdProvenanceRecords,
+            int updatedDisplayRecords,
             int conflictCount
     ) {
     }

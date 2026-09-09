@@ -1,0 +1,129 @@
+{
+  "completion_status": "COMPLETED_WITH_GRAPH_SEMANTICS_LIMITATION",
+  "conclusion": "INCONCLUSIVE",
+  "counts": {
+    "bad_case_records_written": 25,
+    "case_construction": {
+      "cases": 394,
+      "selected_bucket_students": 961,
+      "students_excluded_below_minimum_interactions": 567
+    },
+    "method_by_case_rows": 3152,
+    "source_scan": {
+      "raw_problem_log_rows_scanned": 25925992,
+      "rows_excluded_non_eligible_exercise": 30695,
+      "rows_excluded_outside_fixed_bucket": 25795423,
+      "selected_bucket_mapped_rows": 99874
+    },
+    "topic_universe": 39
+  },
+  "deferred_or_blocked": [
+    "Rasch is DEFERRED by R1.",
+    "M2/M3 are INCONCLUSIVE_GRAPH_SEMANTICS; no replacement graph is used.",
+    "No product, Platform User, AnswerRecord, Question, or Published Graph mutation is in scope."
+  ],
+  "evaluation_gate": "EVAL_INCONCLUSIVE",
+  "foundation_graph_audit": {
+    "foundation_candidate_graph_cyclic_scc_count": 4,
+    "foundation_candidate_graph_edges": 78,
+    "foundation_candidate_graph_nodes": 39,
+    "foundation_candidate_graph_self_loop_count": 0,
+    "foundation_candidate_record_count": 78,
+    "foundation_candidate_unpublished_record_count": 78,
+    "reason": "Foundation Topic relations are review-only candidates, not a Published Graph; Foundation also reports cyclic candidate SCCs. M2/M3 are not run.",
+    "status": "INCONCLUSIVE_GRAPH_SEMANTICS"
+  },
+  "input_boundary": {
+    "answer_record_created": false,
+    "foundation_export_path": "D:\\Code\\java\\_tmp_recommendation_eval_foundation_export_20260909",
+    "platform_user_created": false,
+    "problem_log_path": "D:\\Code\\java\\data-pipeline\\data\\interim\\junyi_original\\junyi_ProblemLog_original.csv",
+    "raw_interactions_written_to_repository": false,
+    "research_data_only": true
+  },
+  "methods": {
+    "M0_POPULARITY": {
+      "cases_evaluated": 394,
+      "coverage_at_3": 0.2564102564102564,
+      "covered_topic_count": 10,
+      "future_error_eligible_cases": 363,
+      "future_error_topic_hit_at_3": 0.6170798898071626,
+      "future_topic_hit_at_3": 0.6903553299492385,
+      "interpretation": "Population-frequency offline proxy baseline.",
+      "mean_recommendation_count": 3.0,
+      "method_status": "EVALUATED",
+      "popularity_adjusted_future_recall_at_3": 0.37612107354692176,
+      "topic_universe_count": 39
+    },
+    "M1_MASTERY_ONLY": {
+      "cases_evaluated": 394,
+      "coverage_at_3": 0.9230769230769231,
+      "covered_topic_count": 36,
+      "future_error_eligible_cases": 363,
+      "future_error_topic_hit_at_3": 0.23415977961432508,
+      "future_topic_hit_at_3": 0.26903553299492383,
+      "interpretation": "Student-history RuleBeta-style Topic weakness proxy.",
+      "mean_recommendation_count": 3.0,
+      "method_status": "EVALUATED",
+      "popularity_adjusted_future_recall_at_3": 0.08852098623136295,
+      "topic_universe_count": 39
+    },
+    "M2_GRAPH_ONLY": {
+      "cases_evaluated": 0,
+      "coverage_at_3": null,
+      "covered_topic_count": 0,
+      "future_error_eligible_cases": 0,
+      "future_error_topic_hit_at_3": null,
+      "future_topic_hit_at_3": null,
+      "interpretation": "Foundation Topic relations are review-only candidates, not a Published Graph; Foundation also reports cyclic candidate SCCs. M2/M3 are not run.",
+      "mean_recommendation_count": null,
+      "method_status": "INCONCLUSIVE_GRAPH_SEMANTICS",
+      "popularity_adjusted_future_recall_at_3": null,
+      "topic_universe_count": 39
+    },
+    "M3_MASTERY_GRAPH": {
+      "cases_evaluated": 0,
+      "coverage_at_3": null,
+      "covered_topic_count": 0,
+      "future_error_eligible_cases": 0,
+      "future_error_topic_hit_at_3": null,
+      "future_topic_hit_at_3": null,
+      "interpretation": "Foundation Topic relations are review-only candidates, not a Published Graph; Foundation also reports cyclic candidate SCCs. M2/M3 are not run.",
+      "mean_recommendation_count": null,
+      "method_status": "INCONCLUSIVE_GRAPH_SEMANTICS",
+      "popularity_adjusted_future_recall_at_3": null,
+      "topic_universe_count": 39
+    }
+  },
+  "protocol": {
+    "cohort_selector": {
+      "correct_used_for_membership": false,
+      "membership_fields": [
+        "user_id",
+        "exercise",
+        "time_done"
+      ],
+      "rule": "numeric user_id % 257 == 17"
+    },
+    "future_data_used_for_recommendation": false,
+    "history_fraction": "3/5",
+    "methods": {
+      "M0_POPULARITY": "Other Research Students' Topic frequency observed no later than each focal cutoff.",
+      "M1_MASTERY_ONLY": "Focal history Beta(1,1) posterior Topic error rate; no Rasch theta.",
+      "M2_GRAPH_ONLY": "INCONCLUSIVE_GRAPH_SEMANTICS",
+      "M3_MASTERY_GRAPH": "INCONCLUSIVE_GRAPH_SEMANTICS"
+    },
+    "minimum_eligible_interactions": 20,
+    "offline_proxy_metrics": [
+      "future_topic_hit_at_3",
+      "future_error_topic_hit_at_3",
+      "coverage_at_3",
+      "popularity_adjusted_future_recall_at_3"
+    ],
+    "rasch": "DEFERRED",
+    "recommendation_count": 3,
+    "sequence_order": "time_done ascending; original ProblemLog source row ascending as tie-breaker",
+    "topic_candidate_set": "Foundation ELIGIBLE_FOR_IMPORT Exercise-to-Topic projection"
+  },
+  "schema_version": "recommendation-eval-v1.0.0"
+}

@@ -1,0 +1,1 @@
+{"candidate_id":"fixture-candidate-1","candidate_status":"REVIEW_REQUIRED_NOT_PUBLISHED","dependent_topic_external_id":"fixture-topic:1","derivation_policy_version":"fixture-topic-projection-v1","evidence_count":1,"prerequisite_topic_external_id":"fixture-topic:0","published_graph_status":"NOT_PUBLISHED","raw_evidence_ids":["fixture-evidence-1"],"relation_type":"PREREQUISITE"}

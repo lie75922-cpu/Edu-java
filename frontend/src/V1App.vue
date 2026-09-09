@@ -21,6 +21,7 @@ import {
 } from './v1/store.js'
 import './v1/styles.css'
 import './v1/polish.css'
+import './v1/realData.css'
 
 const studentMenus = ['首页', '课程学习', '知识图谱', '个性化学习']
 const teacherMenus = ['教师工作台']

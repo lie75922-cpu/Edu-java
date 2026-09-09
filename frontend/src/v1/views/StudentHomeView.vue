@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { api, currentView, percent, run, selectedCourse, session } from '../store.js'
+import { recommendationExplanation } from '../recommendationExplanation.js'
 
 const courses = ref([])
 const mastery = ref([])
@@ -33,6 +34,10 @@ async function loadHome() {
 function openCourse(course) {
   selectedCourse.value = course
   currentView.value = '课程学习'
+}
+
+function explanationFor(item) {
+  return recommendationExplanation(item)
 }
 
 onMounted(loadHome)
@@ -104,7 +109,12 @@ onMounted(loadHome)
         <template v-if="recommendation?.items?.length">
           <article v-for="item in recommendation.items.slice(0, 3)" :key="item.id" class="recommend-card">
             <span class="recommend-rank">{{ item.rank }}</span>
-            <div><strong>{{ item.knowledgeName }}</strong><p>{{ item.exerciseName || '建议先复习该知识点' }}</p><small>{{ item.reasonCode === 'UNMET_PREREQUISITE' ? '前置知识尚未巩固' : item.reasonCode === 'LOW_MASTERY' ? '当前掌握程度偏低' : '根据近期学习记录推荐' }}</small></div>
+            <div>
+              <strong>{{ item.knowledgeName }}</strong>
+              <p>{{ item.exerciseName || '建议先复习该知识点' }}</p>
+              <small>{{ explanationFor(item).message }}</small>
+              <small v-if="explanationFor(item).masteryScore !== null">当前掌握情况：{{ percent(explanationFor(item).masteryScore) }}</small>
+            </div>
           </article>
         </template>
         <div v-else class="empty-state compact"><strong>等待更多学习记录</strong><p>完成练习后会生成可解释的学习建议。</p></div>

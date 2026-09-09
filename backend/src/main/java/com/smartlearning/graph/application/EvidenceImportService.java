@@ -18,6 +18,8 @@ import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvide
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvidenceLinkRepository;
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationEvidenceRepository;
 import com.smartlearning.graph.infrastructure.persistence.KnowledgeRelationRepository;
+import com.smartlearning.knowledge.domain.KnowledgePoint;
+import com.smartlearning.knowledge.infrastructure.persistence.KnowledgePointRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -34,7 +36,10 @@ import java.util.Set;
 public class EvidenceImportService {
 
     private static final String JUNYI_RAW_PREREQUISITE = "JUNYI_RAW_PREREQUISITE";
+    private static final String JUNYI_TOPIC_CANDIDATE = "JUNYI_TOPIC_CANDIDATE";
     private static final String PREREQUISITE = "PREREQUISITE";
+    private static final String DERIVED_POLICY = "DERIVED_POLICY";
+    private static final String TOPIC_SOURCE = "JUNYI_TOPIC";
 
     private final GraphVersionRepository graphVersionRepository;
     private final KnowledgeRelationEvidenceRepository evidenceRepository;
@@ -43,6 +48,8 @@ public class EvidenceImportService {
     private final KnowledgeRelationEvidenceImportRunRepository importRunRepository;
     private final KnowledgeRelationEvidenceConflictRepository conflictRepository;
     private final EvidenceResolutionResolver evidenceResolutionResolver;
+    private final KnowledgePointRepository knowledgePointRepository;
+    private final CandidateGraphPublicationGuard publicationGuard;
     private final ObjectMapper objectMapper;
     private final CourseAccessService courseAccessService;
 
@@ -54,6 +61,8 @@ public class EvidenceImportService {
             KnowledgeRelationEvidenceImportRunRepository importRunRepository,
             KnowledgeRelationEvidenceConflictRepository conflictRepository,
             EvidenceResolutionResolver evidenceResolutionResolver,
+            KnowledgePointRepository knowledgePointRepository,
+            CandidateGraphPublicationGuard publicationGuard,
             ObjectMapper objectMapper,
             CourseAccessService courseAccessService
     ) {
@@ -64,6 +73,8 @@ public class EvidenceImportService {
         this.importRunRepository = importRunRepository;
         this.conflictRepository = conflictRepository;
         this.evidenceResolutionResolver = evidenceResolutionResolver;
+        this.knowledgePointRepository = knowledgePointRepository;
+        this.publicationGuard = publicationGuard;
         this.objectMapper = objectMapper;
         this.courseAccessService = courseAccessService;
     }
@@ -86,6 +97,26 @@ public class EvidenceImportService {
     ) {
         requireTeachingVersion(graphVersionId, user);
         return apply(graphVersionId, request, user.id());
+    }
+
+    @Transactional(readOnly = true)
+    public GraphApi.CandidateRelationImportResult dryRunCandidatesForTeaching(
+            long graphVersionId,
+            GraphApi.CandidateRelationImportRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return dryRunCandidates(graphVersionId, request, user.id());
+    }
+
+    @Transactional
+    public GraphApi.CandidateRelationImportResult applyCandidatesForTeaching(
+            long graphVersionId,
+            GraphApi.CandidateRelationImportRequest request,
+            CurrentUser user
+    ) {
+        requireTeachingVersion(graphVersionId, user);
+        return applyCandidates(graphVersionId, request, user.id());
     }
 
     public List<GraphApi.EvidenceResponse> listEvidenceForTeaching(long courseId, CurrentUser user) {
@@ -125,6 +156,24 @@ public class EvidenceImportService {
             long requestedBy
     ) {
         return execute(graphVersionId, request, requestedBy, true);
+    }
+
+    @Transactional(readOnly = true)
+    public GraphApi.CandidateRelationImportResult dryRunCandidates(
+            long graphVersionId,
+            GraphApi.CandidateRelationImportRequest request,
+            long requestedBy
+    ) {
+        return executeCandidates(graphVersionId, request, requestedBy, false);
+    }
+
+    @Transactional
+    public GraphApi.CandidateRelationImportResult applyCandidates(
+            long graphVersionId,
+            GraphApi.CandidateRelationImportRequest request,
+            long requestedBy
+    ) {
+        return executeCandidates(graphVersionId, request, requestedBy, true);
     }
 
     public List<GraphApi.EvidenceResponse> listEvidence(long courseId) {
@@ -172,7 +221,6 @@ public class EvidenceImportService {
         MutableSummary summary = new MutableSummary();
         List<ConflictDraft> conflicts = new ArrayList<>();
         Set<String> inputEvidenceIds = new HashSet<>();
-        Set<PointPair> dryRunCandidatePairs = new LinkedHashSet<>();
 
         for (GraphApi.RawPrerequisiteEvidenceRequest input : request.evidence()) {
             if (!inputEvidenceIds.add(input.externalEvidenceId())) {
@@ -224,12 +272,6 @@ public class EvidenceImportService {
 
             if (evidence.isResolved()) {
                 summary.resolvedEvidence++;
-                PointPair pair = new PointPair(evidence.getSourceKnowledgePointId(), evidence.getTargetKnowledgePointId());
-                if (apply) {
-                    attachResolvedEvidence(version, evidence, requestedBy, summary);
-                } else {
-                    accountForDryRunCandidate(version, pair, dryRunCandidatePairs, summary);
-                }
             }
         }
 
@@ -261,48 +303,163 @@ public class EvidenceImportService {
         );
     }
 
-    private void attachResolvedEvidence(
-            GraphVersion version,
-            KnowledgeRelationEvidence evidence,
+    /**
+     * Imports the Foundation-derived Topic pairs only after raw evidence has been stored. Raw evidence
+     * never calls this method implicitly. Candidate relations stay CANDIDATE and are guarded before any
+     * separate reviewer can request publication.
+     */
+    private GraphApi.CandidateRelationImportResult executeCandidates(
+            long graphVersionId,
+            GraphApi.CandidateRelationImportRequest request,
             long requestedBy,
-            MutableSummary summary
+            boolean apply
     ) {
-        KnowledgeRelation relation = relationRepository
-                .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
-                        version.getId(), evidence.getSourceKnowledgePointId(), evidence.getTargetKnowledgePointId(), PREREQUISITE
-                )
-                .orElseGet(() -> {
-                    summary.candidateRelationsCreated++;
-                    return relationRepository.save(new KnowledgeRelation(
-                            version.getId(), evidence.getSourceKnowledgePointId(), evidence.getTargetKnowledgePointId(),
-                            PREREQUISITE, "EVIDENCE", null, 0, RelationReviewStatus.CANDIDATE, requestedBy
-                    ));
-                });
-        if (!evidenceLinkRepository.existsByRelationIdAndEvidenceId(relation.getId(), evidence.getId())) {
-            evidenceLinkRepository.save(new KnowledgeRelationEvidenceLink(relation.getId(), evidence.getId()));
-            relation.reconcileEvidenceCount(linkCount(relation.getId()));
-            if (relation.getEvidenceCount() > 1) {
-                summary.candidateRelationsAggregated++;
+        GraphVersion version = requireImportVersion(graphVersionId, apply);
+        String mode = apply ? "APPLY" : "DRY_RUN";
+        KnowledgeRelationEvidenceImportRun run = apply ? importRunRepository.save(new KnowledgeRelationEvidenceImportRun(
+                version.getId(), version.getCourseId(), requestedBy, mode, JUNYI_TOPIC_CANDIDATE
+        )) : null;
+        CandidateSummary summary = new CandidateSummary();
+        List<ConflictDraft> conflicts = new ArrayList<>();
+        Set<String> candidateIds = new HashSet<>();
+        List<CandidateGraphPublicationGuard.Edge> requestedEdges = new ArrayList<>();
+
+        for (GraphApi.CandidateTopicRelationRequest input : request.candidates()) {
+            if (!candidateIds.add(input.candidateId())) {
+                conflicts.add(candidateConflict(input, "DUPLICATE_CANDIDATE_RECORD", "duplicate candidate ID in this import request"));
+                continue;
+            }
+            CandidateResolution resolution = resolveCandidate(version.getCourseId(), input);
+            if (!resolution.accepted()) {
+                conflicts.add(candidateConflict(input, resolution.conflictCode(), resolution.detail()));
+                continue;
+            }
+            Optional<KnowledgeRelation> existing = relationRepository
+                    .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
+                            version.getId(), resolution.prerequisite().getId(), resolution.dependent().getId(), PREREQUISITE
+                    );
+            KnowledgeRelation relation;
+            if (existing.isPresent()) {
+                relation = existing.get();
+                if (!DERIVED_POLICY.equals(relation.getRelationSource())
+                        || !input.candidateId().equals(relation.getCandidateInputId())
+                        || !input.derivationPolicyVersion().equals(relation.getCandidatePolicyVersion())
+                        || !input.candidateStatus().equals(relation.getCandidateStatus())
+                        || !input.publishedGraphStatus().equals(relation.getPublishedGraphStatus())) {
+                    conflicts.add(candidateConflict(input, "CANDIDATE_PAIR_ALREADY_OWNED",
+                            "the draft already contains this Topic pair from a different source or policy"));
+                    continue;
+                }
+                summary.reusedCandidateRelations++;
+            } else {
+                summary.createdCandidateRelations++;
+                requestedEdges.add(new CandidateGraphPublicationGuard.Edge(
+                        resolution.prerequisite().getId(), resolution.dependent().getId()
+                ));
+                relation = apply ? relationRepository.save(new KnowledgeRelation(
+                        version.getId(), resolution.prerequisite().getId(), resolution.dependent().getId(),
+                        PREREQUISITE, DERIVED_POLICY, input.candidateId(), input.derivationPolicyVersion(),
+                        input.candidateStatus(), input.publishedGraphStatus(),
+                        null, 0, RelationReviewStatus.CANDIDATE, requestedBy
+                )) : null;
+            }
+            if (apply && relation != null) {
+                attachCandidateEvidence(relation, resolution.evidence());
             }
         }
+
+        List<GraphApi.EvidenceConflictResponse> conflictResponses;
+        if (apply) {
+            List<KnowledgeRelationEvidenceConflict> persisted = conflicts.stream()
+                    .map(conflict -> conflictRepository.save(new KnowledgeRelationEvidenceConflict(
+                            run.getId(), conflict.externalEvidenceId(), conflict.sourceExternalId(), conflict.targetExternalId(),
+                            conflict.code(), toJson(Map.of("message", conflict.detail()))
+                    )))
+                    .toList();
+            summary.conflictCount = persisted.size();
+            conflictResponses = persisted.stream().map(this::toConflictResponse).toList();
+        } else {
+            summary.conflictCount = conflicts.size();
+            conflictResponses = conflicts.stream().map(this::toConflictResponse).toList();
+        }
+
+        List<CandidateGraphPublicationGuard.Edge> allDraftEdges = relationRepository
+                .findByGraphVersionIdOrderByIdAsc(version.getId()).stream()
+                .filter(relation -> relation.getReviewStatus() != RelationReviewStatus.REJECTED)
+                .map(relation -> new CandidateGraphPublicationGuard.Edge(
+                        relation.getSourceKnowledgePointId(), relation.getTargetKnowledgePointId()
+                ))
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+        if (!apply) {
+            allDraftEdges.addAll(requestedEdges);
+        }
+        CandidateGraphPublicationGuard.Outcome guard = publicationGuard.assess(allDraftEdges);
+        String status = summary.conflictCount == 0
+                ? (apply ? "COMPLETED" : "DRY_RUN_COMPLETED")
+                : (apply ? "COMPLETED_WITH_CONFLICTS" : "DRY_RUN_COMPLETED_WITH_CONFLICTS");
+        if (apply) {
+            run.complete(status, toJson(summary.snapshot(guard)));
+        }
+        return new GraphApi.CandidateRelationImportResult(
+                run == null ? null : run.getId(), version.getId(), mode, status, summary.createdCandidateRelations,
+                summary.reusedCandidateRelations, summary.conflictCount, guard.publicationStatus(), guard.selfLoopCount(),
+                guard.cycleCount(), conflictResponses
+        );
     }
 
-    private void accountForDryRunCandidate(
-            GraphVersion version,
-            PointPair pair,
-            Set<PointPair> requestedPairs,
-            MutableSummary summary
-    ) {
-        boolean exists = relationRepository
-                .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
-                        version.getId(), pair.sourceKnowledgePointId(), pair.targetKnowledgePointId(), PREREQUISITE
-                )
-                .isPresent();
-        if (!exists && requestedPairs.add(pair)) {
-            summary.candidateRelationsCreated++;
-        } else {
-            summary.candidateRelationsAggregated++;
+    private CandidateResolution resolveCandidate(long courseId, GraphApi.CandidateTopicRelationRequest input) {
+        if (!"REVIEW_REQUIRED_NOT_PUBLISHED".equals(input.candidateStatus())) {
+            return CandidateResolution.rejected("INVALID_CANDIDATE_STATUS",
+                    "derived Topic input must remain REVIEW_REQUIRED_NOT_PUBLISHED");
         }
+        if (!"NOT_PUBLISHED".equals(input.publishedGraphStatus())) {
+            return CandidateResolution.rejected("INVALID_CANDIDATE_PUBLICATION_STATUS",
+                    "derived Topic input cannot claim a Published Graph status");
+        }
+        List<KnowledgePoint> prerequisites = knowledgePointRepository
+                .findByCourseIdAndSourceTypeAndExternalId(courseId, TOPIC_SOURCE, input.prerequisiteTopicExternalId());
+        if (prerequisites.size() != 1) {
+            return CandidateResolution.rejected("UNRESOLVED_PREREQUISITE_TOPIC", "candidate prerequisite Topic does not resolve uniquely");
+        }
+        List<KnowledgePoint> dependents = knowledgePointRepository
+                .findByCourseIdAndSourceTypeAndExternalId(courseId, TOPIC_SOURCE, input.dependentTopicExternalId());
+        if (dependents.size() != 1) {
+            return CandidateResolution.rejected("UNRESOLVED_DEPENDENT_TOPIC", "candidate dependent Topic does not resolve uniquely");
+        }
+        List<KnowledgeRelationEvidence> evidence = new ArrayList<>();
+        for (String evidenceId : new java.util.LinkedHashSet<>(input.rawEvidenceIds())) {
+            KnowledgeRelationEvidence item = evidenceRepository
+                    .findByCourseIdAndSourceTypeAndExternalEvidenceId(courseId, JUNYI_RAW_PREREQUISITE, evidenceId)
+                    .orElse(null);
+            if (item == null) {
+                return CandidateResolution.rejected("MISSING_RAW_EVIDENCE", "candidate references raw evidence that has not been imported");
+            }
+            if (!item.isResolved()
+                    || !prerequisites.getFirst().getId().equals(item.getSourceKnowledgePointId())
+                    || !dependents.getFirst().getId().equals(item.getTargetKnowledgePointId())) {
+                return CandidateResolution.rejected("EVIDENCE_DOES_NOT_SUPPORT_CANDIDATE",
+                        "candidate evidence is unresolved or does not project to the stated Topic pair");
+            }
+            evidence.add(item);
+        }
+        return CandidateResolution.accepted(prerequisites.getFirst(), dependents.getFirst(), List.copyOf(evidence));
+    }
+
+    private void attachCandidateEvidence(KnowledgeRelation relation, List<KnowledgeRelationEvidence> evidence) {
+        for (KnowledgeRelationEvidence item : evidence) {
+            if (!evidenceLinkRepository.existsByRelationIdAndEvidenceId(relation.getId(), item.getId())) {
+                evidenceLinkRepository.save(new KnowledgeRelationEvidenceLink(relation.getId(), item.getId()));
+            }
+        }
+        relation.reconcileEvidenceCount(linkCount(relation.getId()));
+    }
+
+    private ConflictDraft candidateConflict(
+            GraphApi.CandidateTopicRelationRequest input,
+            String code,
+            String detail
+    ) {
+        return new ConflictDraft(input.candidateId(), input.prerequisiteTopicExternalId(), input.dependentTopicExternalId(), code, detail);
     }
 
     private GraphVersion requireImportVersion(long graphVersionId, boolean apply) {
@@ -359,9 +516,6 @@ public class EvidenceImportService {
         );
     }
 
-    private record PointPair(Long sourceKnowledgePointId, Long targetKnowledgePointId) {
-    }
-
     private record ConflictDraft(
             String externalEvidenceId,
             String sourceExternalId,
@@ -372,6 +526,50 @@ public class EvidenceImportService {
         static ConflictDraft of(GraphApi.RawPrerequisiteEvidenceRequest input, String code, String detail) {
             return new ConflictDraft(input.externalEvidenceId(), input.sourceExerciseExternalId(), input.targetExerciseExternalId(), code, detail);
         }
+    }
+
+    private record CandidateResolution(
+            boolean accepted,
+            String conflictCode,
+            String detail,
+            KnowledgePoint prerequisite,
+            KnowledgePoint dependent,
+            List<KnowledgeRelationEvidence> evidence
+    ) {
+        static CandidateResolution rejected(String conflictCode, String detail) {
+            return new CandidateResolution(false, conflictCode, detail, null, null, List.of());
+        }
+
+        static CandidateResolution accepted(
+                KnowledgePoint prerequisite,
+                KnowledgePoint dependent,
+                List<KnowledgeRelationEvidence> evidence
+        ) {
+            return new CandidateResolution(true, null, null, prerequisite, dependent, evidence);
+        }
+    }
+
+    private static final class CandidateSummary {
+        private int createdCandidateRelations;
+        private int reusedCandidateRelations;
+        private int conflictCount;
+
+        private CandidateSummarySnapshot snapshot(CandidateGraphPublicationGuard.Outcome guard) {
+            return new CandidateSummarySnapshot(
+                    createdCandidateRelations, reusedCandidateRelations, conflictCount,
+                    guard.publicationStatus(), guard.selfLoopCount(), guard.cycleCount()
+            );
+        }
+    }
+
+    private record CandidateSummarySnapshot(
+            int createdCandidateRelations,
+            int reusedCandidateRelations,
+            int conflictCount,
+            String graphPublicationStatus,
+            int selfLoopCount,
+            int cycleCount
+    ) {
     }
 
     private static final class MutableSummary {

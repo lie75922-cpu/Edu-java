@@ -1,0 +1,5 @@
+method,method_status,cases_evaluated,future_topic_hit_at_3,future_error_topic_hit_at_3,future_error_eligible_cases,coverage_at_3,covered_topic_count,topic_universe_count,popularity_adjusted_future_recall_at_3,mean_recommendation_count,interpretation
+M0_POPULARITY,EVALUATED,394,0.6903553299492385,0.6170798898071626,363,0.2564102564102564,10,39,0.37612107354692176,3.0,Population-frequency offline proxy baseline.
+M1_MASTERY_ONLY,EVALUATED,394,0.26903553299492383,0.23415977961432508,363,0.9230769230769231,36,39,0.08852098623136295,3.0,Student-history RuleBeta-style Topic weakness proxy.
+M2_GRAPH_ONLY,INCONCLUSIVE_GRAPH_SEMANTICS,0,,,0,,0,39,,,"Foundation Topic relations are review-only candidates, not a Published Graph; Foundation also reports cyclic candidate SCCs. M2/M3 are not run."
+M3_MASTERY_GRAPH,INCONCLUSIVE_GRAPH_SEMANTICS,0,,,0,,0,39,,,"Foundation Topic relations are review-only candidates, not a Published Graph; Foundation also reports cyclic candidate SCCs. M2/M3 are not run."

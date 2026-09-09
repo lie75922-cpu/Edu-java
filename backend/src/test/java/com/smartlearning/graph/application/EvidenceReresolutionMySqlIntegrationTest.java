@@ -103,6 +103,21 @@ class EvidenceReresolutionMySqlIntegrationTest {
     }
 
     @Test
+    void rawEvidenceImportDoesNotImplicitlyCreateCandidateBeforeExplicitDraftReconciliation() {
+        GraphApi.GraphVersionResponse draft = draft("raw evidence remains separate");
+        ExerciseApi.ExerciseUnitResponse source = createExercise("source-separate", pointA);
+        ExerciseApi.ExerciseUnitResponse target = createExercise("target-separate", pointB);
+
+        KnowledgeRelationEvidence evidence = importRawEvidence(draft.id(), "separate", source.externalId(), target.externalId());
+
+        assertThat(relationRepository.findByGraphVersionIdOrderByIdAsc(draft.id())).isEmpty();
+
+        apply(draft.id(), evidence.getId());
+
+        assertThat(relation(draft.id(), pointA, pointB).getEvidenceCount()).isEqualTo(1);
+    }
+
+    @Test
     void unmappedEvidenceBecomesResolvedWithoutChangingRawEvidence() {
         GraphApi.GraphVersionResponse draft = draft("unmapped to resolved");
         ExerciseApi.ExerciseUnitResponse source = createExercise("source-unmapped", pointA);
@@ -310,6 +325,12 @@ class EvidenceReresolutionMySqlIntegrationTest {
     }
 
     private KnowledgeRelationEvidence importEvidence(long graphVersionId, String suffix, String sourceExternalId, String targetExternalId) {
+        KnowledgeRelationEvidence evidence = importRawEvidence(graphVersionId, suffix, sourceExternalId, targetExternalId);
+        apply(graphVersionId, evidence.getId());
+        return evidenceRepository.findById(evidence.getId()).orElseThrow();
+    }
+
+    private KnowledgeRelationEvidence importRawEvidence(long graphVersionId, String suffix, String sourceExternalId, String targetExternalId) {
         String externalEvidenceId = "v005-evidence-" + SEQUENCE.get() + "-" + suffix;
         evidenceImportService.apply(graphVersionId, new GraphApi.EvidenceImportRequest(List.of(
                 new GraphApi.RawPrerequisiteEvidenceRequest(

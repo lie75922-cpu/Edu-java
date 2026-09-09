@@ -7,6 +7,7 @@ const areas = ref([])
 const points = ref([])
 const graph = ref(null)
 const query = ref('')
+const selectedAreaId = ref('ALL')
 const selectedNode = ref(null)
 const relationView = ref(null)
 
@@ -24,14 +25,17 @@ function areaName(node) {
 
 const filteredNodes = computed(() => {
   const keyword = query.value.trim().toLowerCase()
-  if (!keyword) return graph.value?.nodes || []
-  return (graph.value?.nodes || []).filter(node =>
-    `${node.knowledgeName} ${node.knowledgeCode} ${areaName(node)}`.toLowerCase().includes(keyword)
-  )
+  return (graph.value?.nodes || []).filter(node => {
+    const point = pointMap.value.get(Number(node.id))
+    const inArea = selectedAreaId.value === 'ALL' || String(point?.areaId) === selectedAreaId.value
+    const matchesKeyword = !keyword || `${node.knowledgeName} ${node.knowledgeCode} ${areaName(node)}`
+      .toLowerCase().includes(keyword)
+    return inArea && matchesKeyword
+  })
 })
 
 const groups = computed(() => {
-  const nodes = graph.value?.nodes || []
+  const nodes = filteredNodes.value
   const byArea = new Map()
   for (const area of areas.value) byArea.set(String(area.id), [])
   const other = []
@@ -91,6 +95,7 @@ async function load(course = null) {
   points.value = loadedPoints || []
   selectedNode.value = null
   relationView.value = null
+  selectedAreaId.value = 'ALL'
 }
 
 async function boot() {
@@ -125,6 +130,10 @@ onMounted(boot)
       </div>
       <div class="intro-actions">
         <input v-model="query" class="search-input" placeholder="搜索知识点或知识领域">
+        <select v-model="selectedAreaId" aria-label="按知识领域筛选">
+          <option value="ALL">全部知识领域</option>
+          <option v-for="area in areas" :key="area.id" :value="String(area.id)">{{ area.areaName }}</option>
+        </select>
         <select :value="selectedCourse?.id" @change="load(courses.find(item => item.id === Number($event.target.value)))">
           <option v-for="course in courses" :key="course.id" :value="course.id">{{ course.courseName }}</option>
         </select>
@@ -137,14 +146,14 @@ onMounted(boot)
           <span v-for="(group, index) in groups" :key="group.id"><i :class="legendClass(index)"></i>{{ group.name }}</span>
           <b v-if="graph">{{ graph.nodes?.length || 0 }} 个知识点 · {{ graph.edges?.length || 0 }} 条先修关系</b>
         </div>
-        <div v-if="!graph" class="empty-state"><strong>当前课程暂无已发布知识图谱</strong><p>需要先完成知识关系审核与图谱发布。</p></div>
+        <div v-if="!graph?.nodes?.length" class="empty-state"><strong>当前课程暂无可展示的已发布知识关系</strong><p>只有完成审核和发布的课程知识关系会在学生端展示。</p></div>
         <div v-else class="graph-scroll">
           <svg class="knowledge-svg" :viewBox="`0 0 ${canvasWidth} ${canvasHeight}`" :style="{ minHeight: `${canvasHeight}px`, minWidth: `${canvasWidth}px` }">
             <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8294ab" /></marker></defs>
             <g class="graph-lines">
               <line v-for="edge in layoutEdges" :key="edge.relationId" :x1="edge.source.x" :y1="edge.source.y + 31" :x2="edge.target.x" :y2="edge.target.y - 31" marker-end="url(#arrow)" />
             </g>
-            <g v-for="node in layoutNodes" :key="node.id" class="svg-node" :class="[paletteClass(node.palette), { dim: query && !filteredNodes.some(item => Number(item.id) === Number(node.id)), selected: Number(selectedNode?.id) === Number(node.id) }]" :transform="`translate(${node.x},${node.y})`" @click="inspect(node)">
+            <g v-for="node in layoutNodes" :key="node.id" class="svg-node" :class="[paletteClass(node.palette), { selected: Number(selectedNode?.id) === Number(node.id) }]" :transform="`translate(${node.x},${node.y})`" @click="inspect(node)">
               <circle r="30" />
               <text text-anchor="middle" dy="4">{{ node.knowledgeName.slice(0, 4) }}</text>
               <text class="node-label" text-anchor="middle" dy="51">{{ node.knowledgeName }}</text>
