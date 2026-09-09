@@ -8,4 +8,6 @@ import java.util.List;
 public interface SeedImportConflictRepository extends JpaRepository<SeedImportConflict, Long> {
 
     List<SeedImportConflict> findByImportRunIdOrderByIdAsc(Long importRunId);
+
+    long countByImportRunId(Long importRunId);
 }

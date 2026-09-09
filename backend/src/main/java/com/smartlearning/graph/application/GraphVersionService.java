@@ -292,7 +292,9 @@ public class GraphVersionService {
         return new GraphApi.GraphRelationResponse(
                 relation.getId(), relation.getGraphVersionId(), source.getId(), source.getKnowledgeCode(), source.getKnowledgeName(),
                 target.getId(), target.getKnowledgeCode(), target.getKnowledgeName(), relation.getRelationType(),
-                relation.getRelationSource(), relation.getConfidence(), relation.getEvidenceCount(), relation.getReviewStatus().name(),
+                relation.getRelationSource(), relation.getCandidateInputId(), relation.getCandidatePolicyVersion(),
+                relation.getCandidateStatus(), relation.getPublishedGraphStatus(),
+                relation.getConfidence(), relation.getEvidenceCount(), relation.getReviewStatus().name(),
                 relation.getCreatedBy(), relation.getCreatedAt()
         );
     }
