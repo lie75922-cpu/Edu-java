@@ -18,7 +18,8 @@ public class RecommendationRanker {
                         item.candidate().recentErrorCount()).reversed())
                 .thenComparing(item -> lastPracticeSortValue(item.candidate()))
                 .thenComparingLong(item -> item.candidate().knowledgePointId())
-                .thenComparingLong(RecommendationFilter.PracticeCandidate::exerciseUnitId);
+                .thenComparing(RecommendationFilter.PracticeCandidate::exerciseUnitId,
+                        Comparator.nullsLast(Comparator.naturalOrder()));
         List<RecommendationFilter.PracticeCandidate> sorted = candidates.stream().sorted(ordering).toList();
         java.util.ArrayList<RankedRecommendation> ranked = new java.util.ArrayList<>();
         for (int index = 0; index < sorted.size(); index++) {
