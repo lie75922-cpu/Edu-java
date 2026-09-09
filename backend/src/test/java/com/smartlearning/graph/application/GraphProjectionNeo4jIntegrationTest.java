@@ -230,6 +230,10 @@ class GraphProjectionNeo4jIntegrationTest {
         KnowledgeRelationEvidence evidence = evidenceRepository.findByCourseIdAndSourceTypeAndExternalEvidenceId(
                 courseId, EvidenceResolutionResolver.JUNYI_RAW_PREREQUISITE, externalEvidenceId
         ).orElseThrow();
+        assertThat(relationRepository.findByGraphVersionIdOrderByIdAsc(v1.id())).isEmpty();
+        evidenceReresolutionService.apply(v1.id(), new GraphApi.EvidenceReresolutionRequest(
+                List.of(evidence.getId()), EvidenceReresolutionTrigger.MAPPING_CHANGE
+        ), administrator.id());
         var publishedRelation = relationRepository
                 .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
                         v1.id(), pointA, pointB, "PREREQUISITE"
