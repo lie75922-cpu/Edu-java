@@ -1,10 +1,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { api, run, statusText } from '../store.js'
-import { researchSnapshot } from '../researchSnapshot.js'
 
 const section = ref('课程与教学')
-const sections = ['课程与教学', '数据与算法', '教师授权', '知识图谱治理', '系统状态']
+const sections = ['课程与教学', '数据治理', '教师授权', '知识图谱治理', '系统状态']
 const courses = ref([])
 const selectedCourseId = ref('')
 const points = ref([])
@@ -14,20 +13,27 @@ const versions = ref([])
 const selectedVersion = ref(null)
 const relations = ref([])
 const validationIssues = ref([])
+const governanceOverview = ref(null)
+const importRuns = ref([])
 const teacherForm = reactive({ teacherId: '', assignmentRole: 'INSTRUCTOR' })
 const courseForm = reactive({ courseCode: '', courseName: '', description: '', status: 'ACTIVE' })
 const newVersionDescription = ref('')
 
 const selectedCourse = computed(() => courses.value.find(item => String(item.id) === String(selectedCourseId.value)))
-const data0 = researchSnapshot.dataset
-const model3 = researchSnapshot.model
 
 function count(value) {
   return Number(value).toLocaleString('zh-CN')
 }
 
-function pct(value, digits = 2) {
-  return `${(Number(value) * 100).toFixed(digits)}%`
+function timestamp(value) {
+  if (!value) return '—'
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleString('zh-CN', { hour12: false })
+}
+
+function sourceSize(value) {
+  if (!Number.isFinite(Number(value))) return '未记录'
+  return `${Number(value).toLocaleString('zh-CN')} 字节`
 }
 
 async function loadCourses() {
@@ -121,7 +127,22 @@ async function publishVersion() {
   if (result) await openVersion(selectedVersion.value.id)
 }
 
-onMounted(loadCourses)
+async function loadGovernance() {
+  const loaded = await run(() => Promise.all([
+    api('/admin/data-governance/overview'),
+    api('/admin/data-governance/import-runs')
+  ]))
+  if (!loaded) return
+  governanceOverview.value = loaded[0]
+  importRuns.value = loaded[1]?.importRuns || []
+}
+
+async function boot() {
+  await loadCourses()
+  await loadGovernance()
+}
+
+onMounted(boot)
 </script>
 
 <template>
@@ -151,42 +172,46 @@ onMounted(loadCourses)
       <section class="panel"><div class="panel-head"><div><p class="eyebrow">知识目录</p><h3>{{ selectedCourse?.courseName }} · 知识点</h3></div><span class="soft-badge">{{ points.length }} 项</span></div><div class="catalog-grid"><article v-for="point in points" :key="point.id"><strong>{{ point.knowledgeName }}</strong><span>{{ point.knowledgeCode }}</span></article></div></section>
     </template>
 
-    <template v-else-if="section === '数据与算法'">
+    <template v-else-if="section === '数据治理'">
       <section class="panel">
-        <div class="panel-head"><div><p class="eyebrow">DATA-0 已审计快照</p><h3>{{ data0.displayName }}</h3><p class="muted">{{ data0.provenance }}</p></div><span class="soft-badge">{{ data0.id }}</span></div>
-        <div class="metric-grid four">
-          <article class="metric-card accent-blue"><span>匿名学生</span><strong>{{ count(data0.students) }}</strong><small>人</small></article>
-          <article class="metric-card accent-green"><span>学习行为</span><strong>{{ count(data0.interactions) }}</strong><small>条</small></article>
-          <article class="metric-card accent-purple"><span>练习元数据</span><strong>{{ count(data0.metadataRows) }}</strong><small>{{ count(data0.distinctExerciseIds) }} 个不同ID</small></article>
-          <article class="metric-card accent-orange"><span>整体正确率</span><strong>{{ pct(data0.correctRate) }}</strong><small>研究数据统计</small></article>
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">真实持久化治理数据</p>
+            <h3>目录导入与知识关系状态</h3>
+            <p class="muted">所有计数由管理员数据治理接口读取；未发生实际导入时显示为当前数据库状态，不以基础数据预期规模替代。</p>
+          </div>
+          <button class="secondary-button" @click="loadGovernance">刷新治理数据</button>
         </div>
-        <p class="muted">{{ data0.boundary }}</p>
+        <div v-if="governanceOverview" class="metric-grid three">
+          <article class="metric-card accent-blue"><span>目录导入批次</span><strong>{{ count(governanceOverview.catalogImportRunCount) }}</strong><small>个已记录批次</small></article>
+          <article class="metric-card accent-orange"><span>待处理导入冲突</span><strong>{{ count(governanceOverview.catalogConflictCount) }}</strong><small>项</small></article>
+          <article class="metric-card accent-purple"><span>原始先修证据</span><strong>{{ count(governanceOverview.rawEvidenceCount) }}</strong><small>条持久化证据</small></article>
+          <article class="metric-card accent-green"><span>策略生成的候选关系</span><strong>{{ count(governanceOverview.derivedCandidateRelationCount) }}</strong><small>待人工审核，不等同于已发布关系</small></article>
+          <article class="metric-card"><span>已发布知识关系版本</span><strong>{{ count(governanceOverview.publishedGraphVersionCount) }}</strong><small>个</small></article>
+          <article class="metric-card"><span>已发布知识关系</span><strong>{{ count(governanceOverview.publishedGraphRelationCount) }}</strong><small>条</small></article>
+        </div>
+        <div v-else class="empty-state compact"><strong>尚未取得治理数据</strong><p>请确认以系统管理员身份登录，并检查后端数据治理服务是否可用。</p></div>
+        <div class="warning-box"><strong>状态边界</strong><p>原始先修证据、策略候选关系和已发布知识关系是三个独立状态。候选关系需要人工审核；本页面不会把候选数据写成已发布图谱。</p></div>
       </section>
 
-      <div class="two-column admin-layout">
-        <section class="panel">
-          <div class="panel-head"><div><p class="eyebrow">数据处理链</p><h3>从原始资料到模型输入</h3></div></div>
-          <article v-for="(item, index) in researchSnapshot.pipeline" :key="item" class="simple-row"><span>{{ index + 1 }}. {{ item }}</span><b>已记录</b></article>
-        </section>
-        <section class="panel">
-          <div class="panel-head"><div><p class="eyebrow">数据质量</p><h3>审计发现</h3></div></div>
-          <article class="simple-row"><span>知识领域 / 主题</span><b>{{ data0.areas }} / {{ data0.topics }}</b></article>
-          <article class="simple-row"><span>原始先修关系</span><b>{{ count(data0.rawPrerequisiteEdges) }} 条</b></article>
-          <article class="simple-row"><span>重复练习ID记录</span><b>{{ data0.duplicateExerciseIdRecords }}</b></article>
-          <article class="simple-row"><span>缺失主题 / 领域记录</span><b>{{ data0.missingTopicRows }} / {{ data0.missingAreaRows }}</b></article>
-          <article class="simple-row"><span>原始关系自环 / 有环SCC</span><b>{{ data0.selfLoops }} / {{ data0.cyclicSccs }}</b></article>
-        </section>
-      </div>
-
       <section class="panel">
-        <div class="panel-head"><div><p class="eyebrow">{{ model3.experiment }} 最终验证</p><h3>算法比较与当前集成边界</h3></div><span class="soft-badge">{{ model3.gate }}</span></div>
-        <div class="metric-grid four">
-          <article class="metric-card"><span>{{ model3.baselineName }}</span><strong>{{ model3.baselineAuc.toFixed(6) }}</strong><small>AUC</small></article>
-          <article class="metric-card accent-blue"><span>{{ model3.raschName }}</span><strong>{{ model3.raschAuc.toFixed(6) }}</strong><small>AUC · ACC {{ model3.raschAcc.toFixed(6) }}</small></article>
-          <article class="metric-card accent-green"><span>Rasch 相对基线</span><strong>+{{ model3.aucDelta.toFixed(6) }}</strong><small>95%CI [{{ model3.aucCiLow.toFixed(6) }}, {{ model3.aucCiHigh.toFixed(6) }}]</small></article>
-          <article class="metric-card accent-orange"><span>{{ model3.hierarchicalName }}</span><strong>{{ model3.hierarchicalAuc.toFixed(6) }}</strong><small>AUC，未优于 Rasch</small></article>
+        <div class="panel-head"><div><p class="eyebrow">导入批次</p><h3>真实导入审计记录</h3></div><span class="soft-badge">{{ importRuns.length }} 个批次</span></div>
+        <div v-if="importRuns.length" class="import-run-list">
+          <article v-for="run in importRuns" :key="run.id" class="import-run-card">
+            <div class="import-run-head"><div><strong>批次 {{ run.id }}</strong><span>{{ statusText(run.mode) }} · {{ statusText(run.status) }}</span></div><time>{{ timestamp(run.completedAt || run.createdAt) }}</time></div>
+            <div class="import-run-details">
+              <span>来源名称（审计字段）：{{ run.sourceName || '未提供' }}</span>
+              <span>导出格式版本：{{ run.exportFormatVersion || '未提供' }}</span>
+              <span>输入记录数：{{ run.sourceRecordCount ?? '未记录' }}</span>
+              <span>隔离记录数：{{ run.quarantineCount ?? 0 }}</span>
+              <span>冲突数：{{ run.conflictCount ?? 0 }}</span>
+              <span>输入编码：{{ run.inputEncoding || '未记录' }}</span>
+              <span>输入大小：{{ sourceSize(run.inputSizeBytes) }}</span>
+              <span class="wide-detail">原始输入路径（审计字段）：{{ run.inputPath || '未记录' }}</span>
+            </div>
+          </article>
         </div>
-        <div class="warning-box"><strong>不能混淆研究结果与线上算法</strong><p>{{ model3.productionBoundary }}</p></div>
+        <div v-else class="empty-state compact"><strong>尚无导入批次</strong><p>这表示当前数据库没有可由接口返回的目录导入记录；并不表示真实基础目录已导入。</p></div>
       </section>
     </template>
 
@@ -200,12 +225,12 @@ onMounted(loadCourses)
     <template v-else-if="section === '知识图谱治理'">
       <div class="two-column admin-layout graph-admin-layout">
         <section class="panel"><div class="panel-head"><div><p class="eyebrow">{{ selectedCourse?.courseName }}</p><h3>图谱版本</h3></div></div><article v-for="version in versions" :key="version.id" class="admin-list-card" :class="{ selected: selectedVersion?.id === version.id }" @click="openVersion(version.id)"><div><strong>版本 {{ version.versionNo }}</strong><span>{{ version.description || '暂无版本说明' }}</span></div><div><span class="soft-badge">{{ statusText(version.status) }}</span><small v-if="version.active">当前在线</small></div></article><form class="inline-create" @submit.prevent="createVersion"><input v-model="newVersionDescription" placeholder="新版本说明"><button class="primary-button small">从当前图创建草稿</button></form></section>
-        <section class="panel"><template v-if="selectedVersion"><div class="panel-head"><div><p class="eyebrow">版本详情</p><h3>图谱版本 {{ selectedVersion.versionNo }}</h3></div><span class="soft-badge">{{ statusText(selectedVersion.status) }}</span></div><div class="metric-grid two compact-metrics"><article class="metric-card"><span>知识关系</span><strong>{{ relations.length }}</strong></article><article class="metric-card"><span>校验问题</span><strong>{{ validationIssues.length }}</strong></article></div><div class="button-row"><button class="secondary-button" @click="validateVersion">运行关系校验</button><button class="primary-button" :disabled="selectedVersion.status !== 'READY'" @click="publishVersion">发布知识图谱</button></div><h4>已维护知识关系</h4><article v-for="relation in relations.slice(0, 12)" :key="relation.id" class="simple-row"><span>{{ relation.sourceKnowledgeName }} → {{ relation.targetKnowledgeName }}</span><b>{{ statusText(relation.reviewStatus) }}</b></article><div v-if="validationIssues.length" class="warning-box"><strong>需要处理的校验问题</strong><p v-for="item in validationIssues" :key="item.id">{{ item.issueCode }}：{{ item.detailJson }}</p></div></template><div v-else class="empty-state"><strong>选择一个图谱版本</strong><p>版本化治理保证新知识关系通过校验和投影验证后才会替换当前在线图。</p></div></section>
+        <section class="panel"><template v-if="selectedVersion"><div class="panel-head"><div><p class="eyebrow">版本详情</p><h3>图谱版本 {{ selectedVersion.versionNo }}</h3></div><span class="soft-badge">{{ statusText(selectedVersion.status) }}</span></div><div class="metric-grid two compact-metrics"><article class="metric-card"><span>知识关系</span><strong>{{ relations.length }}</strong></article><article class="metric-card"><span>校验问题</span><strong>{{ validationIssues.length }}</strong></article></div><div class="button-row"><button class="secondary-button" @click="validateVersion">运行关系校验</button><button class="primary-button" :disabled="selectedVersion.status !== 'READY'" @click="publishVersion">发布知识图谱</button></div><h4>已维护知识关系</h4><article v-for="relation in relations.slice(0, 12)" :key="relation.id" class="simple-row"><div><strong>{{ relation.sourceKnowledgeName }} → {{ relation.targetKnowledgeName }}</strong><span v-if="relation.candidateStatus">候选输入状态：{{ statusText(relation.candidateStatus) }}；发布状态：{{ statusText(relation.publishedGraphStatus) }}</span><span v-if="relation.relationSource">关系来源：{{ statusText(relation.relationSource) }}</span></div><b>{{ statusText(relation.reviewStatus) }}</b></article><div v-if="validationIssues.length" class="warning-box"><strong>需要处理的校验问题</strong><p v-for="item in validationIssues" :key="item.id">校验代码（供审计）：{{ item.issueCode }}。详情：{{ item.detailJson || '后端未提供详细说明。' }}</p></div></template><div v-else class="empty-state"><strong>选择一个图谱版本</strong><p>版本化治理保证新知识关系通过校验和投影验证后才会替换当前在线图。</p></div></section>
       </div>
     </template>
 
     <template v-else>
-      <section class="panel"><div class="panel-head"><div><p class="eyebrow">系统状态</p><h3>Java 工程底座</h3></div><span class="soft-badge">发布候选</span></div><div class="system-cap-grid"><article><strong>MySQL 8.4</strong><span>业务权威数据与图谱版本事实</span></article><article><strong>Neo4j</strong><span>已发布知识图查询投影，可从 MySQL 重建</span></article><article><strong>Redis</strong><span>可选缓存，故障时系统进入降级状态</span></article><article><strong>Spring Boot</strong><span>认证、课程、答题、推荐、图谱与学情服务</span></article><article><strong>Playwright</strong><span>学生、教师、管理员真实浏览器回归</span></article><article><strong>Docker Compose</strong><span>完整本地评审环境一键启动</span></article></div></section>
+      <section class="panel"><div class="panel-head"><div><p class="eyebrow">系统状态</p><h3>Java 工程底座</h3></div><span class="soft-badge">待运行环境验证</span></div><div class="system-cap-grid"><article><strong>MySQL 8.4</strong><span>业务权威数据与图谱版本事实</span></article><article><strong>Neo4j</strong><span>仅用于已发布知识关系查询投影，可从 MySQL 重建</span></article><article><strong>Redis</strong><span>可选缓存，故障时系统进入降级状态</span></article><article><strong>Spring Boot</strong><span>认证、课程、答题、推荐、图谱与学情服务</span></article><article><strong>Playwright</strong><span>可用于学生、教师、管理员浏览器回归</span></article><article><strong>Docker Compose</strong><span>可用于完整本地评审环境启动</span></article></div></section>
     </template>
   </section>
 </template>

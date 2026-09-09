@@ -58,6 +58,27 @@ async function nextPage(delta) {
   await loadAnalytics()
 }
 
+function associatedNames(item) {
+  return item.associatedKnowledgePoints?.map(point => point.knowledgeName).join('、') || '未关联知识点'
+}
+
+function heatClass(cell) {
+  if (cell.status === 'UNKNOWN') return 'unknown'
+  if (Number(cell.masteryScore) < 0.5) return 'low'
+  if (Number(cell.masteryScore) < 0.7) return 'mid'
+  return 'high'
+}
+
+function masteryText(item) {
+  return item.status === 'UNKNOWN' ? '暂无学习数据' : percent(item.masteryScore)
+}
+
+function recommendationText(item) {
+  if (item.reasonCode === 'UNMET_PREREQUISITE') return '前置知识待巩固'
+  if (item.reasonCode === 'LOW_MASTERY') return '掌握程度偏低'
+  return '建议复习'
+}
+
 async function boot() {
   await loadCourses()
   if (selectedCourseId.value) await loadAnalytics()
@@ -96,7 +117,7 @@ onMounted(boot)
         <div class="panel-head"><div><p class="eyebrow">高频错误</p><h3>近期需要讲解的题目</h3></div><label class="mini-filter">最少作答<input v-model.number="minimumAttempts" type="number" min="1" @change="loadAnalytics"></label></div>
         <div v-if="highErrors.length" class="error-question-list">
           <article v-for="item in highErrors.slice(0, 8)" :key="item.questionId">
-            <div><strong>{{ item.stemPreview }}</strong><span>{{ item.associatedKnowledgePoints?.map(point => point.knowledgeName).join('、') || '未关联知识点' }}</span></div>
+            <div><strong>{{ item.stemPreview }}</strong><span>{{ associatedNames(item) }}</span></div>
             <b>{{ percent(item.wrongRate) }} 错误率</b>
           </article>
         </div>
@@ -112,7 +133,7 @@ onMounted(boot)
           <tbody>
             <tr v-for="item in heatmap.students" :key="item.studentId">
               <th><button class="text-button strong" @click="openStudent(item.studentId)">{{ item.displayName }}</button></th>
-              <td v-for="cell in item.items" :key="cell.knowledgePointId"><span :class="['heat-cell', cell.status === 'UNKNOWN' ? 'unknown' : Number(cell.masteryScore) < 0.5 ? 'low' : Number(cell.masteryScore) < 0.7 ? 'mid' : 'high']">{{ cell.status === 'UNKNOWN' ? '暂无' : percent(cell.masteryScore) }}</span></td>
+              <td v-for="cell in item.items" :key="cell.knowledgePointId"><span :class="['heat-cell', heatClass(cell)]">{{ masteryText(cell) }}</span></td>
             </tr>
           </tbody>
         </table>
@@ -131,10 +152,10 @@ onMounted(boot)
       </div>
       <div class="metric-grid three compact-metrics"><article class="metric-card"><span>作答次数</span><strong>{{ student.activity.attemptCount }}</strong></article><article class="metric-card"><span>正确次数</span><strong>{{ student.activity.correctCount }}</strong></article><article class="metric-card"><span>正确率</span><strong>{{ percent(student.activity.correctRate) }}</strong></article></div>
       <div class="two-column">
-        <div><h4>当前掌握情况</h4><article v-for="item in student.mastery" :key="item.knowledgePointId" class="simple-row"><span>{{ item.knowledgeName }}</span><b>{{ item.status === 'UNKNOWN' ? '暂无学习数据' : percent(item.masteryScore) }}</b></article></div>
+        <div><h4>当前掌握情况</h4><article v-for="item in student.mastery" :key="item.knowledgePointId" class="simple-row"><span>{{ item.knowledgeName }}</span><b>{{ masteryText(item) }}</b></article></div>
         <div><h4>最近作答</h4><article v-for="answer in student.recentAnswers.slice(0, 8)" :key="answer.answerRecordId" class="simple-row"><span>{{ answer.stemPreview }}</span><b :class="answer.correct ? 'good-text' : 'bad-text'">{{ answer.correct ? '正确' : '错误' }}</b></article></div>
       </div>
-      <div v-if="student.latestRecommendation" class="detail-block"><h4>当前学习建议</h4><article v-for="item in student.latestRecommendation.items" :key="item.rank" class="simple-row"><span>{{ item.rank }}. {{ item.knowledgeName }}</span><b>{{ item.reasonCode === 'UNMET_PREREQUISITE' ? '前置知识待巩固' : item.reasonCode === 'LOW_MASTERY' ? '掌握程度偏低' : '建议复习' }}</b></article></div>
+      <div v-if="student.latestRecommendation" class="detail-block"><h4>当前学习建议</h4><article v-for="item in student.latestRecommendation.items" :key="item.rank" class="simple-row"><span>{{ item.rank }}. {{ item.knowledgeName }}</span><b>{{ recommendationText(item) }}</b></article></div>
     </section>
   </section>
 </template>

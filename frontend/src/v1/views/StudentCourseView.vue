@@ -1,16 +1,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { api, newRequestId, run, selectedCourse } from '../store.js'
+import { api, run, selectedCourse, statusText } from '../store.js'
 
 const courses = ref([])
 const areas = ref([])
 const points = ref([])
 const exercises = ref([])
 const selectedAreaId = ref('ALL')
-const activeQuestion = ref(null)
-const selectedOptions = ref([])
-const answerResult = ref(null)
-const requestId = ref('')
+const selectedExercise = ref(null)
 
 const areaMap = computed(() => new Map(areas.value.map(area => [String(area.id), area])))
 
@@ -42,6 +39,12 @@ function pointExercise(point) {
   ))
 }
 
+function exerciseAvailability(exercise) {
+  if (!exercise) return '当前知识点暂无已关联练习元数据'
+  if (exercise.status === 'ACTIVE') return '目录记录可用；题目内容需由题库单独接入'
+  return '当前目录记录不可用'
+}
+
 async function loadCourse(course = null) {
   if (course) selectedCourse.value = course
   if (!selectedCourse.value) return
@@ -67,36 +70,6 @@ async function boot() {
     selectedCourse.value = result[0] || null
   }
   if (selectedCourse.value) await run(() => loadCourse())
-}
-
-async function startPractice(point) {
-  const exercise = pointExercise(point)
-  if (!exercise) return
-  const question = await run(() => api(`/exercise-units/${exercise.id}/questions/next`))
-  if (!question) return
-  activeQuestion.value = { ...question, point, exercise }
-  selectedOptions.value = []
-  answerResult.value = null
-  requestId.value = newRequestId()
-}
-
-function chooseOption(key) {
-  if (activeQuestion.value?.questionType === 'MULTIPLE_CHOICE') {
-    selectedOptions.value = selectedOptions.value.includes(key)
-      ? selectedOptions.value.filter(item => item !== key)
-      : [...selectedOptions.value, key]
-  } else {
-    selectedOptions.value = [key]
-  }
-}
-
-async function submit() {
-  if (!activeQuestion.value || !selectedOptions.value.length) return
-  const result = await run(() => api(`/questions/${activeQuestion.value.id}/answers`, {
-    method: 'POST',
-    body: JSON.stringify({ selectedOptionKeys: selectedOptions.value, durationMs: 0, clientRequestId: requestId.value })
-  }))
-  if (result) answerResult.value = result
 }
 
 onMounted(boot)
@@ -137,9 +110,9 @@ onMounted(boot)
           <div class="knowledge-index">{{ String(index + 1).padStart(2, '0') }}</div>
           <div class="knowledge-main"><strong>{{ point.knowledgeName }}</strong><span>{{ areaName(point) }}</span></div>
           <div class="knowledge-actions">
-            <span v-if="pointExercise(point)" class="resource-count">已关联练习</span>
-            <button v-if="pointExercise(point)" class="primary-button small" @click="startPractice(point)">开始练习</button>
-            <span v-else class="muted">暂无练习</span>
+            <span v-if="pointExercise(point)" class="resource-count">已关联练习元数据</span>
+            <button v-if="pointExercise(point)" class="secondary-button small" @click="selectedExercise = pointExercise(point)">查看练习状态</button>
+            <span v-else class="muted">暂无已关联练习元数据</span>
           </div>
         </article>
       </div>
@@ -148,22 +121,17 @@ onMounted(boot)
       </div>
     </section>
 
-    <div v-if="activeQuestion" class="modal-backdrop" @click.self="activeQuestion = null">
+    <div v-if="selectedExercise" class="modal-backdrop" @click.self="selectedExercise = null">
       <section class="question-modal">
-        <button class="close-button" @click="activeQuestion = null">×</button>
-        <p class="eyebrow">{{ activeQuestion.point.knowledgeName }} · 知识点练习</p>
-        <h3>{{ activeQuestion.stem }}</h3>
-        <div class="option-list">
-          <button v-for="option in activeQuestion.options" :key="option.id" :class="['answer-option', { selected: selectedOptions.includes(option.optionKey) }]" @click="chooseOption(option.optionKey)">
-            <span>{{ option.optionKey }}</span><strong>{{ option.optionText }}</strong>
-          </button>
-        </div>
-        <button v-if="!answerResult" class="primary-button full" :disabled="!selectedOptions.length" @click="submit">提交答案</button>
-        <div v-else :class="['answer-feedback', answerResult.correct ? 'right' : 'wrong']">
-          <strong>{{ answerResult.correct ? '回答正确' : '这道题还需要再巩固一下' }}</strong>
-          <p>正确答案：{{ answerResult.correctOptionKeys.join('、') }}</p>
-          <p>{{ answerResult.explanation || '暂无解析。' }}</p>
-          <button class="primary-button" @click="activeQuestion = null">完成本次练习</button>
+        <button class="close-button" @click="selectedExercise = null">×</button>
+        <p class="eyebrow">练习目录信息</p>
+        <h3>{{ selectedExercise.exerciseName }}</h3>
+        <p>目录状态：{{ statusText(selectedExercise.status) }}。{{ exerciseAvailability(selectedExercise) }}</p>
+        <p v-if="selectedExercise.difficulty !== null && selectedExercise.difficulty !== undefined">标注难度：{{ selectedExercise.difficulty }}</p>
+        <p>关联知识：{{ selectedExercise.knowledgePoints?.map(item => item.knowledgeName).filter(Boolean).join('、') || '暂未提供' }}</p>
+        <div class="warning-box">
+          <strong>题目内容尚未由目录数据提供</strong>
+          <p>本页只展示后端返回的练习元数据。题干、选项、答案和解析属于独立题库数据，当前不会将目录元数据伪装成可作答题目。</p>
         </div>
       </section>
     </div>
