@@ -42,18 +42,26 @@ test('教师可维护平台自编题目且停用后状态可追踪', async ({ pa
   const { course, exercise } = await teacherContext()
   await login(page)
 
+  const initialExercises = page.waitForResponse(response =>
+    response.url().includes(`/api/v1/admin/exercise-units?courseId=${course.courseId}`) && response.status() === 200
+  )
+  const initialQuestions = page.waitForResponse(response =>
+    response.url().includes('/api/v1/admin/questions?exerciseUnitId=') && response.status() === 200
+  )
   await page.getByRole('button', { name: '题库管理', exact: true }).click()
   await expect(page.locator('.page-intro h2')).toHaveText('题库管理')
+  await initialExercises
+  await initialQuestions
 
   const selects = page.locator('.page-intro .intro-actions select')
-  await Promise.all([
-    page.waitForResponse(response => response.url().includes(`/api/v1/admin/exercise-units?courseId=${course.courseId}`) && response.status() === 200),
-    selects.nth(0).selectOption(String(course.courseId))
-  ])
-  await Promise.all([
-    page.waitForResponse(response => response.url().includes(`/api/v1/admin/questions?exerciseUnitId=${exercise.id}`) && response.status() === 200),
-    selects.nth(1).selectOption(String(exercise.id))
-  ])
+  await expect(selects.nth(0)).toHaveValue(String(course.courseId))
+  const currentExerciseId = await selects.nth(1).inputValue()
+  if (currentExerciseId !== String(exercise.id)) {
+    await Promise.all([
+      page.waitForResponse(response => response.url().includes(`/api/v1/admin/questions?exerciseUnitId=${exercise.id}`) && response.status() === 200),
+      selects.nth(1).selectOption(String(exercise.id))
+    ])
+  }
 
   const stem = '平台题库 E2E：2 + 3 的结果是多少？'
   await page.getByLabel('题干').fill(stem)
