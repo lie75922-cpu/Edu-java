@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { api, run, selectedCourse, statusText } from '../store.js'
+import { api, newRequestId, run, selectedCourse, statusText } from '../store.js'
 
 const courses = ref([])
 const areas = ref([])
@@ -8,6 +8,10 @@ const points = ref([])
 const exercises = ref([])
 const selectedAreaId = ref('ALL')
 const selectedExercise = ref(null)
+const question = ref(null)
+const selectedOptionKeys = ref([])
+const answerResult = ref(null)
+const questionUnavailable = ref(false)
 
 const areaMap = computed(() => new Map(areas.value.map(area => [String(area.id), area])))
 
@@ -33,16 +37,53 @@ function pointCount(areaId) {
   return points.value.filter(item => String(item.areaId) === String(areaId)).length
 }
 
-function pointExercise(point) {
-  return exercises.value.find(exercise => (exercise.knowledgePoints || []).some(item =>
+function pointExercises(point) {
+  return exercises.value.filter(exercise => (exercise.knowledgePoints || []).some(item =>
     Number(item.id ?? item.knowledgePointId) === Number(point.id)
   ))
 }
 
-function exerciseAvailability(exercise) {
-  if (!exercise) return '当前知识点暂无已关联练习元数据'
-  if (exercise.status === 'ACTIVE') return '目录记录可用；题目内容需由题库单独接入'
-  return '当前目录记录不可用'
+function closeExercise() {
+  selectedExercise.value = null
+  question.value = null
+  selectedOptionKeys.value = []
+  answerResult.value = null
+  questionUnavailable.value = false
+}
+
+async function openExercise(exercise) {
+  selectedExercise.value = exercise
+  question.value = null
+  selectedOptionKeys.value = []
+  answerResult.value = null
+  questionUnavailable.value = false
+  const loadedQuestion = await api(`/exercise-units/${exercise.id}/questions/next`).catch(() => null)
+  if (!loadedQuestion) {
+    questionUnavailable.value = true
+    return
+  }
+  question.value = loadedQuestion
+}
+
+function toggleOption(optionKey) {
+  if (selectedOptionKeys.value.includes(optionKey)) {
+    selectedOptionKeys.value = selectedOptionKeys.value.filter(key => key !== optionKey)
+    return
+  }
+  selectedOptionKeys.value = [...selectedOptionKeys.value, optionKey]
+}
+
+async function submitAnswer() {
+  if (!question.value || !selectedOptionKeys.value.length) return
+  const result = await run(() => api(`/questions/${question.value.id}/answers`, {
+    method: 'POST',
+    body: JSON.stringify({
+      selectedOptionKeys: selectedOptionKeys.value,
+      durationMs: 0,
+      clientRequestId: newRequestId()
+    })
+  }))
+  if (result) answerResult.value = result
 }
 
 async function loadCourse(course = null) {
@@ -110,8 +151,10 @@ onMounted(boot)
           <div class="knowledge-index">{{ String(index + 1).padStart(2, '0') }}</div>
           <div class="knowledge-main"><strong>{{ point.knowledgeName }}</strong><span>{{ areaName(point) }}</span></div>
           <div class="knowledge-actions">
-            <span v-if="pointExercise(point)" class="resource-count">已关联练习元数据</span>
-            <button v-if="pointExercise(point)" class="secondary-button small" @click="selectedExercise = pointExercise(point)">查看练习状态</button>
+            <template v-if="pointExercises(point).length">
+              <span class="resource-count">{{ pointExercises(point).length }} 条已关联练习元数据</span>
+              <button v-for="exercise in pointExercises(point)" :key="exercise.id" class="secondary-button small" :data-exercise-id="exercise.id" @click="openExercise(exercise)">查看练习状态</button>
+            </template>
             <span v-else class="muted">暂无已关联练习元数据</span>
           </div>
         </article>
@@ -121,17 +164,28 @@ onMounted(boot)
       </div>
     </section>
 
-    <div v-if="selectedExercise" class="modal-backdrop" @click.self="selectedExercise = null">
+    <div v-if="selectedExercise" class="modal-backdrop" @click.self="closeExercise">
       <section class="question-modal">
-        <button class="close-button" @click="selectedExercise = null">×</button>
+        <button class="close-button" @click="closeExercise">×</button>
         <p class="eyebrow">练习目录信息</p>
         <h3>{{ selectedExercise.exerciseName }}</h3>
-        <p>目录状态：{{ statusText(selectedExercise.status) }}。{{ exerciseAvailability(selectedExercise) }}</p>
+        <p>目录状态：{{ statusText(selectedExercise.status) }}。目录元数据与题库内容分开管理。</p>
         <p v-if="selectedExercise.difficulty !== null && selectedExercise.difficulty !== undefined">标注难度：{{ selectedExercise.difficulty }}</p>
         <p>关联知识：{{ selectedExercise.knowledgePoints?.map(item => item.knowledgeName).filter(Boolean).join('、') || '暂未提供' }}</p>
-        <div class="warning-box">
-          <strong>题目内容尚未由目录数据提供</strong>
-          <p>本页只展示后端返回的练习元数据。题干、选项、答案和解析属于独立题库数据，当前不会将目录元数据伪装成可作答题目。</p>
+        <div v-if="question" class="question-content">
+          <p class="eyebrow">独立题库题目</p>
+          <h4>{{ question.stem }}</h4>
+          <p class="muted">题目由独立题库接口返回；目录记录本身不主张题干、选项或答案的来源。</p>
+          <div class="answer-options">
+            <button v-for="option in question.options" :key="option.id" type="button" class="answer-option" :class="{ selected: selectedOptionKeys.includes(option.optionKey) }" :aria-pressed="selectedOptionKeys.includes(option.optionKey)" @click="toggleOption(option.optionKey)">{{ option.optionKey }}. {{ option.optionText }}</button>
+          </div>
+          <button class="primary-button" :disabled="!selectedOptionKeys.length" @click="submitAnswer">提交答案</button>
+          <p v-if="answerResult" class="answer-result">{{ answerResult.correct ? '回答正确' : '还需要再巩固' }}</p>
+        </div>
+        <div v-else class="warning-box" data-testid="question-unavailable">
+          <strong>当前练习没有可用题目</strong>
+          <p v-if="questionUnavailable">目录数据可以展示练习元数据，但题库尚未为此练习提供可答题内容。系统不会把目录元数据伪造成题干。</p>
+          <p v-else>正在读取独立题库中的可用题目。</p>
         </div>
       </section>
     </div>

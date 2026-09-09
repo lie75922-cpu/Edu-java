@@ -8,6 +8,7 @@ const courses = ref([])
 const selectedCourseId = ref('')
 const points = ref([])
 const exercises = ref([])
+const evidence = ref([])
 const assignments = ref([])
 const versions = ref([])
 const selectedVersion = ref(null)
@@ -52,14 +53,16 @@ async function loadCourseData() {
   const loaded = await run(() => Promise.all([
     api(`/admin/knowledge-points?courseId=${id}`).catch(() => []),
     api(`/admin/exercise-units?courseId=${id}`).catch(() => []),
+    api(`/admin/evidence?courseId=${id}`).catch(() => []),
     api(`/admin/courses/${id}/teachers`).catch(() => []),
     api(`/admin/graph-versions?courseId=${id}`).catch(() => [])
   ]))
   if (!loaded) return
   points.value = loaded[0]
   exercises.value = loaded[1]
-  assignments.value = loaded[2]
-  versions.value = loaded[3]
+  evidence.value = loaded[2]
+  assignments.value = loaded[3]
+  versions.value = loaded[4]
   selectedVersion.value = null
   relations.value = []
   validationIssues.value = []
@@ -212,6 +215,18 @@ onMounted(boot)
           </article>
         </div>
         <div v-else class="empty-state compact"><strong>尚无导入批次</strong><p>这表示当前数据库没有可由接口返回的目录导入记录；并不表示真实基础目录已导入。</p></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">原始先修证据</p><h3>{{ selectedCourse?.courseName || '当前课程' }}的 Evidence 审计</h3></div><span class="soft-badge">{{ evidence.length }} 条</span></div>
+        <p class="muted">原始证据、策略候选关系与已发布图谱分开治理。这里展示后端返回的原始证据状态，不把候选输入表述为已发布关系。</p>
+        <div v-if="evidence.length" class="import-run-list">
+          <article v-for="item in evidence.slice(0, 20)" :key="item.id" class="import-run-card">
+            <div class="import-run-head"><div><strong>{{ item.sourceExternalId }} → {{ item.targetExternalId }}</strong><span>{{ statusText(item.resolutionStatus) }}</span></div><time>{{ timestamp(item.createdAt) }}</time></div>
+            <div class="import-run-details"><span>来源类型：{{ item.sourceType || '未提供' }}</span><span>冲突状态：{{ item.conflictCode || '无' }}</span><span>解析说明：{{ item.resolutionDetail || '后端未提供' }}</span></div>
+          </article>
+        </div>
+        <div v-else class="empty-state compact"><strong>当前课程尚无原始证据</strong><p>这表示接口未返回该课程的 Evidence；不以基础数据的预期输入数量替代数据库事实。</p></div>
       </section>
     </template>
 
