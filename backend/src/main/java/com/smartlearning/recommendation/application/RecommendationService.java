@@ -3,7 +3,6 @@ package com.smartlearning.recommendation.application;
 import com.smartlearning.assessment.domain.ExerciseUnit;
 import com.smartlearning.assessment.infrastructure.persistence.ExerciseUnitRepository;
 import com.smartlearning.auth.domain.CurrentUser;
-import com.smartlearning.common.exception.ConflictException;
 import com.smartlearning.common.exception.NotFoundException;
 import com.smartlearning.course.application.CourseAccessService;
 import com.smartlearning.course.infrastructure.persistence.CourseRepository;
@@ -75,17 +74,22 @@ public class RecommendationService {
     @Transactional
     public RecommendationApi.RecommendationSnapshotResponse generate(long courseId, CurrentUser user) {
         requireCourseAccess(courseId, user);
-        long graphVersionId = graphQueryService.activeGraphVersionId(courseId, user);
+        Long graphVersionId = graphQueryService.activeGraphVersionIdOrNull(courseId, user);
         List<RecommendationCandidate> candidates;
         try {
             candidates = candidateGenerator.generate(user.id(), courseId, graphVersionId);
         } catch (Neo4jException ex) {
-            throw new ConflictException("active published graph is unavailable; recommendations were not synthesized");
+            // A valid Published Graph is optional for the conventional V2 recommender.
+            // If Neo4j is temporarily unavailable, fall back to mastery/recency/error
+            // signals rather than failing the student's entire recommendation flow.
+            graphVersionId = null;
+            candidates = candidateGenerator.generate(user.id(), courseId, null);
         }
         List<RecommendationFilter.PracticeCandidate> available = recommendationFilter.filter(
                 candidates, courseId, graphVersionId
         );
-        List<RecommendationRanker.RankedRecommendation> ranked = recommendationRanker.rank(available);
+        List<RecommendationRanker.RankedRecommendation> ranked = recommendationRanker.rank(available)
+                .stream().limit(policy.maxRecommendations()).toList();
 
         RecommendationSnapshot snapshot = snapshotRepository.save(new RecommendationSnapshot(
                 user.id(), courseId, graphVersionId, masteryProvider.algorithmVersion(), policy.ruleVersion()
