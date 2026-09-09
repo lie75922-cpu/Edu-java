@@ -12,6 +12,7 @@ const graph = ref(null)
 
 const weakItems = computed(() => mastery.value.filter(item => item.status === 'OBSERVED' && item.masteryScore !== null && Number(item.masteryScore) < 0.7))
 const unknownItems = computed(() => mastery.value.filter(item => item.status === 'UNKNOWN'))
+const targetOptions = computed(() => mastery.value)
 
 async function load(course = null) {
   if (course) {
@@ -29,7 +30,7 @@ async function load(course = null) {
   recommendation.value = await api(`/courses/${id}/recommendations/latest`).catch(() => null)
   path.value = null
   if (!targetId.value && weakItems.value[0]) targetId.value = String(weakItems.value[0].knowledgePointId)
-  if (!targetId.value && graph.value?.nodes?.length) targetId.value = String(graph.value.nodes[graph.value.nodes.length - 1].id)
+  if (!targetId.value && targetOptions.value[0]) targetId.value = String(targetOptions.value[0].knowledgePointId)
 }
 
 async function generate() {
@@ -48,12 +49,14 @@ function explanationFor(item) {
 }
 
 function pathBadge(node) {
-  return node.reasonCode === 'UNMET_PREREQUISITE' ? '前置知识' : '学习目标'
+  if (node.reasonCode === 'UNMET_PREREQUISITE') return '前置知识'
+  if (node.reasonCode === 'LOW_MASTERY' || node.reasonCode === 'RECENT_ERRORS' || node.reasonCode === 'REVIEW_DUE') return '复习建议'
+  return '学习目标'
 }
 
 function pathDescription(node) {
   return node.masteryStatus === 'UNKNOWN'
-    ? '暂无学习数据，建议先完成基础学习与练习。'
+    ? '暂无学习数据，可先完成基础学习。'
     : `当前掌握情况 ${percent(node.masteryScore)}。`
 }
 
@@ -73,7 +76,7 @@ onMounted(boot)
 <template>
   <section class="dashboard-page">
     <div class="page-intro">
-      <div><p class="eyebrow">个性化学习</p><h2>我的学习建议与路径</h2><p>根据真实答题记录识别薄弱知识，再结合已发布知识图谱安排学习顺序。</p></div>
+      <div><p class="eyebrow">个性化学习</p><h2>我的学习建议与计划</h2><p>优先依据真实答题记录、掌握情况、近期错误和复习间隔生成建议；课程存在已发布知识图谱时，再额外使用先修关系优化顺序。</p></div>
       <div class="intro-actions"><select :value="selectedCourse?.id" @change="load(courses.find(item => item.id === Number($event.target.value)))"><option v-for="course in courses" :key="course.id" :value="course.id">{{ course.courseName }}</option></select><button class="primary-button" @click="generate">更新学习建议</button></div>
     </div>
 
@@ -93,7 +96,7 @@ onMounted(boot)
             <p>已作答 {{ item.attemptCount }} 次，答对 {{ item.correctCount }} 次。建议先复习概念，再完成对应练习。</p>
           </article>
         </div>
-        <div v-else class="empty-state compact"><strong>当前没有明确薄弱知识</strong><p>完成更多练习后，系统会逐步形成更完整的学习诊断。</p></div>
+        <div v-else class="empty-state compact"><strong>当前没有明确薄弱知识</strong><p>系统会优先安排已学内容复习；新用户则按课程顺序提供入门建议。</p></div>
       </section>
 
       <section class="panel">
@@ -103,29 +106,29 @@ onMounted(boot)
             <span class="recommend-rank">{{ item.rank }}</span>
             <div>
               <strong>{{ item.knowledgeName }}</strong>
-              <p>{{ item.exerciseName || '复习该知识点' }}</p>
+              <p>{{ item.exerciseName || '学习或复习该知识点' }}</p>
               <small>{{ explanationFor(item).message }}</small>
               <small v-if="explanationFor(item).masteryScore !== null">当前掌握情况：{{ percent(explanationFor(item).masteryScore) }}</small>
               <small v-if="explanationFor(item).attemptCount !== null && explanationFor(item).correctCount !== null">已有作答 {{ explanationFor(item).attemptCount }} 次，答对 {{ explanationFor(item).correctCount }} 次。</small>
               <small v-if="explanationFor(item).recentErrorCount !== null && explanationFor(item).recentErrorCount > 0">近期错误 {{ explanationFor(item).recentErrorCount }} 次。</small>
-              <small v-if="explanationFor(item).unmetPrerequisite">建议先巩固相关前置知识。</small>
-              <small v-if="explanationFor(item).ruleVersion || explanationFor(item).graphVersionId !== null">推荐规则版本：{{ explanationFor(item).ruleVersion || '未提供' }}；知识关系版本：{{ explanationFor(item).graphVersionId ?? '未提供' }}</small>
+              <small v-if="explanationFor(item).unmetPrerequisite">已发布知识图谱提示该知识与当前薄弱项存在先修关系。</small>
+              <small>推荐规则：{{ explanationFor(item).ruleVersion || '常规学习建议' }}；{{ explanationFor(item).graphVersionId !== null ? `知识关系版本：${explanationFor(item).graphVersionId}` : '本次未使用知识图谱' }}</small>
             </div>
           </article>
         </template>
-        <div v-else class="empty-state compact"><strong>暂时没有推荐任务</strong><p>点击“更新学习建议”后，系统会结合掌握情况和知识先修关系生成推荐。</p></div>
+        <div v-else class="empty-state compact"><strong>暂时没有推荐任务</strong><p>点击“更新学习建议”，系统会根据已有学习记录或课程顺序生成建议。</p></div>
       </section>
     </div>
 
     <section class="panel">
-      <div class="panel-head"><div><p class="eyebrow">学习路径</p><h3>从当前状态到目标知识</h3></div><div class="path-controls"><select v-model="targetId"><option value="">选择目标知识点</option><option v-for="node in graph?.nodes || []" :key="node.id" :value="String(node.id)">{{ node.knowledgeName }}</option></select><button class="primary-button" @click="loadPath">生成学习路径</button></div></div>
+      <div class="panel-head"><div><p class="eyebrow">学习计划</p><h3>从当前状态到目标知识</h3></div><div class="path-controls"><select v-model="targetId"><option value="">选择目标知识点</option><option v-for="item in targetOptions" :key="item.knowledgePointId" :value="String(item.knowledgePointId)">{{ item.knowledgeName }}</option></select><button class="primary-button" @click="loadPath">生成学习计划</button></div></div>
       <div v-if="path?.nodes?.length" class="learning-path">
         <article v-for="(node, index) in path.nodes" :key="node.knowledgePointId" class="path-step">
           <div class="path-marker"><span>{{ index + 1 }}</span><i v-if="index < path.nodes.length - 1"></i></div>
-          <div class="path-card"><span class="soft-badge">{{ pathBadge(node) }}</span><h4>{{ node.knowledgeName }}</h4><p>{{ pathDescription(node) }}</p><small>{{ node.hasAvailableExercise ? `已关联练习：${node.exerciseName}` : '当前暂无可用练习' }}</small></div>
+          <div class="path-card"><span class="soft-badge">{{ pathBadge(node) }}</span><h4>{{ node.knowledgeName }}</h4><p>{{ pathDescription(node) }}</p><small>{{ node.hasAvailableExercise ? `已关联可答题练习：${node.exerciseName}` : '当前暂无合法可答题练习，可先学习或复习该知识点' }}</small></div>
         </article>
       </div>
-      <div v-else class="empty-state"><strong>选择一个目标知识点</strong><p>系统会从当前已发布知识图谱中提取前置知识，并过滤已经掌握的节点，形成有顺序的学习路径。</p></div>
+      <div v-else class="empty-state"><strong>选择一个目标知识点</strong><p>系统会优先安排当前薄弱知识；如果课程已有安全发布的知识图谱，再使用真实先修关系优化学习顺序。</p></div>
     </section>
   </section>
 </template>
