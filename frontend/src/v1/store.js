@@ -109,6 +109,7 @@ export function statusText(status) {
     OBSERVED: '已有学习记录',
     ACTIVE: '可用',
     INACTIVE: '已停用',
+    DISABLED: '已停用',
     PUBLISHED: '已发布',
     READY: '待发布',
     DRAFT: '草稿',
