@@ -23,7 +23,7 @@ public class RecommendationSnapshot {
     @Column(name = "course_id", nullable = false)
     private Long courseId;
 
-    @Column(name = "graph_version_id", nullable = false)
+    @Column(name = "graph_version_id")
     private Long graphVersionId;
 
     @Column(name = "mastery_algorithm_version", nullable = false, length = 64)
