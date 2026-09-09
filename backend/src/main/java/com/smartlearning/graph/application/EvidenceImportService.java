@@ -334,9 +334,6 @@ public class EvidenceImportService {
                 conflicts.add(candidateConflict(input, resolution.conflictCode(), resolution.detail()));
                 continue;
             }
-            requestedEdges.add(new CandidateGraphPublicationGuard.Edge(
-                    resolution.prerequisite().getId(), resolution.dependent().getId()
-            ));
             Optional<KnowledgeRelation> existing = relationRepository
                     .findByGraphVersionIdAndSourceKnowledgePointIdAndTargetKnowledgePointIdAndRelationType(
                             version.getId(), resolution.prerequisite().getId(), resolution.dependent().getId(), PREREQUISITE
@@ -356,6 +353,9 @@ public class EvidenceImportService {
                 summary.reusedCandidateRelations++;
             } else {
                 summary.createdCandidateRelations++;
+                requestedEdges.add(new CandidateGraphPublicationGuard.Edge(
+                        resolution.prerequisite().getId(), resolution.dependent().getId()
+                ));
                 relation = apply ? relationRepository.save(new KnowledgeRelation(
                         version.getId(), resolution.prerequisite().getId(), resolution.dependent().getId(),
                         PREREQUISITE, DERIVED_POLICY, input.candidateId(), input.derivationPolicyVersion(),
@@ -390,7 +390,9 @@ public class EvidenceImportService {
                         relation.getSourceKnowledgePointId(), relation.getTargetKnowledgePointId()
                 ))
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-        allDraftEdges.addAll(requestedEdges);
+        if (!apply) {
+            allDraftEdges.addAll(requestedEdges);
+        }
         CandidateGraphPublicationGuard.Outcome guard = publicationGuard.assess(allDraftEdges);
         String status = summary.conflictCount == 0
                 ? (apply ? "COMPLETED" : "DRY_RUN_COMPLETED")

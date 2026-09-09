@@ -33,9 +33,13 @@ async function apiData(path, token) {
   return payload.data
 }
 
-async function optionalApiData(path, token) {
+async function optionalApiData(path, token, allowUnpublishedGraph = false) {
   const { response, payload } = await rawApi(path, { token })
   if (response.status === 404) return null
+  if (allowUnpublishedGraph
+    && response.status === 409
+    && payload?.code === 'CONFLICT'
+    && payload?.message === 'course does not have a published graph version') return null
   expect(response.status).toBe(200)
   expect(payload.code).toBe('OK')
   return payload.data
@@ -63,7 +67,7 @@ async function loadCourseContext(course, token) {
     apiData(`/api/v1/courses/${course.id}/knowledge-areas`, token),
     apiData(`/api/v1/courses/${course.id}/knowledge-points`, token),
     apiData(`/api/v1/exercise-units?courseId=${course.id}`, token),
-    optionalApiData(`/api/v1/courses/${course.id}/graph`, token)
+    optionalApiData(`/api/v1/courses/${course.id}/graph`, token, true)
   ])
   return { course, areas, points, exercises, graph }
 }
@@ -89,12 +93,32 @@ test('真实目录、独立题库、角色权限与图谱治理全栈流程', as
   const alice = await sessionFor(studentUsername)
   const dave = await sessionFor(secondStudentUsername)
   const teacher = await sessionFor(teacherUsername)
+  const admin = await sessionFor(adminUsername)
+  const adminContexts = []
+  for (const course of admin.courses) adminContexts.push(await loadCourseContext(course, admin.token))
+  const importedCatalog = adminContexts.find(context =>
+    context.exercises.some(exercise => exercise.sourceType === 'JUNYI_CATALOG') &&
+    context.areas.length > 0 &&
+    context.points.length > 0 &&
+    [context.course.courseName, ...context.areas.map(area => area.areaName), ...context.points.map(point => point.knowledgeName)]
+      .some(containsChinese)
+  )
+  expect(importedCatalog).toBeTruthy()
+  const enrollmentResponse = await fetch(`${apiBase}/api/v1/courses/${importedCatalog.course.id}/enroll`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${alice.token}` }
+  })
+  expect(enrollmentResponse.status).toBe(200)
+  const enrollment = await enrollmentResponse.json()
+  expect(enrollment.code).toBe('OK')
+  expect(enrollment.data.courseId).toBe(importedCatalog.course.id)
+  alice.courses = await apiData('/api/v1/courses', alice.token)
   const teacherAssignments = await apiData('/api/v1/teacher/courses', teacher.token)
   const contexts = []
   for (const course of alice.courses) contexts.push(await loadCourseContext(course, alice.token))
 
   const catalog = contexts.find(context =>
-    context.exercises.some(exercise => exercise.sourceType === 'JUNYI_METADATA') &&
+    context.exercises.some(exercise => exercise.sourceType === 'JUNYI_CATALOG') &&
     context.areas.length > 0 &&
     context.points.length > 0 &&
     [context.course.courseName, ...context.areas.map(area => area.areaName), ...context.points.map(point => point.knowledgeName)]

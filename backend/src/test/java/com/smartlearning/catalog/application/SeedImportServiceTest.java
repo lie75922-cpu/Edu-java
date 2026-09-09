@@ -83,6 +83,7 @@ class SeedImportServiceTest {
 
         SeedImportApi.SeedImportResult result = service.dryRun(request, 9L);
 
+        assertThat(result.status()).isEqualTo("DRY_RUN_COMPLETED_WITH_CONFLICTS");
         assertThat(result.conflictCount()).isEqualTo(1);
         assertThat(result.conflicts()).singleElement().satisfies(conflict -> {
             assertThat(conflict.entityType()).isEqualTo("EXERCISE_UNIT");
@@ -90,6 +91,33 @@ class SeedImportServiceTest {
         });
         verify(exerciseRepository, never()).save(any());
         verify(mappingRepository, never()).save(any());
+    }
+
+    @Test
+    void dryRunPreflightsDatabaseEquivalentExternalIdsWithDifferentRawValues() {
+        when(courseRepository.findByCourseCode("MATH-1")).thenReturn(Optional.empty());
+        when(runRepository.save(any(SeedImportRun.class))).thenAnswer(invocation -> withId(invocation.getArgument(0), 88L));
+        when(conflictRepository.save(any(SeedImportConflict.class))).thenAnswer(invocation -> withId(invocation.getArgument(0), 1L));
+        SeedImportApi.SeedImportRequest request = new SeedImportApi.SeedImportRequest(
+                "MATH-1", "Mathematics",
+                List.of(new SeedImportApi.SeedArea("area-1", "Area")),
+                List.of(new SeedImportApi.SeedTopic("topic-1", "Topic", "area-1")),
+                List.of(
+                        new SeedImportApi.SeedExercise("Case-Identity", "First", "topic-1", null, "raw-first", "First", "UNREVIEWED", "ELIGIBLE_FOR_IMPORT", null, Map.of(), Map.of()),
+                        new SeedImportApi.SeedExercise("case-identity", "Second", "topic-1", null, "raw-second", "Second", "UNREVIEWED", "ELIGIBLE_FOR_IMPORT", null, Map.of(), Map.of())
+                )
+        );
+
+        SeedImportApi.SeedImportResult result = service().dryRun(request, 9L);
+
+        assertThat(result.status()).isEqualTo("DRY_RUN_COMPLETED_WITH_CONFLICTS");
+        assertThat(result.createdExerciseUnits()).isEqualTo(1);
+        assertThat(result.conflictCount()).isEqualTo(1);
+        assertThat(result.conflicts()).singleElement().satisfies(conflict -> {
+            assertThat(conflict.entityType()).isEqualTo("EXERCISE_UNIT");
+            assertThat(conflict.conflictType()).isEqualTo("RAW_VALUE_CONFLICT");
+        });
+        verify(exerciseRepository, never()).save(any());
     }
 
     @Test

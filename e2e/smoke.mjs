@@ -24,13 +24,17 @@ async function request(path, { method = 'GET', token, body, expected = 200 } = {
   return payload
 }
 
-async function optionalData(path, { token } = {}) {
+async function optionalData(path, { token, allowUnpublishedGraph = false } = {}) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {}
   const response = await fetch(`${apiBase}${path}`, { headers })
   const contentType = response.headers.get('content-type') || ''
   const payload = contentType.includes('json') ? await response.json() : await response.text()
   if (response.status === 404) return null
-  assert(response.status === 200, `GET ${path} expected 200 or 404, received ${response.status}`)
+  if (allowUnpublishedGraph
+    && response.status === 409
+    && payload?.code === 'CONFLICT'
+    && payload?.message === 'course does not have a published graph version') return null
+  assert(response.status === 200, `GET ${path} expected 200 or a documented absence response, received ${response.status}`)
   return requireData(payload, path)
 }
 
@@ -57,7 +61,7 @@ async function loadCourseContext(course, token) {
     requireData(await request(`/api/v1/courses/${course.id}/knowledge-areas`, { token }), 'knowledge areas'),
     requireData(await request(`/api/v1/courses/${course.id}/knowledge-points`, { token }), 'knowledge points'),
     requireData(await request(`/api/v1/exercise-units?courseId=${course.id}`, { token }), 'exercise units'),
-    optionalData(`/api/v1/courses/${course.id}/graph`, { token })
+    optionalData(`/api/v1/courses/${course.id}/graph`, { token, allowUnpublishedGraph: true })
   ])
   return { course, areas, points, exercises, graph }
 }
@@ -86,18 +90,35 @@ assert(openapi.status === 200, 'OpenAPI document is unavailable')
 assert((await openapi.text()).includes('bearerAuth'), 'OpenAPI document lacks JWT bearer security')
 
 const student = await login(studentUsername)
+const admin = await login(adminUsername)
 const missingRoute = await request('/api/v1/release-check/missing-route', {
   token: student.accessToken,
   expected: 404
 })
 assert(missingRoute.code === 'NOT_FOUND', 'missing API route does not return the standard 404 envelope')
-const studentCourses = requireData(await request('/api/v1/courses', { token: student.accessToken }), 'student courses')
+const adminCourses = requireData(await request('/api/v1/courses', { token: admin.accessToken }), 'administrator courses')
+const adminContexts = []
+for (const course of adminCourses) adminContexts.push(await loadCourseContext(course, admin.accessToken))
+const importedCatalog = adminContexts.find(context =>
+  context.exercises.some(exercise => exercise.sourceType === 'JUNYI_CATALOG') &&
+  context.areas.length > 0 &&
+  context.points.length > 0 &&
+  [context.course.courseName, ...context.areas.map(area => area.areaName), ...context.points.map(point => point.knowledgeName)]
+    .some(containsChinese)
+)
+assert(importedCatalog, 'an administrator cannot discover the Chinese import-backed catalog course')
+const enrollment = requireData(await request(`/api/v1/courses/${importedCatalog.course.id}/enroll`, {
+  method: 'POST', token: student.accessToken
+}), 'student enrollment in imported catalog')
+assert(enrollment.courseId === importedCatalog.course.id, 'student enrollment did not target the imported catalog course')
+
+const studentCourses = requireData(await request('/api/v1/courses', { token: student.accessToken }), 'student courses after catalog enrollment')
 assert(studentCourses.length > 0, 'student has no accessible courses')
 const contexts = []
 for (const course of studentCourses) contexts.push(await loadCourseContext(course, student.accessToken))
 
 const catalogContext = contexts.find(context =>
-  context.exercises.some(exercise => exercise.sourceType === 'JUNYI_METADATA') &&
+  context.exercises.some(exercise => exercise.sourceType === 'JUNYI_CATALOG') &&
   context.areas.length > 0 &&
   context.points.length > 0 &&
   [context.course.courseName, ...context.areas.map(area => area.areaName), ...context.points.map(point => point.knowledgeName)]
@@ -159,7 +180,6 @@ const forbidden = await request(`/api/v1/teacher/courses/${forbiddenCourse.id}/a
 })
 assert(forbidden.code === 'FORBIDDEN', 'cross-course teacher denial is not a consistent 403 response')
 
-const admin = await login(adminUsername)
 const governanceOverview = requireData(await request('/api/v1/admin/data-governance/overview', { token: admin.accessToken }), 'data governance overview')
 assert(Number.isInteger(governanceOverview.catalogImportRunCount), 'data governance overview omits catalog ImportRun count')
 const importRuns = requireData(await request('/api/v1/admin/data-governance/import-runs', { token: admin.accessToken }), 'data governance import runs')

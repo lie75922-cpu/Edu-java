@@ -1,0 +1,2 @@
+ALTER TABLE seed_import_run
+    MODIFY COLUMN status VARCHAR(48) NOT NULL;

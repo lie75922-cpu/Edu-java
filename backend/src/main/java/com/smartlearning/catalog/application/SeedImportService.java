@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -108,9 +110,21 @@ public class SeedImportService {
         Set<String> duplicateAreas = duplicates(request.areas(), SeedImportApi.SeedArea::externalId);
         Set<String> duplicateTopics = duplicates(request.topics(), SeedImportApi.SeedTopic::externalId);
         Set<String> duplicateExercises = duplicates(request.exercises(), SeedImportApi.SeedExercise::externalId);
+        Set<String> areaRawValueConflicts = batchRawValueConflicts(
+                request.areas(), duplicateAreas, SeedImportApi.SeedArea::externalId, SeedImportApi.SeedArea::rawArea
+        );
+        Set<String> topicRawValueConflicts = batchRawValueConflicts(
+                request.topics(), duplicateTopics, SeedImportApi.SeedTopic::externalId, SeedImportApi.SeedTopic::rawTopic
+        );
+        Set<String> exerciseRawValueConflicts = batchRawValueConflicts(
+                request.exercises(), duplicateExercises, SeedImportApi.SeedExercise::externalId, SeedImportApi.SeedExercise::rawExerciseName
+        );
         duplicateAreas.forEach(id -> conflicts.add(conflict(AREA_RECORD, id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate area external ID in import input")));
         duplicateTopics.forEach(id -> conflicts.add(conflict(TOPIC_RECORD, id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate topic external ID in import input")));
         duplicateExercises.forEach(id -> conflicts.add(conflict(EXERCISE_RECORD, id, "DUPLICATE_SOURCE_EXTERNAL_ID", "duplicate exercise external ID in import input")));
+        areaRawValueConflicts.forEach(id -> conflicts.add(conflict(AREA_RECORD, id, "RAW_VALUE_CONFLICT", "database-equivalent source external ID has a different raw value in import input")));
+        topicRawValueConflicts.forEach(id -> conflicts.add(conflict(TOPIC_RECORD, id, "RAW_VALUE_CONFLICT", "database-equivalent source external ID has a different raw value in import input")));
+        exerciseRawValueConflicts.forEach(id -> conflicts.add(conflict(EXERCISE_RECORD, id, "RAW_VALUE_CONFLICT", "database-equivalent source external ID has a different raw value in import input")));
 
         Course course = courseRepository.findByCourseCode(request.courseCode()).orElse(null);
         if (course == null) {
@@ -122,13 +136,13 @@ public class SeedImportService {
         Long courseId = course == null ? null : course.getId();
 
         Map<String, AreaResolution> areas = importAreas(
-                request.areas(), duplicateAreas, courseId, apply, summary, conflicts
+                request.areas(), duplicateAreas, areaRawValueConflicts, courseId, apply, summary, conflicts
         );
         Map<String, PointResolution> points = importTopics(
-                request.topics(), duplicateTopics, duplicateAreas, areas, courseId, apply, summary, conflicts
+                request.topics(), duplicateTopics, topicRawValueConflicts, duplicateAreas, areas, courseId, apply, summary, conflicts
         );
         importExercises(
-                request.exercises(), duplicateExercises, duplicateTopics, points, courseId, apply, summary, conflicts
+                request.exercises(), duplicateExercises, exerciseRawValueConflicts, duplicateTopics, points, courseId, apply, summary, conflicts
         );
 
         List<SeedImportConflict> persistedConflicts = conflicts.stream()
@@ -155,6 +169,7 @@ public class SeedImportService {
     private Map<String, AreaResolution> importAreas(
             List<SeedImportApi.SeedArea> seedAreas,
             Set<String> duplicateIds,
+            Set<String> rawValueConflictIds,
             Long courseId,
             boolean apply,
             MutableSummary summary,
@@ -163,7 +178,7 @@ public class SeedImportService {
         Map<String, AreaResolution> results = new HashMap<>();
         for (SeedImportApi.SeedArea seed : seedAreas) {
             String externalId = normalizedId(seed.externalId());
-            if (duplicateIds.contains(externalId)) {
+            if (duplicateIds.contains(externalId) || rawValueConflictIds.contains(externalId)) {
                 continue;
             }
             if (!ELIGIBLE_FOR_IMPORT.equals(seed.businessMappingStatus())) {
@@ -211,6 +226,7 @@ public class SeedImportService {
     private Map<String, PointResolution> importTopics(
             List<SeedImportApi.SeedTopic> seedTopics,
             Set<String> duplicateIds,
+            Set<String> rawValueConflictIds,
             Set<String> duplicateAreaIds,
             Map<String, AreaResolution> areas,
             Long courseId,
@@ -221,7 +237,7 @@ public class SeedImportService {
         Map<String, PointResolution> results = new HashMap<>();
         for (SeedImportApi.SeedTopic seed : seedTopics) {
             String externalId = normalizedId(seed.externalId());
-            if (duplicateIds.contains(externalId)) {
+            if (duplicateIds.contains(externalId) || rawValueConflictIds.contains(externalId)) {
                 continue;
             }
             if (!ELIGIBLE_FOR_IMPORT.equals(seed.businessMappingStatus())) {
@@ -280,6 +296,7 @@ public class SeedImportService {
     private void importExercises(
             List<SeedImportApi.SeedExercise> seedExercises,
             Set<String> duplicateIds,
+            Set<String> rawValueConflictIds,
             Set<String> duplicateTopicIds,
             Map<String, PointResolution> points,
             Long courseId,
@@ -289,7 +306,7 @@ public class SeedImportService {
     ) {
         for (SeedImportApi.SeedExercise seed : seedExercises) {
             String externalId = normalizedId(seed.externalId());
-            if (duplicateIds.contains(externalId)) {
+            if (duplicateIds.contains(externalId) || rawValueConflictIds.contains(externalId)) {
                 continue;
             }
             if (!ELIGIBLE_FOR_IMPORT.equals(seed.businessMappingStatus())) {
@@ -456,6 +473,33 @@ public class SeedImportService {
             }
         }
         return duplicates;
+    }
+
+    /**
+     * MySQL compares the source-record external ID without case sensitivity. A dry run has no persisted
+     * source records to reveal that collision, so detect it before either mode starts mutating the plan.
+     * Exact duplicate identifiers retain their more specific DUPLICATE_SOURCE_EXTERNAL_ID classification.
+     */
+    private <T> Set<String> batchRawValueConflicts(
+            Collection<T> items,
+            Set<String> exactDuplicateIds,
+            Function<T, String> idExtractor,
+            Function<T, String> rawValueExtractor
+    ) {
+        Map<String, String> rawValueByDatabaseIdentity = new HashMap<>();
+        Set<String> conflicts = new HashSet<>();
+        for (T item : items) {
+            String externalId = normalizedId(idExtractor.apply(item));
+            if (exactDuplicateIds.contains(externalId)) {
+                continue;
+            }
+            String identity = externalId.toLowerCase(Locale.ROOT);
+            String previousRawValue = rawValueByDatabaseIdentity.putIfAbsent(identity, rawValueExtractor.apply(item));
+            if (previousRawValue != null && !Objects.equals(previousRawValue, rawValueExtractor.apply(item))) {
+                conflicts.add(externalId);
+            }
+        }
+        return conflicts;
     }
 
     private String normalizedId(String id) {

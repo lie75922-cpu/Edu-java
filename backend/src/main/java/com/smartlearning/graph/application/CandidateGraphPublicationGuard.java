@@ -28,30 +28,62 @@ public class CandidateGraphPublicationGuard {
             vertices.add(edge.sourcePointId());
             vertices.add(edge.targetPointId());
         }
-        Map<Long, VisitState> states = new HashMap<>();
-        int[] cycles = {0};
+        Map<Long, Integer> discoveryIndex = new HashMap<>();
+        Map<Long, Integer> lowLink = new HashMap<>();
+        List<Long> stack = new ArrayList<>();
+        Set<Long> onStack = new HashSet<>();
+        int[] nextIndex = {0};
+        int[] cyclicStronglyConnectedComponents = {0};
         for (Long vertex : vertices) {
-            if (states.getOrDefault(vertex, VisitState.UNVISITED) == VisitState.UNVISITED) {
-                findCycles(vertex, adjacency, states, cycles);
+            if (!discoveryIndex.containsKey(vertex)) {
+                findCyclicStronglyConnectedComponents(
+                        vertex, adjacency, discoveryIndex, lowLink, stack, onStack, nextIndex, cyclicStronglyConnectedComponents
+                );
             }
         }
-        String publicationStatus = selfLoops == 0 && cycles[0] == 0
+        String publicationStatus = selfLoops == 0 && cyclicStronglyConnectedComponents[0] == 0
                 ? "NOT_PUBLISHED_REVIEW_REQUIRED"
                 : "BLOCKED_GRAPH_PUBLICATION";
-        return new Outcome(publicationStatus, selfLoops, cycles[0]);
+        return new Outcome(publicationStatus, selfLoops, cyclicStronglyConnectedComponents[0]);
     }
 
-    private void findCycles(Long node, Map<Long, List<Long>> adjacency, Map<Long, VisitState> states, int[] cycles) {
-        states.put(node, VisitState.VISITING);
+    private void findCyclicStronglyConnectedComponents(
+            Long node,
+            Map<Long, List<Long>> adjacency,
+            Map<Long, Integer> discoveryIndex,
+            Map<Long, Integer> lowLink,
+            List<Long> stack,
+            Set<Long> onStack,
+            int[] nextIndex,
+            int[] cyclicStronglyConnectedComponents
+    ) {
+        discoveryIndex.put(node, nextIndex[0]);
+        lowLink.put(node, nextIndex[0]++);
+        stack.add(node);
+        onStack.add(node);
         for (Long target : adjacency.getOrDefault(node, List.of())) {
-            VisitState state = states.getOrDefault(target, VisitState.UNVISITED);
-            if (state == VisitState.UNVISITED) {
-                findCycles(target, adjacency, states, cycles);
-            } else if (state == VisitState.VISITING) {
-                cycles[0]++;
+            if (!discoveryIndex.containsKey(target)) {
+                findCyclicStronglyConnectedComponents(
+                        target, adjacency, discoveryIndex, lowLink, stack, onStack, nextIndex, cyclicStronglyConnectedComponents
+                );
+                lowLink.put(node, Math.min(lowLink.get(node), lowLink.get(target)));
+            } else if (onStack.contains(target)) {
+                lowLink.put(node, Math.min(lowLink.get(node), discoveryIndex.get(target)));
             }
         }
-        states.put(node, VisitState.VISITED);
+        if (!lowLink.get(node).equals(discoveryIndex.get(node))) {
+            return;
+        }
+        List<Long> component = new ArrayList<>();
+        Long member;
+        do {
+            member = stack.removeLast();
+            onStack.remove(member);
+            component.add(member);
+        } while (!member.equals(node));
+        if (component.size() > 1) {
+            cyclicStronglyConnectedComponents[0]++;
+        }
     }
 
     public record Edge(Long sourcePointId, Long targetPointId) {
@@ -60,9 +92,4 @@ public class CandidateGraphPublicationGuard {
     public record Outcome(String publicationStatus, int selfLoopCount, int cycleCount) {
     }
 
-    private enum VisitState {
-        UNVISITED,
-        VISITING,
-        VISITED
-    }
 }

@@ -45,7 +45,7 @@ public class SeedImportRun {
     @Column(name = "source_record_count")
     private Integer sourceRecordCount;
 
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 48)
     private String status;
 
     @Column(name = "summary_json", nullable = false, columnDefinition = "JSON")
