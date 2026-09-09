@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/courses/{courseId}/knowledge-points")
+@RequestMapping("/api/v1/courses/{courseId}")
 public class KnowledgeController {
 
     private final KnowledgeService knowledgeService;
@@ -22,11 +22,19 @@ public class KnowledgeController {
         this.knowledgeService = knowledgeService;
     }
 
-    @GetMapping
-    public ApiResponse<List<KnowledgeApi.KnowledgePointResponse>> list(
+    @GetMapping("/knowledge-points")
+    public ApiResponse<List<KnowledgeApi.KnowledgePointResponse>> listPoints(
             @PathVariable long courseId,
             @AuthenticationPrincipal Jwt jwt
     ) {
         return ApiResponse.ok(knowledgeService.listActivePoints(courseId, CurrentUser.from(jwt)));
+    }
+
+    @GetMapping("/knowledge-areas")
+    public ApiResponse<List<KnowledgeApi.KnowledgeAreaResponse>> listAreas(
+            @PathVariable long courseId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(knowledgeService.listActiveAreas(courseId, CurrentUser.from(jwt)));
     }
 }

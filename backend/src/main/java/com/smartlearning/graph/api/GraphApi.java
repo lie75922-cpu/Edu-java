@@ -67,6 +67,10 @@ public final class GraphApi {
             String targetKnowledgeName,
             String relationType,
             String relationSource,
+            String candidateInputId,
+            String candidatePolicyVersion,
+            String candidateStatus,
+            String publishedGraphStatus,
             BigDecimal confidence,
             int evidenceCount,
             String reviewStatus,
@@ -132,6 +136,44 @@ public final class GraphApi {
             int candidateRelationsCreated,
             int candidateRelationsAggregated,
             int conflictCount,
+            List<EvidenceConflictResponse> conflicts
+    ) {
+    }
+
+    /** Candidate records are derived input for a draft only; they are never a Published Graph request. */
+    public record CandidateTopicRelationRequest(
+            @NotBlank @Size(max = 128) String candidateId,
+            @NotBlank @Size(max = 128) String prerequisiteTopicExternalId,
+            @NotBlank @Size(max = 128) String dependentTopicExternalId,
+            @NotBlank @Size(max = 128) String derivationPolicyVersion,
+            @NotBlank @Size(max = 64) String candidateStatus,
+            @NotBlank @Size(max = 64) String publishedGraphStatus,
+            @NotEmpty @Size(max = 10_000) List<@NotBlank @Size(max = 128) String> rawEvidenceIds
+    ) {
+        public CandidateTopicRelationRequest {
+            rawEvidenceIds = rawEvidenceIds == null ? List.of() : List.copyOf(rawEvidenceIds);
+        }
+    }
+
+    public record CandidateRelationImportRequest(
+            @NotEmpty @Size(max = 10_000) List<@Valid CandidateTopicRelationRequest> candidates
+    ) {
+        public CandidateRelationImportRequest {
+            candidates = candidates == null ? List.of() : List.copyOf(candidates);
+        }
+    }
+
+    public record CandidateRelationImportResult(
+            Long importRunId,
+            Long graphVersionId,
+            String mode,
+            String status,
+            int createdCandidateRelations,
+            int reusedCandidateRelations,
+            int conflictCount,
+            String graphPublicationStatus,
+            int selfLoopCount,
+            int cycleCount,
             List<EvidenceConflictResponse> conflicts
     ) {
     }

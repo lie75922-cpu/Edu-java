@@ -127,6 +127,28 @@ public class AdminGraphController {
         return ApiResponse.ok(evidenceImportService.applyForTeaching(graphVersionId, request, CurrentUser.from(jwt)));
     }
 
+    @PostMapping("/graph-versions/{graphVersionId}/candidate-relation-imports/dry-run")
+    public ApiResponse<GraphApi.CandidateRelationImportResult> dryRunCandidateImport(
+            @PathVariable long graphVersionId,
+            @Valid @RequestBody GraphApi.CandidateRelationImportRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(evidenceImportService.dryRunCandidatesForTeaching(
+                graphVersionId, request, CurrentUser.from(jwt)
+        ));
+    }
+
+    @PostMapping("/graph-versions/{graphVersionId}/candidate-relation-imports/apply")
+    public ApiResponse<GraphApi.CandidateRelationImportResult> applyCandidateImport(
+            @PathVariable long graphVersionId,
+            @Valid @RequestBody GraphApi.CandidateRelationImportRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(evidenceImportService.applyCandidatesForTeaching(
+                graphVersionId, request, CurrentUser.from(jwt)
+        ));
+    }
+
     @PostMapping("/graph-versions/{graphVersionId}/evidence-reresolutions/dry-run")
     public ApiResponse<GraphApi.EvidenceReresolutionResult> dryRunEvidenceReresolution(
             @PathVariable long graphVersionId,

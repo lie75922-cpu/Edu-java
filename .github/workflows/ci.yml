@@ -74,6 +74,11 @@ jobs:
         run: docker compose --env-file .env.release -f docker-compose.full.yml up --build -d
       - name: Wait for real readiness
         run: scripts/wait-for-ready.sh http://localhost:8080
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Import controlled catalog fixture for full-stack smoke
+        run: node scripts/import-full-stack-catalog-fixture.mjs
       - name: Run full-stack API smoke
         run: docker compose --env-file .env.release -f docker-compose.full.yml --profile test run --rm e2e npm run smoke
       - name: Run real browser E2E

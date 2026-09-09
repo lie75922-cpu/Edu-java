@@ -1,414 +1,225 @@
 # Edu-java
 
-**基于知识图谱与个性化学习分析的 Java 智能教学平台**
+**基于知识图谱与学习分析的中文数学智能学习平台**
 
-> 当前阶段：**V0.7 Release Readiness 已完成 `GO_RELEASE_CANDIDATE`：clean full stack、真实 API/浏览器 E2E、恢复/备份演练与 GitHub CI 已闭环。该结论仅覆盖本地/reviewer Compose Release Candidate，不构成生产 SLA 或下一阶段业务/模型开发授权。MODEL-0A / MODEL-0R / MODEL-1 实验保持既有归档结论。**
+> 当前状态：V0.7 Java 工程底座已形成可复用 Release Candidate；V1 正在把“数据处理 → 知识结构 → 图谱治理 → 学习状态 → 个性化推荐/路径 → 学生/教师/管理产品”真正连成一条业务链。当前中文业务 fixture 仍以离散数学为小型全栈演示，但平台不再锁死离散数学，真实数据是什么数学领域就按真实语义建模和中文展示。
 
-本项目按真实软件工程与研究流程推进：
+最新产品基线：`docs/V1_MATH_PLATFORM_BASELINE.md`  
+真实数据接入 Codex 执行单：`docs/CODEX_REAL_DATA_INTEGRATION_TASK.md`
 
-```text
-真实数据审计
-  → 领域建模
-  → Java核心业务
-  → 关系证据治理 / Published Graph
-  → 可解释Rule Mastery / Recommendation / Learning Path
-  → 受控模型实验与失败归档
-  → 教师分析 / 最终部署与工程收尾
-```
+## 1. 项目目标
 
-原则不是“为了有 AI 而接一个模型”，而是：**数据、模型、业务能力都必须有可复核证据；模型没有证明增量价值时，平台继续使用透明规则 fallback。**
+平台不是单纯课程 CRUD，也不是只展示一张 Neo4j 图。
 
----
-
-## 1. 当前产品能力
-
-### V0.2 — 在线学习核心闭环 ✅
+目标链路：
 
 ```text
-注册 / JWT登录 / RBAC
-  → Course
-  → KnowledgePoint
-  → ExerciseUnit
-  → Question
-  → AnswerRecord
-  → Outbox
+真实学习数据
+  -> 数据来源登记 / 清洗 / EDA / 质量审计
+  -> 原始英文语义 + 中文展示映射
+  -> KnowledgeArea / KnowledgePoint / ExerciseUnit
+  -> Evidence / GraphVersion / Validator / Published Graph
+  -> 学生 AnswerRecord
+  -> RuleBeta 学习状态
+  -> 图谱先修约束 + 错题历史 + 推荐排序
+  -> 个性化推荐 / 学习路径
+  -> 学生学习页面
+  -> 教师学情分析
+  -> 管理端数据 / 课程 / 图谱 / 权限治理
 ```
 
-已实现：
+用户侧使用自然中文；底层 Java、数据库字段和原始科研数据可以保持英文。中文化不等于篡改原始数据。
 
-- Spring Security + JWT + BCrypt；
-- Course / KnowledgeArea / KnowledgePoint；
-- ExerciseUnit / Exercise-Knowledge mapping；
-- 平台 Question / Option；
-- CourseEnrollment；
-- 在线答题、服务端判题、AnswerRecord；
-- `clientRequestId` 幂等；跨 Question 复用同一幂等键返回冲突；
-- 受控 Junyi 目录导入与冲突审计。
+## 2. 当前真实数据基础
 
-### V0.3 — Knowledge Relation Governance + Published Graph ✅
+DATA-0 已完成来源登记、Schema/质量审计、EDA、图关系审计、学生级划分和模型输入构造。
 
-正式学习图：
-
-```text
-(:KnowledgePoint)-[:PREREQUISITE]->(:KnowledgePoint)
-```
-
-流程：
-
-```text
-Raw prerequisite Evidence
-  → identity / mapping resolution
-  → Draft candidate
-  → manual review
-  → GraphValidator
-  → READY
-  → GRAPH_REBUILD_REQUEST
-  → versioned Neo4j projection
-  → projection verification
-  → active GraphVersion switch
-```
-
-关键能力：
-
-- MySQL 是 Evidence / Relation / GraphVersion 权威；
-- Neo4j 只是可重建 Published Graph 查询投影；
-- self-loop / cycle / duplicate / cross-course 等阻断发布；
-- 投影失败时新版本为 `PROJECTION_FAILED`，旧 Published Graph 继续在线；
-- predecessor / successor / path / prerequisite-subgraph 查询；
-- 管理端 Evidence / Draft / Validation / Publish 治理。
-
-### V0.4 — Rule Mastery + Recommendation + Learning Path ✅
-
-默认 `MasteryProvider`：
-
-```text
-RuleBasedMasteryProvider
-algorithmVersion = RULE_BETA_1_1_V1
-mastery = (correct_count + 1) / (attempt_count + 2)
-```
-
-说明：这是**透明规则 baseline / fallback，不是 AI 模型结果**。
-
-无答题历史：
-
-```text
-UNKNOWN
-```
-
-不会把先验 0.5 展示为学生真实掌握度。
-
-已实现：
-
-- `MASTERY_UPDATE_REQUEST` 专用 worker；
-- AnswerRecord 级 exactly-once mastery 更新；
-- 多 KnowledgePoint Exercise 独立更新；
-- Mastery current/history；
-- Recommendation：Candidate → Filter → Rank → Explanation；
-- `REC_RULE_V1` 可审计 recommendation snapshot；
-- 基于 active Published Graph 的 DAG learning path；
-- 学生端 mastery、弱项、推荐原因、路径、历史页面。
-
-### V0.5 — Evidence Re-resolution Hardening ✅
-
-解决：Evidence 最初因映射缺失/歧义无法解析，而后管理员修复映射后仍永久卡住的问题。
-
-```text
-immutable Raw Evidence
-  → auditable resolution recomputation
-  → targeted editable Draft reconciliation
-  → later Validate / Publish
-```
-
-已实现：
-
-- Flyway V005 resolution history；
-- UNMAPPED / AMBIGUOUS / SELF_LOOP / RESOLVED 状态重解析；
-- stale Evidence link 解绑与 evidence_count 重算；
-- 新 candidate pair 创建/聚合；
-- repeated apply 幂等；
-- dry-run 零持久化副作用；
-- PUBLISHED / ARCHIVED relation 与 active Neo4j 图完全不被重写。
-
-### V0.6 — Teacher Course Authorization + Learning Analytics ✅
-
-先修复课程级权限，再开放教师分析：
-
-```text
-ACTIVE teacher-course assignment
-  -> assigned ACTIVE Course only
-  -> teaching content / Graph / Evidence governance
-  -> course overview / KnowledgePoint analytics
-  -> paginated student heatmap / high-error Question / student detail
-```
-
-已实现：
-
-- Flyway V006 `course_teacher_assignment` 和最小分析索引；
-- SYSTEM_ADMIN / TEACH_ADMIN 的 Course lifecycle 与教师分配；
-- 普通 TEACHER 仅访问 ACTIVE assigned Course，且既有 Knowledge、Exercise、Question、Graph、Evidence 间接资源均回溯课程后鉴权；
-- Platform Business Domain 教师课程列表、概览、OBSERVED / UNKNOWN mastery、分页 heatmap、高错题、学生作答 / mastery history / recommendation context；
-- 教师工作台和教师分配管理界面；
-- MySQL 8.4 Testcontainers 跨课程 403 演练与受控本地查询测量。
-
----
-
-## 2. 数据与领域基线
-
-### DATA-0 ✅
-
-当前 Junyi 镜像真实审计：
-
-- ProblemLog：**25,925,992** 条交互；
-- 匿名学生：**247,606**；
-- Exercise metadata：**837** 行 / **835** 个不同 external ID；
-- Topic：**40**；
-- Area：**8**。
-
-冻结 Medium：
-
-- 10,000 学生；
-- 284,245 原始 Medium 交互；
-- 模型派生输入移除 17 条完全重复后 284,228；
-- 624 observed/Q-eligible Exercise；
-- student-level 7,000 / 1,000 / 2,000 split，成员交叉 0。
-
-已知数据边界：
-
-- 官方 DataShop 原始包未在当前执行环境直接取得，本地输入使用已登记第三方镜像；
-- raw prerequisite / relationship annotation 仅作为 Evidence；
-- 2 个重复 Exercise external ID；
-- 原始 prerequisite 存在 self-loop / cycle；
-- Junyi Research Student 永不自动映射为平台 `sys_user`。
-
-### 业务领域分层
-
-```text
-Course
- └─ KnowledgeArea
-     └─ KnowledgePoint      # 当前可解释业务层：Junyi Topic来源
-         └─ ExerciseUnit    # Junyi Exercise / 练习能力单元
-             └─ Question    # 平台自有/授权的具体题目
-```
-
-重要：
-
-```text
-ExerciseUnit != Question
-ExerciseUnit != KnowledgePoint
-ModelConcept != business KnowledgePoint ID
-Research Student != platform User
-```
-
-模型内部 Concept 通过 Adapter 投影到业务 KnowledgePoint，不反向污染平台主键。
-
----
-
-## 3. 模型研究状态
-
-项目没有把论文数字写成自己的结果，也没有因为实验失败修改 test split。
-
-### MODEL-0A — Zero-history Cold Start ✅ 负实验归档
-
-- NCDM AUC **0.756775**；
-- ORCDF AUC **0.638144**；
-- RCD：`NOT_COMPARABLE_ON_COMMON_GRAPH`；
-- GEAR-CD：smoke only；
-- DOA：N/A。
-
-结论：`NO_GO_FOR_ZERO_HISTORY_PROTOCOL_AS_MODEL_SELECTION`。
-
-它只说明传统 student-specific CDM 不应通过“未见学生 + zero representation”直接做最终模型选择，不代表认知诊断整体失败。
-
-### MODEL-0R — Warm / Calibrated Cold Re-evaluation ✅ 负实验归档
-
-Warm（原 Medium 10k，per-student chronological 60/20/20）：
-
-| 方法 | Test AUC |
+| 指标 | 已审计值 |
 | --- | ---: |
-| Exercise historical rate | 0.748487 |
-| NCDM C40 Topic | **0.765630** |
-| ORCDF-NCD | 0.470608 |
+| 匿名学生 | 247,606 |
+| 学习行为 | 25,925,992 |
+| Exercise metadata | 837 |
+| distinct Exercise external ID | 835 |
+| non-empty Topic | 40 |
+| non-empty Area | 8 |
+| 整体正确率 | 0.827874 |
+| raw prerequisite rows | 980 |
+| duplicate Exercise external-ID records | 2 |
+| missing Topic rows | 20 |
+| missing Area rows | 20 |
 
-NCDM 对 Exercise-rate 有小幅稳定预测增益，但完整 40-Topic mastery 指标被判定 collapse；cold k=5 也未超过 Exercise-rate baseline。
+原始 prerequisite 分析图存在 self-loop 和 cycle，因此**不能直接导入 Neo4j 当成生产知识图谱**。
 
-Final Gate：`NO_GO`。
+数据来源边界：当前执行环境未直接取得官方 PSLC/DataShop 原包，实际研究输入为已登记的第三方镜像；该 provenance 限制继续保留。
 
-### MODEL-1 — Concept Granularity Gate ✅ fine路线停止
-
-另冻结与 Medium 10k **零重叠**的 fresh external holdout 5k：
-
-| 方法 | Test AUC |
-| --- | ---: |
-| Exercise historical rate | 0.708358 |
-| NCDM C40 Topic | **0.719500** |
-| NCDM Fine Exercise-Concept | 0.708524 |
-
-Fine route 相对 Exercise baseline 的 paired-bootstrap lower bound 为负，不能证明增量，因此：
-
-`NO_GO_CONCEPT_LAYER`
-
-不会继续在 fine identity-style Concept 上堆 RCD / ORCDF / GEAR-CD。
-
-独立审查同时发现：历史 `mastery_sanity` 对完整 student×concept 矩阵计算 collapse，没有区分某 student 是否在 train/history 中真正观察过该 Concept。无历史 embedding≈0.5 在业务语义应是 `UNKNOWN`，不能直接作为真实 mastery 参与解释。
-
-因此 C40 仍未获生产批准，但需要最后一次 **observability-aware student signal audit**，而不是继续换复杂模型。
-
-### MODEL-2 — Personalization Signal Stop Gate ▶ 下一阶段
-
-只回答：
-
-1. 排除 UNKNOWN 维度后 observed Topic mastery 是否仍塌缩；
-2. C40 的预测增益是否真正依赖 student-specific embedding；
-3. StudentGlobal / Rasch / TopicBeta 等简单方法是否能证明稳定个体信号。
-
-主要统计改用 **student-cluster paired bootstrap**。
-
-MODEL-2 是强制停止 Gate，结果只允许：
-
-- `GO_C40_FINAL_VALIDATION`
-- `GO_SIMPLE_HIERARCHICAL_ROUTE`
-- `STOP_ML_DIAGNOSIS_RULE_ONLY`
-
-如果没有可靠个体化信号，ML认知诊断路线正式停止；平台继续使用已验证可工作的 Rule Mastery + Published KG + Recommendation。
-
----
-
-## 4. V0.6 Teacher Analytics ✅
-
-V0.6 先消除了早期实现中 TEACHER 课程权限过宽的问题，并新增：
+### 语义边界
 
 ```text
-course_teacher_assignment
+Area != Topic != Exercise != Question
+Research Student != Platform User
+Raw prerequisite Evidence != Published Graph
 ```
 
-并将普通 TEACHER 收紧到 **ACTIVE assigned Course only**。
-
-随后已实现：
-
-- assigned course list；
-- course overview；
-- KnowledgePoint mastery summary；
-- paginated student × KnowledgePoint heatmap；
-- high-error questions；
-- student detail / recent answers / mastery history / recommendation context。
-
-既有 Question / Exercise / Knowledge / Graph / Evidence 管理入口已回归验证跨 Course 越权拒绝。
-
-Junyi Research Student / ProblemLog 不会作为教师端班级成员展示。
-
----
-
-## 5. 技术栈
-
-### Backend
-
-- Java 21
-- Spring Boot 4.1.1
-- Spring Security / JWT / BCrypt
-- Spring Data JPA
-- Flyway
-- MySQL 8.4
-- Spring Data Redis / Redis 7.4
-- Neo4j + Java Driver
-- Testcontainers
-
-### Frontend
-
-- Vue 3.5.x
-- Vite 8.x
-
-### Research / Model
-
-- Python
-- FastAPI
-- PyTorch
-- Junyi research data
-- NCDM / ORCDF controlled experiments
-
-### Infrastructure
-
-- Docker Compose
-- GitHub Actions CI
-
----
-
-## 6. Repository Structure
+第一版真实业务映射候选：
 
 ```text
-Edu-java/
-├── backend/         # Spring Boot业务主系统
-├── frontend/        # Vue学生/教师/管理端
-├── model-service/   # Python模型服务与受控实验
-├── data-pipeline/   # DATA-0 / Research Data Domain
-├── docs/            # ADR、Scope、实验Gate、实现与验收记录
-└── docker-compose.yml
+KnowledgeArea <- Area
+KnowledgePoint <- Topic
+ExerciseUnit <- Exercise
+Question <- 仅平台自有/有权使用的具体题目
 ```
 
-### V0.7 — Release Readiness ✅ `GO_RELEASE_CANDIDATE`
+原始英文名称必须保留；中文名称通过版本化 display mapping 提供。
 
-V0.7 不增加教育业务功能。它为 V0.6 已有能力增加可复现全栈 Compose、release 配置校验、健康/readiness/version/OpenAPI、合成 Platform Demo Seed、真实 API/Playwright 验收、恢复/备份 Runbook 与 GitHub Full-stack Release Gate。具体证据、边界和非 SLA 声明见 [V0.7 implementation record](docs/V0.7_IMPLEMENTATION.md)。
+## 3. 当前 Java 工程底座
 
-快速本地启动（PowerShell）：
+- Java 21 / Spring Boot / Spring Security / JWT / RBAC
+- MySQL 8.4：业务权威数据
+- Neo4j：已发布知识图查询投影，可从 MySQL/GraphVersion 重建
+- Redis：可选缓存
+- Flyway V001–V006
+- Course / KnowledgeArea / KnowledgePoint / ExerciseUnit / Question
+- AnswerRecord 幂等
+- Outbox
+- Mastery exactly-once
+- Evidence -> Draft -> GraphValidator -> Published Graph -> Neo4j
+- RuleBeta mastery，零历史保持 UNKNOWN/“暂无学习数据”
+- Recommendation / Learning Path
+- Teacher course authorization / analytics
+- Docker Compose / OpenAPI / health-readiness / Playwright / backup-restore
 
-```powershell
-Set-Location D:\Code\java\Edu-java-v07-20260908
-.\scripts\generate-local-release-env.ps1 -Path .env.release
-docker compose --env-file .env.release -f docker-compose.full.yml up --build -d
+## 4. V1 当前产品形态
+
+### 学生端
+
+- 首页：课程、学习记录、薄弱知识、平均掌握情况、图谱摘要、推荐摘要
+- 课程学习：从后端 `KnowledgeArea -> KnowledgePoint` 动态生成领域和知识目录
+- 知识图谱：按后端 Area 分组，查看前置/后继关系
+- 个性化学习：薄弱知识、推荐理由、学习路径
+- 真实服务端答题与判题闭环
+
+**重要纠偏：**课程页和知识图谱页已经删除通过 `DM-LOGIC / DM-GRAPH / DM-ALG` 等编码判断章节的前端硬编码。
+
+### 教师端
+
+- 授权课程列表
+- 在读/活跃学生、累计作答、整体正确率
+- KnowledgePoint 班级掌握概览
+- 高频错误题
+- 学生 × KnowledgePoint 热力表
+- 单学生作答、掌握状态、推荐上下文
+- 跨课程权限隔离
+
+### 管理端
+
+当前拆分为：
+
+- 课程与教学
+- 数据与算法
+- 教师授权
+- 知识图谱治理
+- 系统状态
+
+“数据与算法”当前展示的是仓库已经冻结、可审计的 DATA-0 / MODEL-3 快照，用于让产品评审看到数据处理和算法研究工作；它**不是实时数据治理后端**，后续会由 DatasetSource / DatasetVersion / ImportRun API 替代。
+
+## 5. 当前合成业务 fixture 的边界
+
+为了让 CI 可以在没有 Junyi 原始 CSV 的 GitHub Runner 上完整跑通学生/教师/管理员流程，目前仍保留一个小型中文离散数学业务 fixture：
+
+- 主课程 `DM-101 离散数学`
+- 16 个知识点
+- 16 个练习单元
+- 16 道中文题
+- 12 条已审核先修关系
+- 少量合成学生/教师/管理员
+
+它的用途是**全栈演示与自动化测试**，不是：
+
+- 平台最终学科限制；
+- 真实 Junyi 业务导入结果；
+- 真实知识库规模；
+- 教学效果证据。
+
+## 6. 个性化推荐目前怎样工作
+
+当前生产链：
+
+```text
+学生作答
+  -> RuleBeta KnowledgePoint mastery
+  -> 找到低于阈值的薄弱知识
+  -> 查询 Published Graph 前置关系
+  -> 补充未掌握 prerequisite
+  -> 结合近期错误 / 复习间隔
+  -> 过滤和确定性排序
+  -> Recommendation Snapshot
+  -> Learning Path
 ```
 
-详细步骤见 [Deployment](docs/DEPLOYMENT.md)、[Runbook](docs/RUNBOOK.md)、[Demo Guide](docs/DEMO_GUIDE.md)、[Architecture](docs/ARCHITECTURE.md) 与 [V0.7 implementation record](docs/V0.7_IMPLEMENTATION.md)。本地演示只使用合成 `DEMO-*` 平台用户；Junyi Research Student 永不作为业务用户展示。
+当前弱掌握阈值：`0.70`。
 
----
+系统保留 UNKNOWN 语义：没有真实历史记录的知识点不伪造为 0.5 掌握度。
 
-## 7. 关键文档
+## 7. 算法研究结论与生产边界
 
-### Data / Domain
+MODEL-3 最终验证：
 
-- `docs/DATA-0_IMPLEMENTATION.md`
-- `docs/DATA0_ARCHITECT_REVIEW.md`
-- `docs/ADR/0001-data-domain-boundary.md`
-- `docs/ADR/0002-post-data0-domain-model.md`
+| 方法 | AUC | ACC | RMSE |
+| --- | ---: | ---: | ---: |
+| ExerciseRate | 0.707210 | 0.820778 | 0.368169 |
+| Rasch / IRT-1PL | 0.724675 | 0.826387 | 0.362658 |
+| Hierarchical Rasch + Topic | 0.710015 | 0.811279 | 0.374733 |
 
-### Graph
+Rasch - ExerciseRate AUC = `+0.017465`，student-cluster bootstrap 95% CI `[0.012394, 0.022665]`。
 
-- `docs/ADR/0003-prerequisite-evidence-and-published-graph.md`
-- `docs/ADR/0005-mysql-authority-and-versioned-neo4j-projection.md`
-- `docs/V0.3_IMPLEMENTATION.md`
-- `docs/V0.5_IMPLEMENTATION.md`
+Final Gate：`GO_RASCH_ONLY_INTEGRATION`。
 
-### Personalization
+这表示 Rasch 可以进入下一阶段**独立审查的辅助信号集成设计**，不表示它已经上线。当前 Java 生产 Mastery/Recommendation 仍由 RuleBeta + Published Graph 驱动。
 
-- `docs/ADR/0006-mastery-provider-and-rule-fallback.md`
-- `docs/V0.4_SCOPE_AND_ACCEPTANCE.md`
-- `docs/V0.4_IMPLEMENTATION.md`
+Rasch θ 只能解释为全局能力/答题风险辅助信号，不能写成知识点掌握度。
 
-### Model Research
+## 8. 当前最重要的未完成工作
 
-- `docs/ADR/0004-cognitive-diagnosis-evaluation-protocol.md`
-- `docs/MODEL-0R_PLAN.md`
-- `docs/ADR/0007-model-concept-granularity-after-model0r.md`
-- `docs/MODEL-1_CONCEPT_GATE_PLAN.md`
-- `docs/ADR/0008-observability-aware-mastery-and-personalization-signal-gate.md`
-- `docs/MODEL-2_PERSONALIZATION_SIGNAL_GATE.md`
+P0：**真实 Junyi 数学数据 → Java Business Domain**。
 
-### Teacher Analytics
+需要在有本地原始数据的环境完成：
 
-- `docs/ADR/0009-teacher-course-authorization-and-analytics-boundary.md`
-- `docs/V0.6_SCOPE_AND_ACCEPTANCE.md`
-- `docs/V0.6_AUTHORIZATION_MATRIX.md`
-- `docs/V0.6_IMPLEMENTATION.md`
+1. Area / Topic / Exercise 的确定性业务导出；
+2. 原始英文 label + 中文 display mapping；
+3. Java 幂等、可审计 ImportRun；
+4. raw prerequisite -> Evidence -> resolve/review -> GraphVersion -> Published Graph；
+5. 实际导入数量与冲突报告；
+6. >100 节点知识图谱的筛选/局部图，而不是默认一次画全部节点；
+7. 推荐证据链可视化；
+8. 正式数据治理 API。
 
----
+本地真实输入路径与完整执行要求已经写入：
 
-## 8. 工程原则
+`docs/CODEX_REAL_DATA_INTEGRATION_TASK.md`
 
-1. **Evidence First**：真实数据事实先于架构和模型结论。
-2. **Research / Business 分域**：科研匿名学生不进入平台用户体系。
-3. **MySQL authority**：业务事实、Graph lifecycle、Mastery/Recommendation审计以MySQL为准。
-4. **Neo4j projection**：只查询已验证 Published Graph，不作为第二业务真相。
-5. **Model optional**：模型必须证明增量价值；失败时平台仍由规则 fallback 正常工作。
-6. **UNKNOWN ≠ 0.5**：没有历史证据的 mastery 不伪装成数值掌握度。
-7. **Test integrity**：测试集被观察后不能继续作为下一轮无偏最终验证集。
-8. **No hidden hardcoding**：不按 student/exercise/test ID 硬编码结果。
-9. **No big raw data in Git**：原始行为数据、派生大表、checkpoint、runtime和凭据不提交。
-10. **Gate-driven development**：每个阶段有明确 DoD、真实测试、Final Gate，并在 Gate 后停止再评审。
+## 9. 当前不做/不能伪造
+
+- 不把 Junyi Exercise 元数据变成假的 Question 题干/答案；
+- 不把科研匿名学生导成平台 User；
+- 不直接发布有 self-loop/cycle 的原始 prerequisite；
+- 不虚构教材、视频、课件等资源中心内容；
+- 不虚构学习效果提升；
+- 不新增与需求无关的 LLM/Agent、Kafka、微服务、Kubernetes；
+- 不为了页面看起来丰富而硬造课程数量。
+
+## 10. Release Gate
+
+每个 Release Candidate 都必须通过：
+
+- backend tests
+- model-service tests
+- data-pipeline tests
+- frontend build
+- compose-config
+- clean-volume full-stack startup
+- API smoke
+- Playwright 学生/教师/管理员真实浏览器 E2E
+- 跨角色/跨课程权限隔离
+- 不提交原始数据/凭据/日志/依赖目录
+
+任何一项失败都不能写 `GO_RELEASE`。

@@ -35,6 +35,18 @@ public class KnowledgeRelation {
     @Column(name = "relation_source", nullable = false, length = 32)
     private String relationSource;
 
+    @Column(name = "candidate_input_id", length = 128)
+    private String candidateInputId;
+
+    @Column(name = "candidate_policy_version", length = 128)
+    private String candidatePolicyVersion;
+
+    @Column(name = "candidate_status", length = 64)
+    private String candidateStatus;
+
+    @Column(name = "published_graph_status", length = 64)
+    private String publishedGraphStatus;
+
     @Column(precision = 5, scale = 4)
     private BigDecimal confidence;
 
@@ -65,11 +77,36 @@ public class KnowledgeRelation {
             RelationReviewStatus reviewStatus,
             Long createdBy
     ) {
+        this(
+                graphVersionId, sourceKnowledgePointId, targetKnowledgePointId, relationType, relationSource,
+                null, null, null, null, confidence, evidenceCount, reviewStatus, createdBy
+        );
+    }
+
+    public KnowledgeRelation(
+            Long graphVersionId,
+            Long sourceKnowledgePointId,
+            Long targetKnowledgePointId,
+            String relationType,
+            String relationSource,
+            String candidateInputId,
+            String candidatePolicyVersion,
+            String candidateStatus,
+            String publishedGraphStatus,
+            BigDecimal confidence,
+            int evidenceCount,
+            RelationReviewStatus reviewStatus,
+            Long createdBy
+    ) {
         this.graphVersionId = graphVersionId;
         this.sourceKnowledgePointId = sourceKnowledgePointId;
         this.targetKnowledgePointId = targetKnowledgePointId;
         this.relationType = relationType;
         this.relationSource = relationSource;
+        this.candidateInputId = candidateInputId;
+        this.candidatePolicyVersion = candidatePolicyVersion;
+        this.candidateStatus = candidateStatus;
+        this.publishedGraphStatus = publishedGraphStatus;
         this.confidence = confidence;
         this.evidenceCount = evidenceCount;
         this.reviewStatus = reviewStatus;
@@ -102,6 +139,10 @@ public class KnowledgeRelation {
                 targetKnowledgePointId,
                 relationType,
                 relationSource,
+                candidateInputId,
+                candidatePolicyVersion,
+                candidateStatus,
+                publishedGraphStatus,
                 confidence,
                 evidenceCount,
                 reviewStatus,
@@ -131,6 +172,22 @@ public class KnowledgeRelation {
 
     public String getRelationSource() {
         return relationSource;
+    }
+
+    public String getCandidateInputId() {
+        return candidateInputId;
+    }
+
+    public String getCandidatePolicyVersion() {
+        return candidatePolicyVersion;
+    }
+
+    public String getCandidateStatus() {
+        return candidateStatus;
+    }
+
+    public String getPublishedGraphStatus() {
+        return publishedGraphStatus;
     }
 
     public BigDecimal getConfidence() {

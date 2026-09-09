@@ -1,0 +1,10 @@
+{
+  "export_format_version": "1.0.0",
+  "input": {
+    "metadata_path": "D:/test-data/fixture-metadata.csv",
+    "size_bytes": 1234,
+    "encoding": "utf-8-sig",
+    "columns": ["name", "topic", "prerequisites"],
+    "row_count": 2
+  }
+}

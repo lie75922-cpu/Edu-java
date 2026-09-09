@@ -43,6 +43,14 @@ public class KnowledgeService {
                 .toList();
     }
 
+    public List<KnowledgeApi.KnowledgeAreaResponse> listActiveAreas(long courseId, CurrentUser user) {
+        courseService.requireCourse(courseId);
+        courseAccessService.requireCourseAccess(courseId, user);
+        return areaRepository.findByCourseIdAndStatusOrderByAreaCodeAsc(courseId, "ACTIVE").stream()
+                .map(this::toAreaResponse)
+                .toList();
+    }
+
     public List<KnowledgeApi.KnowledgeAreaResponse> listAreasForAdmin(long courseId) {
         courseService.requireCourse(courseId);
         return areaRepository.findByCourseIdAndStatusOrderByAreaCodeAsc(courseId, "ACTIVE").stream()

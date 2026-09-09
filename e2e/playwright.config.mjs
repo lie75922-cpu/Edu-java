@@ -2,6 +2,7 @@ import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests',
+  outputDir: 'artifacts/test-results',
   timeout: 90_000,
   fullyParallel: false,
   forbidOnly: true,
