@@ -6,6 +6,7 @@ import StudentCourseView from './v1/views/StudentCourseView.vue'
 import StudentGraphView from './v1/views/StudentGraphView.vue'
 import StudentPersonalView from './v1/views/StudentPersonalView.vue'
 import TeacherWorkspaceView from './v1/views/TeacherWorkspaceView.vue'
+import QuestionBankView from './v1/views/QuestionBankView.vue'
 import AdminWorkspaceView from './v1/views/AdminWorkspaceView.vue'
 import {
   authenticated,
@@ -24,7 +25,7 @@ import './v1/polish.css'
 import './v1/realData.css'
 
 const studentMenus = ['首页', '课程学习', '知识图谱', '个性化学习']
-const teacherMenus = ['教师工作台']
+const teacherMenus = ['教师工作台', '题库管理']
 const adminMenus = ['管理工作台']
 
 const menus = computed(() => {
@@ -99,6 +100,7 @@ function choose(view) {
         <StudentGraphView v-else-if="isStudent && currentView === '知识图谱'" />
         <StudentPersonalView v-else-if="isStudent && currentView === '个性化学习'" />
         <TeacherWorkspaceView v-else-if="canTeach && currentView === '教师工作台'" />
+        <QuestionBankView v-else-if="canTeach && currentView === '题库管理'" />
         <AdminWorkspaceView v-else-if="canManage && currentView === '管理工作台'" />
         <StudentHomeView v-else-if="isStudent" />
         <AdminWorkspaceView v-else-if="canManage" />
