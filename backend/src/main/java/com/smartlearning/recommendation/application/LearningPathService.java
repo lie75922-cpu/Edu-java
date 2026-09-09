@@ -14,6 +14,7 @@ import com.smartlearning.knowledge.domain.KnowledgePoint;
 import com.smartlearning.knowledge.infrastructure.persistence.KnowledgePointRepository;
 import com.smartlearning.mastery.application.MasteryQueryService;
 import com.smartlearning.mastery.application.MasteryReadService;
+import com.smartlearning.mastery.domain.MasteryStatus;
 import com.smartlearning.recommendation.api.RecommendationApi;
 import com.smartlearning.recommendation.domain.RecommendationReasonCode;
 import org.neo4j.driver.exceptions.Neo4jException;
@@ -66,17 +67,23 @@ public class LearningPathService {
     public RecommendationApi.LearningPathResponse learningPath(long targetKnowledgePointId, CurrentUser user) {
         KnowledgePoint target = knowledgePointRepository.findById(targetKnowledgePointId)
                 .orElseThrow(() -> new NotFoundException("knowledge point does not exist"));
-        long graphVersionId = graphQueryService.activeGraphVersionId(target.getCourseId(), user);
+        if (!"ACTIVE".equals(target.getStatus())) {
+            throw new ConflictException("target knowledge point is not active");
+        }
+        Long graphVersionId = graphQueryService.activeGraphVersionIdOrNull(target.getCourseId(), user);
+        if (graphVersionId == null) {
+            return conventionalLearningPlan(target, user);
+        }
         PublishedGraphStore.GraphSlice slice;
         try {
             slice = publishedGraphStore.prerequisiteSubgraph(graphVersionId, targetKnowledgePointId);
         } catch (Neo4jException ex) {
-            throw new ConflictException("active published graph is unavailable; learning path was not synthesized");
+            return conventionalLearningPlan(target, user);
         }
         Map<Long, PublishedGraphStore.ProjectionNode> graphNodes = new LinkedHashMap<>();
         slice.nodes().forEach(node -> graphNodes.put(node.businessId(), node));
         if (!graphNodes.containsKey(targetKnowledgePointId)) {
-            throw new ConflictException("target knowledge point is not present in the active published graph");
+            return conventionalLearningPlan(target, user);
         }
         Map<Long, MasteryReadService.MasteryState> mastery = masteryQueryService.masteryStates(
                 user.id(), target.getCourseId(), graphNodes.keySet()
@@ -102,6 +109,63 @@ public class LearningPathService {
             ));
         }
         return new RecommendationApi.LearningPathResponse(targetKnowledgePointId, target.getCourseId(), graphVersionId, nodes);
+    }
+
+    /**
+     * Graph-optional conventional plan. It never claims that weak Topics are
+     * prerequisites: it simply schedules a few observed weak Topics before the
+     * selected target and marks graphVersionId as null.
+     */
+    private RecommendationApi.LearningPathResponse conventionalLearningPlan(KnowledgePoint target, CurrentUser user) {
+        List<KnowledgePoint> activePoints = knowledgePointRepository
+                .findByCourseIdAndStatusOrderByKnowledgeCodeAsc(target.getCourseId(), "ACTIVE");
+        Map<Long, KnowledgePoint> pointsById = new LinkedHashMap<>();
+        activePoints.forEach(point -> pointsById.put(point.getId(), point));
+        Map<Long, MasteryReadService.MasteryState> mastery = masteryQueryService.masteryStates(
+                user.id(), target.getCourseId(), pointsById.keySet()
+        );
+
+        List<Long> orderedIds = activePoints.stream()
+                .map(KnowledgePoint::getId)
+                .filter(id -> id != target.getId())
+                .filter(id -> mastery.get(id).status() == MasteryStatus.OBSERVED)
+                .filter(id -> mastery.get(id).masteryScore() != null
+                        && mastery.get(id).masteryScore().compareTo(policy.weakMasteryThreshold()) < 0)
+                .sorted(Comparator
+                        .comparing((Long id) -> mastery.get(id).masteryScore())
+                        .thenComparingLong(Long::longValue))
+                .limit(Math.max(0, policy.maxRecommendations() - 1L))
+                .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+        orderedIds.remove(target.getId());
+        orderedIds.add(target.getId());
+
+        Map<Long, AvailableExercise> exercises = availableExercises(target.getCourseId(), orderedIds);
+        List<RecommendationApi.LearningPathNodeResponse> nodes = new ArrayList<>();
+        for (int index = 0; index < orderedIds.size(); index++) {
+            long pointId = orderedIds.get(index);
+            KnowledgePoint point = pointsById.get(pointId);
+            if (point == null) {
+                continue;
+            }
+            MasteryReadService.MasteryState state = mastery.get(pointId);
+            AvailableExercise exercise = exercises.get(pointId);
+            nodes.add(new RecommendationApi.LearningPathNodeResponse(
+                    nodes.size() + 1,
+                    pointId,
+                    point.getKnowledgeCode(),
+                    point.getKnowledgeName(),
+                    state.status().name(),
+                    state.masteryScore(),
+                    pointId == target.getId()
+                            ? RecommendationReasonCode.TARGET_PRACTICE.name()
+                            : RecommendationReasonCode.LOW_MASTERY.name(),
+                    exercise == null ? null : exercise.id(),
+                    exercise == null ? null : exercise.code(),
+                    exercise == null ? null : exercise.name(),
+                    exercise != null
+            ));
+        }
+        return new RecommendationApi.LearningPathResponse(target.getId(), target.getCourseId(), null, nodes);
     }
 
     private List<Long> topologicalOrder(
