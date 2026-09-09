@@ -54,6 +54,14 @@ public class AdminQuestionController {
         return ApiResponse.ok(questionService.createForTeaching(request, CurrentUser.from(jwt)));
     }
 
+    @PostMapping("/batch")
+    public ApiResponse<QuestionApi.QuestionBatchResponse> createBatch(
+            @Valid @RequestBody QuestionApi.QuestionBatchRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        return ApiResponse.ok(questionService.createBatchForTeaching(request, CurrentUser.from(jwt)));
+    }
+
     @PutMapping("/{questionId}")
     public ApiResponse<QuestionApi.AdminQuestionResponse> update(
             @PathVariable long questionId,
