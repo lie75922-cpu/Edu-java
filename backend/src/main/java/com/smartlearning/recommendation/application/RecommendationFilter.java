@@ -80,10 +80,14 @@ public class RecommendationFilter {
                     .filter(exercise -> exercise.getCourseId().equals(courseId))
                     .sorted(Comparator.comparing(ExerciseUnit::getExerciseCode).thenComparing(ExerciseUnit::getId))
                     .toList();
+            if (mappedActiveExercises.isEmpty()) {
+                continue;
+            }
 
-            // Prefer one actually answerable exercise. If the imported catalog has no
-            // legal Question content, keep a Topic-level study recommendation instead
-            // of fabricating a question or dropping the recommendation completely.
+            // Prefer one actually answerable exercise. If the imported catalog has an
+            // active Exercise but no legal Question content, keep a Topic-level study
+            // recommendation instead of fabricating a Question. A Topic with no active
+            // mapped Exercise is excluded because there is no actionable content.
             ExerciseUnit answerable = mappedActiveExercises.stream()
                     .filter(exercise -> questionRepository.existsByExerciseUnitIdAndStatus(exercise.getId(), "ACTIVE"))
                     .findFirst()
