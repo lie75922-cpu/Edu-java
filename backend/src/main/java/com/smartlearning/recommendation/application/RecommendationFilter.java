@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class RecommendationFilter {
@@ -39,7 +40,7 @@ public class RecommendationFilter {
     public List<PracticeCandidate> filter(
             Collection<RecommendationCandidate> candidates,
             long courseId,
-            long activeGraphVersionId
+            Long activeGraphVersionId
     ) {
         if (candidates.isEmpty()) {
             return List.of();
@@ -48,7 +49,7 @@ public class RecommendationFilter {
         knowledgePointRepository.findAllById(candidates.stream().map(RecommendationCandidate::knowledgePointId).toList())
                 .forEach(point -> pointsById.put(point.getId(), point));
         List<RecommendationCandidate> currentCandidates = candidates.stream()
-                .filter(candidate -> candidate.graphVersionId() == activeGraphVersionId)
+                .filter(candidate -> Objects.equals(candidate.graphVersionId(), activeGraphVersionId))
                 .filter(candidate -> isActiveCoursePoint(pointsById.get(candidate.knowledgePointId()), courseId))
                 .toList();
         if (currentCandidates.isEmpty()) {
@@ -70,20 +71,41 @@ public class RecommendationFilter {
 
         List<PracticeCandidate> filtered = new ArrayList<>();
         for (RecommendationCandidate candidate : currentCandidates) {
-            for (ExerciseKnowledge mapping : mappingsByPoint.getOrDefault(candidate.knowledgePointId(), List.of())) {
-                ExerciseUnit exercise = activeExercisesById.get(mapping.getExerciseUnitId());
-                if (exercise == null || !exercise.getCourseId().equals(courseId)) {
-                    continue;
-                }
-                if (!questionRepository.existsByExerciseUnitIdAndStatus(exercise.getId(), "ACTIVE")) {
-                    continue;
-                }
-                filtered.add(new PracticeCandidate(candidate, exercise.getId(), exercise.getExerciseCode(), exercise.getExerciseName()));
+            List<ExerciseUnit> mappedActiveExercises = mappingsByPoint
+                    .getOrDefault(candidate.knowledgePointId(), List.of())
+                    .stream()
+                    .map(ExerciseKnowledge::getExerciseUnitId)
+                    .map(activeExercisesById::get)
+                    .filter(Objects::nonNull)
+                    .filter(exercise -> exercise.getCourseId().equals(courseId))
+                    .sorted(Comparator.comparing(ExerciseUnit::getExerciseCode).thenComparing(ExerciseUnit::getId))
+                    .toList();
+            if (mappedActiveExercises.isEmpty()) {
+                continue;
+            }
+
+            // Prefer one actually answerable exercise. If the imported catalog has an
+            // active Exercise but no legal Question content, keep a Topic-level study
+            // recommendation instead of fabricating a Question. A Topic with no active
+            // mapped Exercise is excluded because there is no actionable content.
+            ExerciseUnit answerable = mappedActiveExercises.stream()
+                    .filter(exercise -> questionRepository.existsByExerciseUnitIdAndStatus(exercise.getId(), "ACTIVE"))
+                    .findFirst()
+                    .orElse(null);
+            if (answerable != null) {
+                filtered.add(new PracticeCandidate(
+                        candidate,
+                        answerable.getId(),
+                        answerable.getExerciseCode(),
+                        answerable.getExerciseName()
+                ));
+            } else {
+                filtered.add(new PracticeCandidate(candidate, null, null, null));
             }
         }
         return filtered.stream().sorted(Comparator
                 .comparingLong((PracticeCandidate candidate) -> candidate.candidate().knowledgePointId())
-                .thenComparingLong(PracticeCandidate::exerciseUnitId))
+                .thenComparing(PracticeCandidate::exerciseUnitId, Comparator.nullsLast(Comparator.naturalOrder())))
                 .toList();
     }
 
@@ -93,7 +115,7 @@ public class RecommendationFilter {
 
     public record PracticeCandidate(
             RecommendationCandidate candidate,
-            long exerciseUnitId,
+            Long exerciseUnitId,
             String exerciseCode,
             String exerciseName
     ) {

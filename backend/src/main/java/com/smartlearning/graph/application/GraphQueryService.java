@@ -74,23 +74,36 @@ public class GraphQueryService {
         return toView(graphVersionId, publishedGraphStore.prerequisiteSubgraph(graphVersionId, knowledgePointId));
     }
 
-    /** Reuses the V0.3 active-version authority for recommendation and learning-path consumers. */
+    /** Reuses the V0.3 active-version authority for graph-required consumers. */
     public long activeGraphVersionId(long courseId, CurrentUser user) {
         return requireActiveGraphVersion(courseId, user);
     }
 
-    private long requireActiveGraphVersion(long courseId, CurrentUser user) {
+    /**
+     * Returns the active Published GraphVersion when one exists. A course with no
+     * published graph is a valid state for conventional recommendation fallback;
+     * an invalid configured active version still fails closed.
+     */
+    public Long activeGraphVersionIdOrNull(long courseId, CurrentUser user) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new NotFoundException("course does not exist"));
         courseAccessService.requireCourseAccess(courseId, user);
         Long graphVersionId = course.getActiveGraphVersionId();
         if (graphVersionId == null) {
-            throw new ConflictException("course does not have a published graph version");
+            return null;
         }
         GraphVersion graphVersion = graphVersionRepository.findById(graphVersionId)
                 .orElseThrow(() -> new ConflictException("course active graph version does not exist"));
         if (graphVersion.getStatus() != GraphVersionStatus.PUBLISHED || !graphVersion.getCourseId().equals(courseId)) {
             throw new ConflictException("course active graph version is not a published graph for this course");
+        }
+        return graphVersionId;
+    }
+
+    private long requireActiveGraphVersion(long courseId, CurrentUser user) {
+        Long graphVersionId = activeGraphVersionIdOrNull(courseId, user);
+        if (graphVersionId == null) {
+            throw new ConflictException("course does not have a published graph version");
         }
         return graphVersionId;
     }
