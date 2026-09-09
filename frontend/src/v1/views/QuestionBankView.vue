@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { api, canManage, run, statusText } from '../store.js'
 
 const courses = ref([])
@@ -76,8 +76,6 @@ function applyTypeDefaults() {
     form.answerOptionKeys = [form.answerOptionKeys[0] || 'A']
   }
 }
-
-watch(() => form.questionType, applyTypeDefaults)
 
 async function loadCourses() {
   const result = await run(() => api(canManage.value ? '/courses' : '/teacher/courses'))
@@ -172,8 +170,8 @@ async function saveQuestion() {
 }
 
 async function disableQuestion(item) {
-  const result = await run(() => api(`/admin/questions/${item.id}`, { method: 'DELETE' }), '题目已停用。')
-  if (result !== undefined) await loadQuestions()
+  await run(() => api(`/admin/questions/${item.id}`, { method: 'DELETE' }), '题目已停用。')
+  await loadQuestions()
 }
 
 async function boot() {
@@ -234,7 +232,7 @@ onMounted(boot)
         <div class="panel-head"><div><p class="eyebrow">{{ editingId ? '编辑题目' : '创建题目' }}</p><h3>平台题目内容</h3></div></div>
         <form class="modern-form" @submit.prevent="saveQuestion">
           <label>题型
-            <select v-model="form.questionType">
+            <select v-model="form.questionType" @change="applyTypeDefaults">
               <option value="SINGLE_CHOICE">单选题</option>
               <option value="MULTIPLE_CHOICE">多选题</option>
               <option value="TRUE_FALSE">判断题</option>
