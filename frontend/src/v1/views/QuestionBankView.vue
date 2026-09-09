@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue'
 import { api, canManage, run, statusText } from '../store.js'
+import QuestionBatchImportPanel from '../components/QuestionBatchImportPanel.vue'
 
 const courses = ref([])
 const selectedCourseId = ref('')
@@ -114,6 +115,10 @@ async function loadQuestions() {
   questions.value = await run(() => api(`/admin/questions?exerciseUnitId=${exerciseId}`)) || []
 }
 
+async function afterBatchImport() {
+  await loadQuestions()
+}
+
 function answerChecked(key) {
   return form.answerOptionKeys.includes(key)
 }
@@ -187,7 +192,7 @@ onMounted(boot)
       <div>
         <p class="eyebrow">教学内容</p>
         <h2>题库管理</h2>
-        <p>为已有练习单元维护平台自编题目、答案和解析。真实目录元数据不会自动伪造成题目。</p>
+        <p>为已有练习单元维护平台自编或已获授权题目、答案和解析。真实目录元数据不会自动伪造成题目。</p>
       </div>
       <div class="intro-actions">
         <select v-model="selectedCourseId" @change="loadExercises">
@@ -204,6 +209,8 @@ onMounted(boot)
       <article class="metric-card accent-green"><span>当前单元题目</span><strong>{{ questions.length }}</strong><small>{{ selectedExercise?.exerciseName || '未选择练习单元' }}</small></article>
       <article class="metric-card accent-purple"><span>启用题目</span><strong>{{ activeQuestionCount }}</strong><small>可进入学生答题流程</small></article>
     </div>
+
+    <QuestionBatchImportPanel :exercises="exercises" @imported="afterBatchImport" />
 
     <div class="two-column admin-layout">
       <section class="panel">
@@ -225,7 +232,7 @@ onMounted(boot)
             </div>
           </article>
         </div>
-        <div v-else class="empty-state compact"><strong>当前练习单元尚无题目</strong><p>可以在右侧创建平台自编题目；不要从目录元数据自动生成题干、答案或解析。</p></div>
+        <div v-else class="empty-state compact"><strong>当前练习单元尚无题目</strong><p>可以在右侧创建平台自编/授权题目，或使用上方批量导入；不要从目录元数据自动生成题干、答案或解析。</p></div>
       </section>
 
       <section class="panel">
@@ -257,7 +264,7 @@ onMounted(boot)
             </div>
           </div>
           <label>答案解析<textarea v-model="form.explanation" placeholder="解释为什么选择该答案，便于学生完成后复盘"></textarea></label>
-          <div class="warning-box"><strong>内容边界</strong><p>本页面创建的是平台教学人员维护的题目。除非有明确来源授权，不得把 Junyi Exercise metadata、第三方教材或网络内容标注成平台自有题目。</p></div>
+          <div class="warning-box"><strong>内容边界</strong><p>本页面创建的是教学人员维护的题目。除非有明确来源授权，不得把 Junyi Exercise metadata、第三方教材或网络内容标注成平台自有题目。</p></div>
           <div class="intro-actions"><button class="primary-button">{{ editingId ? '保存修改' : '创建题目' }}</button><button v-if="editingId" type="button" class="secondary-button" @click="resetForm">取消编辑</button></div>
         </form>
       </section>

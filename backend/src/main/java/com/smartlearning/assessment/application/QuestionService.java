@@ -88,6 +88,25 @@ public class QuestionService {
         return create(request, user.id());
     }
 
+    /**
+     * Creates one bounded batch atomically. Every item goes through the same teaching-access and semantic validation
+     * as a single create. Any runtime validation/authorization failure rolls the entire transaction back.
+     */
+    @Transactional
+    public QuestionApi.QuestionBatchResponse createBatchForTeaching(
+            QuestionApi.QuestionBatchRequest request,
+            CurrentUser user
+    ) {
+        List<QuestionApi.AdminQuestionResponse> created = new ArrayList<>();
+        for (QuestionApi.QuestionRequest question : request.questions()) {
+            courseAccessService.requireTeachingAccess(
+                    exerciseUnitService.requireExercise(question.exerciseUnitId()).getCourseId(), user
+            );
+            created.add(create(question, user.id()));
+        }
+        return new QuestionApi.QuestionBatchResponse(created.size(), created);
+    }
+
     @Transactional
     public QuestionApi.AdminQuestionResponse updateForTeaching(
             long questionId,

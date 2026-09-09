@@ -1,13 +1,14 @@
 openapi: 3.0.3
 info:
   title: Edu-java Platform API
-  version: 1.0.0-rc1
+  version: 1.1.0-rc1
   description: |
-    API surface for the Chinese math smart-learning platform product rebase.
+    API surface for the Chinese math smart-learning platform.
     MySQL remains the business authority; Neo4j is a versioned Published Graph
     projection. Course structure is data-driven through KnowledgeArea and
-    KnowledgePoint APIs. RuleBeta remains the production personalization
-    provider; research-model results are not presented as production behavior.
+    KnowledgePoint APIs. RuleBeta and conventional history-based ranking remain
+    the production personalization baseline; a Published Graph is optional for
+    recommendations and mandatory only for prerequisite learning-path queries.
 servers:
   - url: /api/v1
 security:
@@ -107,11 +108,15 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
   /courses/{courseId}/recommendations:
     post:
-      summary: Generate a recommendation snapshot bound to the active Published Graph
+      summary: Generate a conventional recommendation snapshot from platform learning history
+      description: |
+        Uses observed mastery, recent errors, review interval and deterministic course-order cold start.
+        When a safe Published Graph exists it may add prerequisite evidence; a graph is not required for recommendation generation.
+        UNKNOWN knowledge is never assigned a fabricated mastery score.
       parameters: [ { $ref: '#/components/parameters/CourseId' } ]
       responses:
         '200': { $ref: '#/components/responses/Success' }
-        '409': { $ref: '#/components/responses/Conflict' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /courses/{courseId}/recommendations/latest:
     get:
       summary: Read the latest student's recommendation snapshot
@@ -121,7 +126,8 @@ paths:
         '404': { $ref: '#/components/responses/NotFound' }
   /knowledge-points/{knowledgePointId}/learning-path:
     get:
-      summary: Build a learning path from the active Published Graph
+      summary: Build a prerequisite learning path from the active Published Graph
+      description: Fails closed when the course has no safe Published Graph; conventional recommendations remain available independently.
       parameters: [ { $ref: '#/components/parameters/KnowledgePointId' } ]
       responses:
         '200': { $ref: '#/components/responses/Success' }
@@ -169,6 +175,66 @@ paths:
           in: path
           required: true
           schema: { type: integer, format: int64 }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/questions:
+    get:
+      summary: List questions for a teaching-authorized exercise unit
+      parameters:
+        - name: exerciseUnitId
+          in: query
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      summary: Create one teacher-maintained or licensed question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/questions/batch:
+    post:
+      summary: Create up to 200 teacher-maintained or licensed questions atomically
+      description: Every item uses normal teaching authorization and question validation; any failure rolls the transaction back. Catalog metadata is never converted into question content.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionBatchRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/questions/{questionId}:
+    get:
+      summary: Read one teaching-authorized question
+      parameters: [ { $ref: '#/components/parameters/QuestionId' } ]
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      summary: Update one teaching-authorized question
+      parameters: [ { $ref: '#/components/parameters/QuestionId' } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/QuestionRequest' }
+      responses:
+        '200': { $ref: '#/components/responses/Success' }
+        '400': { $ref: '#/components/responses/InvalidRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    delete:
+      summary: Disable one teaching-authorized question
+      parameters: [ { $ref: '#/components/parameters/QuestionId' } ]
       responses:
         '200': { $ref: '#/components/responses/Success' }
         '403': { $ref: '#/components/responses/Forbidden' }
@@ -264,6 +330,40 @@ components:
           items: { type: string }
         durationMs: { type: integer, format: int64, minimum: 0 }
         clientRequestId: { type: string, maxLength: 128 }
+    QuestionOptionRequest:
+      type: object
+      required: [optionKey, optionText, sortOrder]
+      properties:
+        optionKey: { type: string, maxLength: 16 }
+        optionText: { type: string }
+        sortOrder: { type: integer }
+    QuestionRequest:
+      type: object
+      required: [exerciseUnitId, questionType, stem, answerOptionKeys, status, options]
+      properties:
+        exerciseUnitId: { type: integer, format: int64 }
+        questionType: { type: string, enum: [SINGLE_CHOICE, MULTIPLE_CHOICE, TRUE_FALSE] }
+        stem: { type: string }
+        answerOptionKeys:
+          type: array
+          minItems: 1
+          items: { type: string, maxLength: 16 }
+        explanation: { type: string, nullable: true }
+        difficulty: { type: number, minimum: 0, maximum: 100, nullable: true }
+        status: { type: string, maxLength: 20 }
+        options:
+          type: array
+          minItems: 2
+          items: { $ref: '#/components/schemas/QuestionOptionRequest' }
+    QuestionBatchRequest:
+      type: object
+      required: [questions]
+      properties:
+        questions:
+          type: array
+          minItems: 1
+          maxItems: 200
+          items: { $ref: '#/components/schemas/QuestionRequest' }
     ApiEnvelope:
       type: object
       required: [code, message]

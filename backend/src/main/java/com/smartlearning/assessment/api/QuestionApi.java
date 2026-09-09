@@ -35,6 +35,18 @@ public final class QuestionApi {
     ) {
     }
 
+    /**
+     * Transactional batch creation for teacher-owned/licensed content.
+     * The batch is intentionally bounded so that a bad payload cannot become an unreviewable bulk write.
+     */
+    public record QuestionBatchRequest(
+            @NotEmpty @Size(max = 200) List<@Valid QuestionRequest> questions
+    ) {
+        public QuestionBatchRequest {
+            questions = questions == null ? List.of() : List.copyOf(questions);
+        }
+    }
+
     public record OptionResponse(Long id, String optionKey, String optionText, int sortOrder) {
     }
 
@@ -59,5 +71,14 @@ public final class QuestionApi {
             String status,
             List<OptionResponse> options
     ) {
+    }
+
+    public record QuestionBatchResponse(
+            int createdCount,
+            List<AdminQuestionResponse> items
+    ) {
+        public QuestionBatchResponse {
+            items = List.copyOf(items);
+        }
     }
 }
